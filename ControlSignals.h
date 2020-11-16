@@ -1,6 +1,5 @@
 #ifndef I960_CONTROL_SIGNALS_H__
 #define I960_CONTROL_SIGNALS_H__
-#include <HardwareSerial.h>
 #include <string>
 #include <map>
 #include "TargetPlatform.h"
@@ -9,7 +8,7 @@
 template<typename T>
 std::string 
 getPinName(T value) noexcept {
-    static std::map<T, std::string> lookupTable = {
+    static std::map<T, std::string> lookupTable {
         {T::Lock, "Lock_" },
         {T::INT0, "INT0_" },
         {T::INT1, "INT1" },

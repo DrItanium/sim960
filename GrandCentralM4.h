@@ -2,6 +2,7 @@
 #define I960_GRAND_CENTRAL_M4_H__
 
 enum class GrandCentralM4Pinout : uint8_t {
+    // i960Sx Pinout
   Lock = 22, // active low, open collector, bi directional
   INT0, // active low input
   INT1, // active low 
