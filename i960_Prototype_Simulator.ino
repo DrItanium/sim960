@@ -1,7 +1,9 @@
+#include <SPI.h>
 #include <array>
 #include <type_traits>
 #include <string>
 #include <map>
+#include "TargetPlatform.h"
 
 template<typename ... Pins>
 void setBlockOfPins(decltype(OUTPUT) mode, decltype(HIGH) value, Pins ... pins) noexcept {
@@ -42,30 +44,6 @@ using RegisterSet = std::array<Register,16>;
 volatile RegisterSet globalRegisters = { 0 };
 volatile RegisterSet localRegisters = { 0 };
 /// @todo implement the register frames "in hardware"
-enum class GrandCentralM4Pinout : uint8_t {
-  Lock = 22, // active low, open collector, bi directional
-  INT0, // active low input
-  INT1, // active low 
-  INT2,
-  INT3,
-  Ready,
-  Hold,
-  ALE,
-  AS,
-  BLAST,
-  DT_R,
-  DEN,
-  W_R,
-  HLDA,
-  BE0,
-  BE1,
-  BA1,
-  BA2,
-  BA3,
-  // continue here
-  Last,
-  First = Lock,
-};
 template<typename T>
 std::string 
 getPinName(T value) noexcept {
@@ -74,7 +52,7 @@ getPinName(T value) noexcept {
         {T::INT0, "INT0_" },
         {T::INT1, "INT1" },
         {T::INT2, "INT2" },
-        {T::INT3_, "INT3_" },
+        {T::INT3, "INT3_" },
         {T::Ready, "READY_" },
         {T::Hold, "HOLD" }, 
         {T::ALE, "ALE"},
@@ -102,36 +80,45 @@ template<typename T>
 void displayPinoutToConsole() noexcept {
     static_assert(std::is_enum_v<T>, "Pinout type must be an enum");
     for (auto i = T::First; i != T::Last; i = static_cast<T>(static_cast<int>(i) + 1)) {
-        Serial.print(getPinName(i));
+        auto name = getPinName(i);
+        Serial.print(name.c_str());
         Serial.print(": ");
         Serial.println(static_cast<int>(i));
     }
 }
-void setup() {
-  Serial.begin(115200);
-  Serial.println("i960 Simulator Starting up");
+template<typename T>
+void setupPins() noexcept {
   // put your setup code here, to run once:
-  setBlockOfInputPins(GrandCentralM4Pinout::Lock, 
-                      GrandCentralM4Pinout::INT3); // open collector
+  setBlockOfInputPins(T::Lock, 
+                      T::INT3); // open collector
   setBlockOfInputPins(
-          GrandCentralM4Pinout::INT0, 
-          GrandCentralM4Pinout::INT1, 
-          GrandCentralM4Pinout::INT2, 
-          GrandCentralM4Pinout::Ready, 
-          GrandCentralM4Pinout::Hold);
+          T::INT0, 
+          T::INT1, 
+          T::INT2, 
+          T::Ready, 
+          T::Hold);
   setBlockOfOutputPins(
-          GrandCentralM4Pinout::ALE,
-          GrandCentralM4Pinout::AS,
-          GrandCentralM4Pinout::BLAST,
-          GrandCentralM4Pinout::DT_R,
-          GrandCentralM4Pinout::DEN,
-          GrandCentralM4Pinout::W_R,
-          GrandCentralM4Pinout::HLDA,
-          GrandCentralM4Pinout::BE0,
-          GrandCentralM4Pinout::BE1,
-          GrandCentralM4Pinout::BA1,
-          GrandCentralM4Pinout::BA2,
-          GrandCentralM4Pinout::BA3);
+          T::ALE,
+          T::AS,
+          T::BLAST,
+          T::DT_R,
+          T::DEN,
+          T::W_R,
+          T::HLDA,
+          T::BE0,
+          T::BE1,
+          T::BA1,
+          T::BA2,
+          T::BA3);
+}
+void setup() {
+  Serial.begin(9600);
+  delay(1000);
+  Serial.println("i960 Simulator Starting up");
+  displayPinoutToConsole<TargetBoardPinout>();
+  setupPins<TargetBoardPinout>();
+  Serial.println("SPI Started");
+  SPI.begin();
 }
 
 void loop() {
