@@ -1,7 +1,9 @@
 #ifndef I960_GRAND_CENTRAL_M4_H__
 #define I960_GRAND_CENTRAL_M4_H__
-
-enum class GrandCentralM4Pinout : uint8_t {
+#include "SerialKind.h"
+namespace GrandCentralM4
+{
+enum class Pinout : uint8_t {
     // i960Sx Pinout
   Lock = 22, // active low, open collector, bi directional
   INT0, // active low input
@@ -26,5 +28,7 @@ enum class GrandCentralM4Pinout : uint8_t {
   Last,
   First = Lock,
 };
-using TargetBoardPinout = GrandCentralM4Pinout;
+}
+using TargetBoardPinout = GrandCentralM4::Pinout;
+using SerialKind = IsSoftwareBasedSerial;
 #endif // end I960_GRAND_CENTRAL_M4__

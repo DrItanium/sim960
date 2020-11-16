@@ -4,6 +4,8 @@
 #include <map>
 #include "TargetPlatform.h"
 #include "PinSetup.h"
+#include "SerialKind.h"
+namespace i960 {
 
 template<typename T>
 std::string 
@@ -38,7 +40,8 @@ getPinName(T value) noexcept {
     }
 }
 template<typename T = TargetBoardPinout>
-void displayPinoutToConsole() noexcept {
+void 
+displayPinoutToConsole() noexcept {
     static_assert(std::is_enum_v<T>, "Pinout type must be an enum");
     for (auto i = T::First; i != T::Last; i = static_cast<T>(static_cast<int>(i) + 1)) {
         auto name = getPinName(i);
@@ -46,6 +49,14 @@ void displayPinoutToConsole() noexcept {
         Serial.print(": ");
         Serial.println(static_cast<int>(i));
     }
+}
+void setupSerial(int rate, IsHardwareBasedSerial);
+void setupSerial(int rate, IsSoftwareBasedSerial);
+
+template<typename SK = SerialKind>
+void 
+setupSerial(int rate) {
+    setupSerial(rate, SK{ });
 }
 
 template<typename T = TargetBoardPinout>
@@ -72,5 +83,6 @@ void setupPins() noexcept {
           T::BA1,
           T::BA2,
           T::BA3);
+}
 }
 #endif // end I960_CONTROL_SIGNALS_H__

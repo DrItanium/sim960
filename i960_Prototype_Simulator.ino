@@ -21,13 +21,13 @@ volatile RegisterSet globalRegisters = { 0 };
 volatile RegisterSet localRegisters = { 0 };
 /// @todo implement the register frames "in hardware"
 void setup() {
-  SPI.begin();
-  Serial.begin(9600);
-  while(!Serial);
-  Serial.println("i960 Simulator Starting up");
-  displayPinoutToConsole();
-  setupPins();
-  Serial.println("SPI Started");
+    i960::setupSerial(9600);
+    Serial.println("i960 Simulator Starting up");
+    i960::displayPinoutToConsole();
+    i960::setupPins();
+    Serial.print("Starting up SPI...");
+    SPI.begin();
+    Serial.println("Done");
 }
 
 void loop() {
