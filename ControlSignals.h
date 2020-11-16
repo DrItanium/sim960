@@ -5,6 +5,7 @@
 #include "TargetPlatform.h"
 #include "PinSetup.h"
 #include "SerialKind.h"
+#include "SetupSerial.h"
 namespace i960 {
 
 template<typename T>
@@ -50,13 +51,10 @@ displayPinoutToConsole() noexcept {
         Serial.println(static_cast<int>(i));
     }
 }
-void setupSerial(int rate, IsHardwareBasedSerial);
-void setupSerial(int rate, IsSoftwareBasedSerial);
 
-template<typename SK = SerialKind>
-void 
+inline void
 setupSerial(int rate) {
-    setupSerial(rate, SK{ });
+    setupSerial(rate, SerialKind{});
 }
 
 template<typename T = TargetBoardPinout>
