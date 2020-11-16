@@ -1,5 +1,5 @@
-#ifndef I960_GRAND_CENTRAL_M4__
-#define I960_GRAND_CENTRAL_M4__
+#ifndef I960_GRAND_CENTRAL_M4_H__
+#define I960_GRAND_CENTRAL_M4_H__
 
 enum class GrandCentralM4Pinout : uint8_t {
   Lock = 22, // active low, open collector, bi directional
