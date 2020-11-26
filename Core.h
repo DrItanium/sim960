@@ -2,6 +2,8 @@
 #define I960_CORE_H__
 #include <cstdint>
 #include <array>
+#include "TargetPlatform.h"
+
 namespace i960
 {
   using Ordinal = std::uint32_t;
@@ -39,6 +41,8 @@ namespace i960
   };
   using RegisterFile = std::array<Register, 16>;
   class Core {
+    public:
+      using Pins = TargetBoardPinout;
     public:
       void cycle();
     private:
