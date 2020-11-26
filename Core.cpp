@@ -26,7 +26,20 @@ Core::getRegister(int index) const noexcept {
 
 void
 Core::moveRegisterContents(int from, int to) noexcept {
-  getRegister(to).setOrdinal(getRegister(from).getOrdinalValue());
+  getRegister(to).setOrdinal(static_cast<Ordinal>(getRegister(from)));
 }
 Core::Core(MemoryInterface& mi) : memoryController(mi) { }
+
+void
+Core::saveLocals() noexcept
+{
+    // okay, we have to save all of the registers to the stack or the on board
+    // register cache (however, I'm not implementing that yet)
+}
+void
+Core::restoreLocals() noexcept
+{
+    // restore the local register frame, generally done when you return from a
+    // previous function
+}
 } // end namespace i960

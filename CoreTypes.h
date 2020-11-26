@@ -10,5 +10,6 @@ namespace i960 {
   using LongInteger = std::int64_t;
   using ByteOrdinal = std::uint8_t;
   using ByteInteger = std::int8_t;
+  using Address = Ordinal;
 } // end namespace i960
 #endif // end I960_CORE_TYPES_H__

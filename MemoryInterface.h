@@ -15,22 +15,22 @@ namespace i960
     struct MemoryInterface {
         MemoryInterface() = default;
         virtual ~MemoryInterface() = default;
-        virtual Integer loadValue(Ordinal address, TreatAsInteger) = 0;
-        virtual Ordinal loadValue(Ordinal address, TreatAsOrdinal) = 0;
-        virtual void storeValue(Ordinal address, Ordinal value, TreatAsOrdinal) = 0;
-        virtual void storeValue(Ordinal address, Integer value, TreatAsInteger) = 0;
-        virtual ByteInteger loadValue(Ordinal address, TreatAsByteInteger) = 0;
-        virtual ByteOrdinal loadValue(Ordinal address, TreatAsByteOrdinal) = 0;
-        virtual void storeValue(Ordinal address, ByteOrdinal value, TreatAsByteOrdinal) = 0;
-        virtual void storeValue(Ordinal address, ByteInteger value, TreatAsByteInteger) = 0;
-        virtual ShortInteger loadValue(Ordinal address, TreatAsShortInteger) = 0;
-        virtual ShortOrdinal loadValue(Ordinal address, TreatAsShortOrdinal) = 0;
-        virtual void storeValue(Ordinal address, ShortOrdinal value, TreatAsShortOrdinal) = 0;
-        virtual void storeValue(Ordinal address, ShortInteger value, TreatAsShortInteger) = 0;
-        virtual LongInteger loadValue(Ordinal address, TreatAsLongInteger) = 0;
-        virtual LongOrdinal loadValue(Ordinal address, TreatAsLongOrdinal) = 0;
-        virtual void storeValue(Ordinal address, LongOrdinal value, TreatAsLongOrdinal) = 0;
-        virtual void storeValue(Ordinal address, LongInteger value, TreatAsLongInteger) = 0;
+        virtual Integer loadValue(Address address, TreatAsInteger) = 0;
+        virtual Ordinal loadValue(Address address, TreatAsOrdinal) = 0;
+        virtual void storeValue(Address address, Ordinal value, TreatAsOrdinal) = 0;
+        virtual void storeValue(Address address, Integer value, TreatAsInteger) = 0;
+        virtual ByteInteger loadValue(Address address, TreatAsByteInteger) = 0;
+        virtual ByteOrdinal loadValue(Address address, TreatAsByteOrdinal) = 0;
+        virtual void storeValue(Address address, ByteOrdinal value, TreatAsByteOrdinal) = 0;
+        virtual void storeValue(Address address, ByteInteger value, TreatAsByteInteger) = 0;
+        virtual ShortInteger loadValue(Address address, TreatAsShortInteger) = 0;
+        virtual ShortOrdinal loadValue(Address address, TreatAsShortOrdinal) = 0;
+        virtual void storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal) = 0;
+        virtual void storeValue(Address address, ShortInteger value, TreatAsShortInteger) = 0;
+        virtual LongInteger loadValue(Address address, TreatAsLongInteger) = 0;
+        virtual LongOrdinal loadValue(Address address, TreatAsLongOrdinal) = 0;
+        virtual void storeValue(Address address, LongOrdinal value, TreatAsLongOrdinal) = 0;
+        virtual void storeValue(Address address, LongInteger value, TreatAsLongInteger) = 0;
     };
 
     struct LambdaMemoryInterface : public MemoryInterface {
@@ -84,22 +84,22 @@ namespace i960
             stLongOrdinal(storeLongOrdinal),
             stLongInteger(storeLongInteger) { }
         ~LambdaMemoryInterface() override = default;
-        Integer loadValue(Ordinal address, TreatAsInteger) override { return ldInteger(address); }
-        Ordinal loadValue(Ordinal address, TreatAsOrdinal) override { return ldOrdinal(address); }
-        void storeValue(Ordinal address, Ordinal value, TreatAsOrdinal) override { stOrdinal(address, value); }
-        void storeValue(Ordinal address, Integer value, TreatAsInteger) override { stInteger(address, value); }
-        ByteInteger loadValue(Ordinal address, TreatAsByteInteger) override { return ldByteInteger(address); }
-        ByteOrdinal loadValue(Ordinal address, TreatAsByteOrdinal) override { return ldByteOrdinal(address); }
-        void storeValue(Ordinal address, ByteOrdinal value, TreatAsByteOrdinal) override { stByteOrdinal(address, value); }
-        void storeValue(Ordinal address, ByteInteger value, TreatAsByteInteger) override { stByteInteger(address, value); }
-        ShortInteger loadValue(Ordinal address, TreatAsShortInteger) override { return ldShortInteger(address); }
-        ShortOrdinal loadValue(Ordinal address, TreatAsShortOrdinal) override { return ldShortOrdinal(address); }
-        void storeValue(Ordinal address, ShortOrdinal value, TreatAsShortOrdinal) override { stShortOrdinal(address, value); }
-        void storeValue(Ordinal address, ShortInteger value, TreatAsShortInteger) override { stShortInteger(address, value); }
-        LongInteger loadValue(Ordinal address, TreatAsLongInteger) override { return ldLongInteger(address); }
-        LongOrdinal loadValue(Ordinal address, TreatAsLongOrdinal) override { return ldLongOrdinal(address); }
-        void storeValue(Ordinal address, LongOrdinal value, TreatAsLongOrdinal) override { stLongOrdinal(address, value); }
-        void storeValue(Ordinal address, LongInteger value, TreatAsLongInteger) override { stLongInteger(address, value); }
+        Integer loadValue(Address address, TreatAsInteger) override { return ldInteger(address); }
+        Ordinal loadValue(Address address, TreatAsOrdinal) override { return ldOrdinal(address); }
+        void storeValue(Address address, Ordinal value, TreatAsOrdinal) override { stOrdinal(address, value); }
+        void storeValue(Address address, Integer value, TreatAsInteger) override { stInteger(address, value); }
+        ByteInteger loadValue(Address address, TreatAsByteInteger) override { return ldByteInteger(address); }
+        ByteOrdinal loadValue(Address address, TreatAsByteOrdinal) override { return ldByteOrdinal(address); }
+        void storeValue(Address address, ByteOrdinal value, TreatAsByteOrdinal) override { stByteOrdinal(address, value); }
+        void storeValue(Address address, ByteInteger value, TreatAsByteInteger) override { stByteInteger(address, value); }
+        ShortInteger loadValue(Address address, TreatAsShortInteger) override { return ldShortInteger(address); }
+        ShortOrdinal loadValue(Address address, TreatAsShortOrdinal) override { return ldShortOrdinal(address); }
+        void storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal) override { stShortOrdinal(address, value); }
+        void storeValue(Address address, ShortInteger value, TreatAsShortInteger) override { stShortInteger(address, value); }
+        LongInteger loadValue(Address address, TreatAsLongInteger) override { return ldLongInteger(address); }
+        LongOrdinal loadValue(Address address, TreatAsLongOrdinal) override { return ldLongOrdinal(address); }
+        void storeValue(Address address, LongOrdinal value, TreatAsLongOrdinal) override { stLongOrdinal(address, value); }
+        void storeValue(Address address, LongInteger value, TreatAsLongInteger) override { stLongInteger(address, value); }
         private:
             LoadOrdinalFunction ldOrdinal;
             LoadIntegerFunction ldInteger;
