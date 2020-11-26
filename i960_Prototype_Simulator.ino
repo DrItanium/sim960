@@ -7,18 +7,8 @@
 #include "TargetPlatform.h"
 #include "ControlSignals.h"
 #include "PinSetup.h"
+#include "Core.h"
 
-
-// targeting grand central m4
-using Integer = int32_t;
-
-using Ordinal = uint32_t;
-
-using Register = Ordinal;
-
-using RegisterSet = std::array<Register,16>;
-volatile RegisterSet globalRegisters = { 0 };
-volatile RegisterSet localRegisters = { 0 };
 /// @todo implement the register frames "in hardware"
 void setup() {
     i960::setupSerial(9600);
