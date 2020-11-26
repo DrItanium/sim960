@@ -42,4 +42,33 @@ Core::restoreLocals() noexcept
     // restore the local register frame, generally done when you return from a
     // previous function
 }
+
+void
+Core::storeLongRegister(Address address, int baseIndex) noexcept {
+    /// @todo error out if the long register is not even
+    storeOrdinal(address, static_cast<Ordinal>(getRegister(baseIndex)));
+    storeOrdinal(address+4, static_cast<Ordinal>(getRegister(baseIndex + 1)));
+}
+
+void
+Core::loadLongRegister(Address address, int baseIndex) noexcept {
+    getRegister(baseIndex).setOrdinal(loadOrdinal(address));
+    getRegister(baseIndex+1).setOrdinal(loadOrdinal(address+4));
+}
+
+void
+Core::storeTripleRegister(Address address, int baseIndex) noexcept {
+    /// @todo error out if the long register is not even
+    storeOrdinal(address, static_cast<Ordinal>(getRegister(baseIndex)));
+    storeOrdinal(address+4, static_cast<Ordinal>(getRegister(baseIndex + 1)));
+    storeOrdinal(address+8, static_cast<Ordinal>(getRegister(baseIndex + 2)));
+}
+
+void
+Core::loadTripleRegister(Address address, int baseIndex) noexcept {
+    getRegister(baseIndex).setOrdinal(loadOrdinal(address));
+    getRegister(baseIndex+1).setOrdinal(loadOrdinal(address+4));
+    getRegister(baseIndex+2).setOrdinal(loadOrdinal(address+8));
+}
+
 } // end namespace i960

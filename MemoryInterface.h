@@ -10,8 +10,6 @@ namespace i960
     struct TreatAsShortInteger { };
     struct TreatAsByteOrdinal { };
     struct TreatAsByteInteger { };
-    struct TreatAsLongOrdinal { };
-    struct TreatAsLongInteger { };
     struct MemoryInterface {
         MemoryInterface() = default;
         virtual ~MemoryInterface() = default;
@@ -27,10 +25,6 @@ namespace i960
         virtual ShortOrdinal loadValue(Address address, TreatAsShortOrdinal) = 0;
         virtual void storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal) = 0;
         virtual void storeValue(Address address, ShortInteger value, TreatAsShortInteger) = 0;
-        virtual LongInteger loadValue(Address address, TreatAsLongInteger) = 0;
-        virtual LongOrdinal loadValue(Address address, TreatAsLongOrdinal) = 0;
-        virtual void storeValue(Address address, LongOrdinal value, TreatAsLongOrdinal) = 0;
-        virtual void storeValue(Address address, LongInteger value, TreatAsLongInteger) = 0;
     };
 
     struct LambdaMemoryInterface : public MemoryInterface {
@@ -46,10 +40,6 @@ namespace i960
         using LoadShortOrdinalFunction = std::function<ShortOrdinal(Ordinal)>;
         using StoreShortIntegerFunction = std::function<void(Ordinal, ShortInteger)>;
         using StoreShortOrdinalFunction = std::function<void(Ordinal, ShortOrdinal)>;
-        using LoadLongIntegerFunction = std::function<LongInteger(Ordinal)>;
-        using LoadLongOrdinalFunction = std::function<LongOrdinal(Ordinal)>;
-        using StoreLongIntegerFunction = std::function<void(Ordinal, LongInteger)>;
-        using StoreLongOrdinalFunction = std::function<void(Ordinal, LongOrdinal)>;
         LambdaMemoryInterface(LoadOrdinalFunction loadOrdinal, 
                         LoadIntegerFunction loadInteger,
                         StoreOrdinalFunction storeOrdinal,
@@ -61,11 +51,7 @@ namespace i960
                         LoadShortOrdinalFunction loadShortOrdinal,
                         LoadShortIntegerFunction loadShortInteger,
                         StoreShortOrdinalFunction storeShortOrdinal,
-                        StoreShortIntegerFunction storeShortInteger,
-                        LoadLongOrdinalFunction loadLongOrdinal,
-                        LoadLongIntegerFunction loadLongInteger,
-                        StoreLongOrdinalFunction storeLongOrdinal,
-                        StoreLongIntegerFunction storeLongInteger
+                        StoreShortIntegerFunction storeShortInteger
                         ) : 
             ldOrdinal(loadOrdinal),
             ldInteger(loadInteger),
@@ -78,11 +64,7 @@ namespace i960
             ldShortOrdinal(loadShortOrdinal),
             ldShortInteger(loadShortInteger),
             stShortOrdinal(storeShortOrdinal),
-            stShortInteger(storeShortInteger),
-            ldLongOrdinal(loadLongOrdinal),
-            ldLongInteger(loadLongInteger),
-            stLongOrdinal(storeLongOrdinal),
-            stLongInteger(storeLongInteger) { }
+            stShortInteger(storeShortInteger) { }
         ~LambdaMemoryInterface() override = default;
         Integer loadValue(Address address, TreatAsInteger) override { return ldInteger(address); }
         Ordinal loadValue(Address address, TreatAsOrdinal) override { return ldOrdinal(address); }
@@ -96,10 +78,6 @@ namespace i960
         ShortOrdinal loadValue(Address address, TreatAsShortOrdinal) override { return ldShortOrdinal(address); }
         void storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal) override { stShortOrdinal(address, value); }
         void storeValue(Address address, ShortInteger value, TreatAsShortInteger) override { stShortInteger(address, value); }
-        LongInteger loadValue(Address address, TreatAsLongInteger) override { return ldLongInteger(address); }
-        LongOrdinal loadValue(Address address, TreatAsLongOrdinal) override { return ldLongOrdinal(address); }
-        void storeValue(Address address, LongOrdinal value, TreatAsLongOrdinal) override { stLongOrdinal(address, value); }
-        void storeValue(Address address, LongInteger value, TreatAsLongInteger) override { stLongInteger(address, value); }
         private:
             LoadOrdinalFunction ldOrdinal;
             LoadIntegerFunction ldInteger;
@@ -113,10 +91,6 @@ namespace i960
             LoadShortIntegerFunction ldShortInteger;
             StoreShortOrdinalFunction stShortOrdinal;
             StoreShortIntegerFunction stShortInteger;
-            LoadLongOrdinalFunction ldLongOrdinal;
-            LoadLongIntegerFunction ldLongInteger;
-            StoreLongOrdinalFunction stLongOrdinal;
-            StoreLongIntegerFunction stLongInteger;
     };
 }
 

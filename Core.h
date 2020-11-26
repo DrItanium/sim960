@@ -87,17 +87,16 @@ namespace i960
       ByteInteger loadByteInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsByteInteger{}); }
       void storeByteInteger (Address address, ByteInteger value) noexcept { memoryController.storeValue(address, value, TreatAsByteInteger{}); }
 
-      LongOrdinal loadLongOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsLongOrdinal{}); }
-      void storeLongOrdinal (Address address, LongOrdinal value) noexcept { memoryController.storeValue(address, value, TreatAsLongOrdinal{}); }
-      LongInteger loadLongInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsLongInteger{}); }
-      void storeLongInteger (Address address, LongInteger value) noexcept { memoryController.storeValue(address, value, TreatAsLongInteger{}); }
-
       ShortOrdinal loadShortOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsShortOrdinal{}); }
       void storeShortOrdinal (Address address, ShortOrdinal value) noexcept { memoryController.storeValue(address, value, TreatAsShortOrdinal{}); }
       ShortInteger loadShortInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsShortInteger{}); }
       void storeShortInteger (Address address, ShortInteger value) noexcept { memoryController.storeValue(address, value, TreatAsShortInteger{}); }
 
-
+    private:
+      void storeLongRegister(Address address, int baseIndex) noexcept;
+      void loadLongRegister(Address address, int baseIndex) noexcept;
+      void storeTripleRegister(Address address, int baseIndex) noexcept;
+      void loadTripleRegister(Address address, int baseIndex) noexcept;
     private:
       MemoryInterface& memoryController;
       RegisterFile globals, locals;
