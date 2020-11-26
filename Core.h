@@ -36,9 +36,11 @@ namespace i960
         ByteOrdinal byteOrds[4];
         ByteInteger byteInts[4];
       };
-  }
+  };
   using RegisterFile = std::array<Register, 16>;
   class Core {
+    public:
+      void cycle();
     private:
       RegisterFile globals, locals;
   };
