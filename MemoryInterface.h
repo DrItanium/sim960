@@ -1,0 +1,4 @@
+#ifndef I960_MEMORY_INTERFACE_H__
+#define I960_MEMORY_INTERFACE_H__
+
+#endif // end I960_MEMORY_INTERFACE_H__

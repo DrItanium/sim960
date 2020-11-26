@@ -28,4 +28,4 @@ void
 Core::moveRegisterContents(int from, int to) noexcept {
   getRegister(to).setOrdinal(getRegister(from).getOrdinalValue());
 }
-}
+} // end namespace i960
