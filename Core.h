@@ -3,6 +3,7 @@
 #include <array>
 #include "CoreTypes.h"
 #include "TargetPlatform.h"
+#include "MemoryInterface.h"
 
 namespace i960
 {
@@ -38,14 +39,15 @@ namespace i960
     public:
       using Pins = TargetBoardPinout;
     public:
+      Core(MemoryInterface& mi);
       void cycle();
     private:
-      Ordinal retrieveInstruction();
       Register& getRegister(int index) noexcept;
       const Register& getRegister(int index) const noexcept;
       void moveRegisterContents(int from, int to) noexcept;
       
     private:
+      MemoryInterface& memoryController;
       RegisterFile globals, locals;
       Register ip; // always start at address zero
   };

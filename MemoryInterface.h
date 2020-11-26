@@ -53,7 +53,7 @@ namespace i960
         LambdaMemoryInterface(LoadOrdinalFunction loadOrdinal, 
                         LoadIntegerFunction loadInteger,
                         StoreOrdinalFunction storeOrdinal,
-                        StoreIntegerFunction storeInteger
+                        StoreIntegerFunction storeInteger,
                         LoadByteOrdinalFunction loadByteOrdinal,
                         LoadByteIntegerFunction loadByteInteger,
                         StoreByteOrdinalFunction storeByteOrdinal,

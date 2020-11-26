@@ -28,4 +28,5 @@ void
 Core::moveRegisterContents(int from, int to) noexcept {
   getRegister(to).setOrdinal(getRegister(from).getOrdinalValue());
 }
+Core::Core(MemoryInterface& mi) : memoryController(mi) { }
 } // end namespace i960
