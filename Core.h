@@ -2,6 +2,7 @@
 #define I960_CORE_H__
 #include <cstdint>
 #include <array>
+#include <optional>
 #include "TargetPlatform.h"
 
 namespace i960
@@ -29,6 +30,8 @@ namespace i960
     void setShortInteger(ShortInteger value, bool upper = false) noexcept { shortInts[upper ? 1 : 0] = value; }
     void setByteOrdinal(ByteOrdinal value, int index = 0) noexcept { byteOrds[index & 0b11] = value; }
     void setByteInteger(ByteInteger value, int index = 0) noexcept { byteInts[index & 0b11] = value; }
+    void increment() noexcept { ++ordValue; }
+    void decrement() noexcept { --ordValue; }
     private:
       union {
         Ordinal ordValue;
@@ -46,7 +49,14 @@ namespace i960
     public:
       void cycle();
     private:
+      Ordinal retrieveInstruction();
+      Register& getRegister(int index) noexcept;
+      const Register& getRegister(int index) const noexcept;
+      void moveRegisterContents(int from, int to) noexcept;
+      
+    private:
       RegisterFile globals, locals;
+      Register ip; // always start at address zero
   };
 }
 #endif // end I960_CORE_H__
