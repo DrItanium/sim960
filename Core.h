@@ -74,6 +74,17 @@ namespace i960
     using EncodedInstruction = std::tuple<Ordinal, Ordinal>;
     using MemoryAddressing = std::variant<AbsoluteOffset, RegisterIndirect>; // continue to add new targets here
     using RegLit = std::variant<RegisterIndex, Literal>;
+    class RegFormatArguments {
+    public:
+        constexpr RegFormatArguments(RegLit src1, RegLit src2, RegisterIndex dest) : _src1(src1), _src2(src2), _dest(dest) { }
+        [[nodiscard]] constexpr auto getSrc1() const noexcept { return _src1; }
+        [[nodiscard]] constexpr auto getSrc2() const noexcept { return _src2; }
+        [[nodiscard]] constexpr auto getDestination() const noexcept { return _dest; }
+    private:
+        RegLit _src1;
+        RegLit _src2;
+        RegisterIndex _dest;
+    };
     constexpr bool isRegisterIndex(RegLit value) noexcept { return std::holds_alternative<RegisterIndex>(value); }
     constexpr bool isLiteral(RegLit value) noexcept { return std::holds_alternative<Literal>(value); }
     class Register {
