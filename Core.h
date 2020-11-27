@@ -176,10 +176,10 @@ namespace i960
         void stt(int dest, int src, Integer offset);
         void stq(int dest, int src, Integer offset);
 
-        void mov(int dest, int src, Integer offset);
-        void movl(int dest, int src, Integer offset);
-        void movt(int dest, int src, Integer offset);
-        void movq(int dest, int src, Integer offset);
+        void mov(RegLit src, RegisterIndex dest);
+        void movl(RegLit src, RegisterIndex dest);
+        void movt(RegLit src, RegisterIndex dest);
+        void movq(RegLit src, RegisterIndex dest);
 
         void lda(int dest, int src, Integer offset);
     private: // arithmetic
@@ -208,65 +208,52 @@ namespace i960
                 }
             }
         }
-        void addi(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 + src1); }
-        void addo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 + src1); }
-        void divi(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 / src1); }
-        void divo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 / src1); }
-        void muli(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 * src1); }
-        void mulo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 * src1); }
-        void subi(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 - src1); }
-        void subo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 - src1); }
-        void addc(Ordinal src1, Ordinal src2, Register& dest);
-        void subc(Ordinal src1, Ordinal src2, Register& dest);
-        void emul(Ordinal src1, Ordinal src2, LongRegister& dest);
-        void ediv(Ordinal src1, Ordinal src2, LongRegister& dest);
         /// @todo figure out the different code forms
         void addi(RegLit src1, RegLit src2, RegisterIndex dest);
         void addo(RegLit src1, RegLit src2, RegisterIndex dest);
         void addc(RegLit src1, RegLit src2, RegisterIndex dest);
-        void subc(RegLit src1, RegLit src2, RegisterIndex dest);
         void subi(RegLit src1, RegLit src2, RegisterIndex dest);
         void subo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subc(RegLit src1, RegLit src2, RegisterIndex dest);
         void muli(RegLit src1, RegLit src2, RegisterIndex dest);
         void mulo(RegLit src1, RegLit src2, RegisterIndex dest);
         void divi(RegLit src1, RegLit src2, RegisterIndex dest);
         void divo(RegLit src1, RegLit src2, RegisterIndex dest);
         void emul(RegLit src1, RegLit src2, RegisterIndex dest);
         void ediv(RegLit src1, RegLit src2, RegisterIndex dest);
-
-        void remi(int dest, int src0, int src1);
-        void remo(int dest, int src0, int src1);
-        void modi(int dest, int src0, int src1);
-        void shlo(int dest, int src0, int src1);
-        void shli(int dest, int src0, int src1);
-        void shro(int dest, int src0, int src1);
-        void shri(int dest, int src0, int src1);
-        void shrdi(int dest, int src0, int src1);
-        void rotate(int dest, int src0, int src1);
+        void remi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void remo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void modi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shlo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shli(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shro(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shri(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shrdi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void rotate(RegLit len, RegLit src, RegisterIndex dest);
 
     private: // logical operations
-        void logicalAnd(int dest, int src0, int src1);
-        void logicalOr(int dest, int src0, int src1);
-        void logicalXor(int dest, int src0, int src1);
-        void logicalNor(int dest, int src0, int src1);
-        void logicalNand(int dest, int src0, int src1);
-        void logicalXnor(int dest, int src0, int src1);
-        void logicalNot(int dest, int src0);
-        void notand(int dest, int src0, int src1);
-        void andnot(int dest, int src0, int src1);
-        void notor(int dest, int src0, int src1);
-        void ornot(int dest, int src0, int src1);
+        void logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalOr(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalXor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalNand(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalNor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalNot(RegLit src, RegisterIndex dest);
+        void notand(RegLit src1, RegLit src2, RegisterIndex dest);
+        void andnot(RegLit src1, RegLit src2, RegisterIndex dest);
+        void notor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void ornot(RegLit src1, RegLit src2, RegisterIndex dest);
     private: // bit and bit-field operations
-        void setbit(int dest, int src0, int src1);
-        void clrbit(int dest, int src0, int src1);
-        void notbit(int dest, int src0, int src1);
-        void chkbit(int dest, int src0, int src1);
-        void alterbit(int dest, int src0, int src1);
-        void scanbit(int dest, int src0, int src1);
-        void spanbit(int dest, int src0, int src1);
-        void extract(int dest, int src0, int src1);
-        void modify(int dest, int src0, int src1);
-        void scanbyte(int dest, int src0, int src1);
+        void setbit(RegLit bitpos, RegLit src, RegisterIndex dest);
+        void clrbit(RegLit bitpos, RegLit src, RegisterIndex dest);
+        void notbit(RegLit src1, RegLit src2, RegisterIndex dest);
+        void chkbit(RegLit bitpos, RegLit src);
+        void alterbit(RegLit bitpos, RegLit src, RegisterIndex dest);
+        void scanbit(RegLit src, RegisterIndex dest);
+        void spanbit(RegLit src, RegisterIndex dest);
+        void extract(RegLit bitpos, RegLit len, RegisterIndex srcDest);
+        void modify(RegLit bitpos, RegLit len, RegisterIndex srcDest);
+        void scanbyte(RegLit src1, RegLit src2);
     private: // compare and increment or decrement
         void cmpinci(int dest, int src0, int src1);
         void cmpinco(int dest, int src0, int src1);
@@ -318,7 +305,7 @@ namespace i960
         /// @todo implement faults as exceptions
     private: // processor management
         void flushreg(); // noop right now
-        void modac(Integer dest);
+        void modac(RegLit mask, RegLit src, RegisterIndex dest);
     private:
         void loadRegister(Address address, int index, TreatAsOrdinal) noexcept;
         void loadRegister(Address address, int index, TreatAsInteger) noexcept;
