@@ -1,11 +1,13 @@
 #ifndef I960_CORE_H__
 #define I960_CORE_H__
 #include <array>
+#include <tuple>
+#include <variant>
+
 #include "CoreTypes.h"
 #include "TargetPlatform.h"
 #include "MemoryInterface.h"
 #include "DependentFalse.h"
-#include <variant>
 namespace i960
 {
 
@@ -69,7 +71,7 @@ namespace i960
         RegisterIndex idx;
     };
     /// @todo add classes to describe the other memory modes
-
+    using EncodedInstruction = std::tuple<Ordinal, Ordinal>;
     using MemoryAddressing = std::variant<AbsoluteOffset, RegisterIndirect>; // continue to add new targets here
     using RegLit = std::variant<RegisterIndex, Literal>;
     constexpr bool isRegisterIndex(RegLit value) noexcept { return std::holds_alternative<RegisterIndex>(value); }
@@ -136,6 +138,15 @@ namespace i960
     public:
         Core(MemoryInterface& mi);
         void cycle();
+    private:
+        // classic risc pipeline stages
+        /// @todo flesh out
+        void fetchInstruction();
+        void decodeInstruction();
+        void executeInstruction();
+        void memoryAccess();
+        void writeback();
+
     private: // common internal functions
         Register& getRegister(int index) noexcept;
         inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }

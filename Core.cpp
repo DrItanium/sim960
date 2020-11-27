@@ -1,11 +1,6 @@
 #include "Core.h"
 
 namespace i960 {
-    void
-    Core::cycle()
-    {
-
-    }
     Register&
     Core::getRegister(int index) noexcept {
         if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
@@ -25,7 +20,34 @@ namespace i960 {
     }
 
     Core::Core(MemoryInterface& mi) : memoryController(mi) { }
+    void
+    Core::fetchInstruction() {
 
+    }
+    void
+    Core::decodeInstruction() {
+
+    }
+    void
+    Core::executeInstruction() {
+
+    }
+    void
+    Core::memoryAccess() {
+
+    }
+    void
+    Core::writeback() {
+
+    }
+    void
+    Core::cycle() {
+       fetchInstruction();
+       decodeInstruction();
+       executeInstruction();
+       memoryAccess();
+       writeback();
+    }
     void
     Core::saveLocals() noexcept
     {

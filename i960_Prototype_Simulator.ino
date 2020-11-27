@@ -13,6 +13,7 @@
 std::unique_ptr<i960::Core> theCore = nullptr;
 /// @todo implement the register frames "in hardware"
 void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
     setupSerial(9600);
     Serial.println("i960 Simulator Starting up");
     Serial.print("Starting up SPI...");
@@ -22,8 +23,9 @@ void setup() {
 }
 
 void loop() {
+    digitalWrite(LED_BUILTIN, HIGH);
     theCore->cycle();
-  // put your main code here, to run repeatedly:
-    //Serial.println("Donuts");
-    delay(1);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
 }
