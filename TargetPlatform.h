@@ -4,6 +4,8 @@
 #include "GrandCentralM4.h"
 #elif defined(ADAFRUIT_METRO_M4_EXPRESS) || defined(ARDUINO_METRO_M4)
 #include "MetroM4Express.h"
+#elif defined(ADAFRUIT_METRO_M0_EXPRESS) || defined(ARDUINO_METRO_M0)
+#include "MetroM0Express.h"
 #else
 #error "Unknown Board"
 #endif

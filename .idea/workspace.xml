@@ -19,14 +19,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="15a4eb2b-3acd-40e0-8fc2-ff4a49f59051" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/MetroM4Express.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BoardDescription.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MetroM0Express.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ControlSignals.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GrandCentralM4.h" beforeDir="false" afterPath="$PROJECT_DIR$/GrandCentralM4.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SetupSerial.h" beforeDir="false" afterPath="$PROJECT_DIR$/SetupSerial.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TargetPlatform.h" beforeDir="false" afterPath="$PROJECT_DIR$/TargetPlatform.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/i960_Prototype_Simulator.ino" beforeDir="false" afterPath="$PROJECT_DIR$/i960_Prototype_Simulator.ino" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +62,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1606450233118</updated>
-      <workItem from="1606450234837" duration="3605000" />
+      <workItem from="1606450234837" duration="3917000" />
     </task>
     <task id="LOCAL-00001" summary="Add workspace.xml">
       <created>1606450264332</created>
@@ -96,7 +92,14 @@
       <option name="project" value="LOCAL" />
       <updated>1606457175832</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Drop setting up pinouts&#10;&#10;Add a simple metro m4 express target as well">
+      <created>1606462895744</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1606462895744</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -115,7 +118,8 @@
     <MESSAGE value="More clion files" />
     <MESSAGE value="Define the different args possible to instructions minus fp" />
     <MESSAGE value="Start generating the different combos for instructions" />
-    <option name="LAST_COMMIT_MESSAGE" value="Start generating the different combos for instructions" />
+    <MESSAGE value="Drop setting up pinouts&#10;&#10;Add a simple metro m4 express target as well" />
+    <option name="LAST_COMMIT_MESSAGE" value="Drop setting up pinouts&#10;&#10;Add a simple metro m4 express target as well" />
   </component>
   <component name="WindowStateProjectService">
     <state x="2000" y="455" width="526" height="501" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1606462651399">
