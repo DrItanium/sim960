@@ -9,7 +9,7 @@
 #include "PinSetup.h"
 #include "SetupSerial.h"
 #include "Core.h"
-#include "MemoryInterface.h"
+TargetBoard theBoard; // must be default constructible
 std::unique_ptr<i960::Core> theCore = nullptr;
 /// @todo implement the register frames "in hardware"
 void setup() {
@@ -19,7 +19,7 @@ void setup() {
     Serial.print("Starting up SPI...");
     SPI.begin();
     Serial.println("Done");
-    theCore = std::make_unique<i960::Core>(i960::getStubMemoryController());
+    theCore = std::make_unique<i960::Core>(theBoard);
 }
 
 void loop() {

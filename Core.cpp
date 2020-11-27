@@ -19,7 +19,7 @@ namespace i960 {
         }
     }
 
-    Core::Core(MemoryInterface& mi) : memoryController(mi) { }
+    Core::Core(TargetBoard& mi) : theBoard(mi) { }
     void
     Core::fetchInstruction() {
 

@@ -6,7 +6,6 @@
 
 #include "CoreTypes.h"
 #include "TargetPlatform.h"
-#include "MemoryInterface.h"
 #include "DependentFalse.h"
 namespace i960
 {
@@ -147,7 +146,7 @@ namespace i960
     using RegisterFile = std::array<Register, 16>;
     class Core {
     public:
-        Core(MemoryInterface& mi);
+        Core(TargetBoard& tb);
         void cycle();
     private:
         // classic risc pipeline stages
@@ -168,20 +167,20 @@ namespace i960
         bool getCarryFlag() const noexcept;
         void setCarryFlag(bool value) noexcept;
     private: // memory controller interface routines for abstraction purposes
-        Ordinal loadOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsOrdinal{}); }
-        void storeOrdinal (Address address, Ordinal value) noexcept { memoryController.storeValue(address, value, TreatAsOrdinal{}); }
-        Integer loadInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsInteger{}); }
-        void storeInteger (Address address, Integer value) noexcept { memoryController.storeValue(address, value, TreatAsInteger{}); }
+        Ordinal loadOrdinal(Address address) noexcept { return theBoard.loadValue(address, TreatAsOrdinal{}); }
+        void storeOrdinal (Address address, Ordinal value) noexcept { theBoard.storeValue(address, value, TreatAsOrdinal{}); }
+        Integer loadInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsInteger{}); }
+        void storeInteger (Address address, Integer value) noexcept { theBoard.storeValue(address, value, TreatAsInteger{}); }
 
-        ByteOrdinal loadByteOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsByteOrdinal{}); }
-        void storeByteOrdinal (Address address, ByteOrdinal value) noexcept { memoryController.storeValue(address, value, TreatAsByteOrdinal{}); }
-        ByteInteger loadByteInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsByteInteger{}); }
-        void storeByteInteger (Address address, ByteInteger value) noexcept { memoryController.storeValue(address, value, TreatAsByteInteger{}); }
+        ByteOrdinal loadByteOrdinal(Address address) noexcept { return theBoard.loadValue(address, TreatAsByteOrdinal{}); }
+        void storeByteOrdinal (Address address, ByteOrdinal value) noexcept { theBoard.storeValue(address, value, TreatAsByteOrdinal{}); }
+        ByteInteger loadByteInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsByteInteger{}); }
+        void storeByteInteger (Address address, ByteInteger value) noexcept { theBoard.storeValue(address, value, TreatAsByteInteger{}); }
 
-        ShortOrdinal loadShortOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsShortOrdinal{}); }
-        void storeShortOrdinal (Address address, ShortOrdinal value) noexcept { memoryController.storeValue(address, value, TreatAsShortOrdinal{}); }
-        ShortInteger loadShortInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsShortInteger{}); }
-        void storeShortInteger (Address address, ShortInteger value) noexcept { memoryController.storeValue(address, value, TreatAsShortInteger{}); }
+        ShortOrdinal loadShortOrdinal(Address address) noexcept { return theBoard.loadValue(address, TreatAsShortOrdinal{}); }
+        void storeShortOrdinal (Address address, ShortOrdinal value) noexcept { theBoard.storeValue(address, value, TreatAsShortOrdinal{}); }
+        ShortInteger loadShortInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsShortInteger{}); }
+        void storeShortInteger (Address address, ShortInteger value) noexcept { theBoard.storeValue(address, value, TreatAsShortInteger{}); }
     private: // data movement operations
         // mem reg {
         void ld(MemoryAddressing mem, RegisterIndex dest);
@@ -387,7 +386,7 @@ namespace i960
         void storeQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
         void loadQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
     private:
-        MemoryInterface& memoryController;
+        TargetBoard& theBoard;
         RegisterFile globals, locals;
         Register ip; // always start at address zero
     };
