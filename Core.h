@@ -150,7 +150,7 @@ namespace i960
     public:
         Core(MemoryInterface& mi);
         void cycle();
-    private:
+    private: // common internal functions
         Register& getRegister(int index) noexcept;
         inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
         const Register& getRegister(int index) const noexcept;
@@ -159,6 +159,9 @@ namespace i960
         void moveRegisterContents(RegisterIndex from, RegisterIndex to) noexcept { moveRegisterContents(toInteger(from), toInteger(to)); }
         void saveLocals() noexcept;
         void restoreLocals() noexcept;
+        bool getCarryFlag() const noexcept;
+        void setCarryFlag(bool value) noexcept;
+    private: // memory controller interface routines for abstraction purposes
         Ordinal loadOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsOrdinal{}); }
         void storeOrdinal (Address address, Ordinal value) noexcept { memoryController.storeValue(address, value, TreatAsOrdinal{}); }
         Integer loadInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsInteger{}); }
@@ -332,27 +335,39 @@ namespace i960
     private: // Numerics Architecture addons
         void dmovt(RegisterIndex src, RegisterIndex dest);
         void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        /**
+         * @brief Decimal Add with Carry. Adds bits 0 through 3 of src2 and src1 and bit 1 of the condition code (used here as a carry bit).
+         * The result is stored in bits 0 through 3 of dest. If the addition results in a carry, bit 1 of the condition code is set. Bits 4
+         * through 31 of src2 are copied to dst unchanged.
+         *
+         * The instruction is intended to be used iteratively to add binary-coded-decimal (BCD) values in which the least-significant four bits
+         * of the operands represent the decimal numbers 0 to 9. The instruction assumes that the least significant 4 bits of both operands
+         * are valid BCD numbers. If these bits are not valid BCD numbers, the resulting value in dest is unpredictable.
+         * @param src1 The first bcd number
+         * @param src2 The second bcd number
+         * @param dest The destination register to store the result in
+         */
         void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
     private:
     private:
-        void loadRegister(Address address, int index, TreatAsOrdinal) noexcept;
-        void loadRegister(Address address, int index, TreatAsInteger) noexcept;
-        void loadRegister(Address address, int index, TreatAsByteInteger) noexcept;
-        void loadRegister(Address address, int index, TreatAsByteOrdinal) noexcept;
-        void loadRegister(Address address, int index, TreatAsShortInteger) noexcept;
-        void loadRegister(Address address, int index, TreatAsShortOrdinal) noexcept;
-        void storeRegister(Address address, int index, TreatAsOrdinal) noexcept;
-        void storeRegister(Address address, int index, TreatAsInteger) noexcept;
-        void storeRegister(Address address, int index, TreatAsByteInteger) noexcept;
-        void storeRegister(Address address, int index, TreatAsByteOrdinal) noexcept;
-        void storeRegister(Address address, int index, TreatAsShortInteger) noexcept;
-        void storeRegister(Address address, int index, TreatAsShortOrdinal) noexcept;
-        void storeLongRegister(Address address, int baseIndex) noexcept;
-        void loadLongRegister(Address address, int baseIndex) noexcept;
-        void storeTripleRegister(Address address, int baseIndex) noexcept;
-        void loadTripleRegister(Address address, int baseIndex) noexcept;
-        void storeQuadRegister(Address address, int baseIndex) noexcept;
-        void loadQuadRegister(Address address, int baseIndex) noexcept;
+        void loadRegister(Address address, RegisterIndex index, TreatAsOrdinal) noexcept;
+        void loadRegister(Address address, RegisterIndex index, TreatAsInteger) noexcept;
+        void loadRegister(Address address, RegisterIndex index, TreatAsByteInteger) noexcept;
+        void loadRegister(Address address, RegisterIndex index, TreatAsByteOrdinal) noexcept;
+        void loadRegister(Address address, RegisterIndex index, TreatAsShortInteger) noexcept;
+        void loadRegister(Address address, RegisterIndex index, TreatAsShortOrdinal) noexcept;
+        void storeRegister(Address address, RegisterIndex index, TreatAsOrdinal) noexcept;
+        void storeRegister(Address address, RegisterIndex index, TreatAsInteger) noexcept;
+        void storeRegister(Address address, RegisterIndex index, TreatAsByteInteger) noexcept;
+        void storeRegister(Address address, RegisterIndex index, TreatAsByteOrdinal) noexcept;
+        void storeRegister(Address address, RegisterIndex index, TreatAsShortInteger) noexcept;
+        void storeRegister(Address address, RegisterIndex index, TreatAsShortOrdinal) noexcept;
+        void storeLongRegister(Address address, RegisterIndex baseIndex) noexcept;
+        void loadLongRegister(Address address, RegisterIndex baseIndex) noexcept;
+        void storeTripleRegister(Address address, RegisterIndex baseIndex) noexcept;
+        void loadTripleRegister(Address address, RegisterIndex baseIndex) noexcept;
+        void storeQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
+        void loadQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
     private:
         MemoryInterface& memoryController;
         RegisterFile globals, locals;
