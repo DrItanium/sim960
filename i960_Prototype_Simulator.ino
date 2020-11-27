@@ -7,18 +7,12 @@
 #include <SPI.h>
 #include "TargetPlatform.h"
 #include "PinSetup.h"
-#include "SetupSerial.h"
 #include "Core.h"
 TargetBoard theBoard; // must be default constructible
 std::unique_ptr<i960::Core> theCore = nullptr;
 /// @todo implement the register frames "in hardware"
 void setup() {
-    pinMode(LED_BUILTIN, OUTPUT);
-    setupSerial(9600);
-    Serial.println("i960 Simulator Starting up");
-    Serial.print("Starting up SPI...");
-    SPI.begin();
-    Serial.println("Done");
+    theBoard.begin();
     theCore = std::make_unique<i960::Core>(theBoard);
 }
 

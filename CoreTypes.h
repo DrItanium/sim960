@@ -1,7 +1,6 @@
 #ifndef I960_CORE_TYPES_H__
 #define I960_CORE_TYPES_H__
 #include <cstdint>
-namespace i960 {
   using Ordinal = std::uint32_t;
   using Integer = std::int32_t;
   using ShortOrdinal = std::uint16_t;
@@ -11,5 +10,4 @@ namespace i960 {
   using ByteOrdinal = std::uint8_t;
   using ByteInteger = std::int8_t;
   using Address = Ordinal;
-} // end namespace i960
 #endif // end I960_CORE_TYPES_H__

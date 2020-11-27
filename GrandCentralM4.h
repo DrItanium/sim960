@@ -1,8 +1,6 @@
 #ifndef I960_GRAND_CENTRAL_M4_H__
 #define I960_GRAND_CENTRAL_M4_H__
-#include "SerialKind.h"
 #include "MemoryInterface.h"
-using SerialKind = IsSoftwareBasedSerial;
 class GrandCentralM4Board : public MemoryInterface {
 public:
     using MemoryInterface::MemoryInterface;
