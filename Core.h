@@ -141,8 +141,6 @@ namespace i960
         inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
         const Register& getRegister(int index) const noexcept;
         inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
-        void moveRegisterContents(int from, int to) noexcept;
-        void moveRegisterContents(RegisterIndex from, RegisterIndex to) noexcept { moveRegisterContents(toInteger(from), toInteger(to)); }
         void saveLocals() noexcept;
         void restoreLocals() noexcept;
         bool getCarryFlag() const noexcept;

@@ -24,10 +24,6 @@ namespace i960 {
         }
     }
 
-    void
-    Core::moveRegisterContents(int from, int to) noexcept {
-        getRegister(to).setOrdinal(static_cast<Ordinal>(getRegister(from)));
-    }
     Core::Core(MemoryInterface& mi) : memoryController(mi) { }
 
     void
