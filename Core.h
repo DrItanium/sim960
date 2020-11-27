@@ -181,16 +181,38 @@ namespace i960
 
         void lda(int dest, int src, Integer offset);
     private: // arithmetic
-
-        void addi(int dest, int src0, int src1);
-        void addo(int dest, int src0, int src1);
-        void subi(int dest, int src0, int src1);
-        void subo(int dest, int src0, int src1);
-        void muli(int dest, int src0, int src1);
-        void mulo(int dest, int src0, int src1);
-        void divi(int dest, int src0, int src1);
-        void divo(int dest, int src0, int src1);
-
+        void divi(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void divi(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void divi(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void divi(Literal src1, Literal src2, RegisterIndex dest);
+        void divo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void divo(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void divo(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void divo(Literal src1, Literal src2, RegisterIndex dest);
+        void muli(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void muli(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void muli(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void muli(Literal src1, Literal src2, RegisterIndex dest);
+        void mulo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void mulo(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void mulo(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void mulo(Literal src1, Literal src2, RegisterIndex dest);
+        void subi(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void subi(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void subi(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void subi(Literal src1, Literal src2, RegisterIndex dest);
+        void subo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void subo(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void subo(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void subo(Literal src1, Literal src2, RegisterIndex dest);
+        void addi(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void addi(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void addi(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void addi(Literal src1, Literal src2, RegisterIndex dest);
+        void addo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void addo(RegisterIndex src1, Literal src2, RegisterIndex dest);
+        void addo(Literal src1, RegisterIndex src2, RegisterIndex dest);
+        void addo(Literal src1, Literal src2, RegisterIndex dest);
         void addc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
         void addc(RegisterIndex src1, Literal src2, RegisterIndex dest);
         void addc(Literal src1, RegisterIndex src2, RegisterIndex dest);
