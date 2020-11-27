@@ -92,6 +92,23 @@ namespace i960
             StoreShortOrdinalFunction stShortOrdinal;
             StoreShortIntegerFunction stShortInteger;
     };
+    inline LambdaMemoryInterface& getStubMemoryController() noexcept {
+        static LambdaMemoryInterface stubInterface {
+                [](auto) { return 0; },
+                [](auto) { return 0; },
+                [](auto, auto) { },
+                [](auto, auto) { },
+                [](auto) { return 0; },
+                [](auto) { return 0; },
+                [](auto, auto) { },
+                [](auto, auto) { },
+                [](auto) { return 0; },
+                [](auto) { return 0; },
+                [](auto, auto) { },
+                [](auto, auto) { },
+        };
+        return stubInterface;
+    }
 }
 
 #endif // end I960_MEMORY_INTERFACE_H__
