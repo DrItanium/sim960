@@ -4,6 +4,7 @@
 #include "CoreTypes.h"
 #include "TargetPlatform.h"
 #include "MemoryInterface.h"
+#include "DependentFalse.h"
 #include <variant>
 namespace i960
 {
@@ -135,8 +136,11 @@ namespace i960
         void cycle();
     private:
         Register& getRegister(int index) noexcept;
+        inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
         const Register& getRegister(int index) const noexcept;
+        inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
         void moveRegisterContents(int from, int to) noexcept;
+        void moveRegisterContents(RegisterIndex from, RegisterIndex to) noexcept { moveRegisterContents(toInteger(from), toInteger(to)); }
         void saveLocals() noexcept;
         void restoreLocals() noexcept;
         Ordinal loadOrdinal(Address address) noexcept { return memoryController.loadValue(address, TreatAsOrdinal{}); }
@@ -179,49 +183,60 @@ namespace i960
 
         void lda(int dest, int src, Integer offset);
     private: // arithmetic
-        void divi(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void divi(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void divi(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void divi(Literal src1, Literal src2, RegisterIndex dest);
-        void divo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void divo(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void divo(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void divo(Literal src1, Literal src2, RegisterIndex dest);
-        void muli(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void muli(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void muli(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void muli(Literal src1, Literal src2, RegisterIndex dest);
-        void mulo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void mulo(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void mulo(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void mulo(Literal src1, Literal src2, RegisterIndex dest);
-        void subi(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void subi(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void subi(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void subi(Literal src1, Literal src2, RegisterIndex dest);
-        void subo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void subo(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void subo(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void subo(Literal src1, Literal src2, RegisterIndex dest);
-        void addi(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void addi(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void addi(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void addi(Literal src1, Literal src2, RegisterIndex dest);
-        void addo(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void addo(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void addo(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void addo(Literal src1, Literal src2, RegisterIndex dest);
-        void addc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-        void addc(RegisterIndex src1, Literal src2, RegisterIndex dest);
-        void addc(Literal src1, RegisterIndex src2, RegisterIndex dest);
-        void addc(Literal src1, Literal src2, RegisterIndex dest);
-        void subc(int dest, int src0, int src1);
-        void emul(int dest, int src0, int src1);
-        void ediv(int dest, int src0, int src1);
+        using RegLit = std::variant<RegisterIndex, Literal>;
+        static constexpr Ordinal extractValue(RegLit value, TreatAsOrdinal) noexcept {
+            return std::visit([this](auto&& value) {
+                using K = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<K, Literal>) {
+                    return static_cast<Ordinal>(toInteger(value));
+                } else if constexpr (std::is_same_v<K, RegisterIndex>) {
+                    return getRegister(value).getOrdinal();
+                } else {
+                    static_assert(DependentFalse<K>, "Unimplemented type!");
+                }
+            }
+        }
+        static constexpr Integer extractValue(RegLit value, TreatAsInteger) noexcept {
+            return std::visit([this](auto&& value) {
+                using K = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<K, Literal>) {
+                    return static_cast<Integer>(toInteger(value));
+                } else if constexpr (std::is_same_v<K, RegisterIndex>) {
+                    return getRegister(value).getInteger();
+                } else {
+                    static_assert(DependentFalse<K>, "Unimplemented type!");
+                }
+            }
+        }
+        void addi(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 + src1); }
+        void addo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 + src1); }
+        void divi(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 / src1); }
+        void divo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 / src1); }
+        void muli(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 * src1); }
+        void mulo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 * src1); }
+        void subi(Integer src1, Integer src2, Register& dest) { dest.setInteger(src2 - src1); }
+        void subo(Ordinal src1, Ordinal src2, Register& dest) { dest.setOrdinal(src2 - src1); }
+        void addc(Ordinal src1, Ordinal src2, Register& dest);
+        void subc(Ordinal src1, Ordinal src2, Register& dest);
+        void emul(Ordinal src1, Ordinal src2, LongRegister& dest);
+        void ediv(Ordinal src1, Ordinal src2, LongRegister& dest);
+        /// @todo figure out the different code forms
+        void addi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void addo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void addc(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subc(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void muli(RegLit src1, RegLit src2, RegisterIndex dest);
+        void mulo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void divi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void divo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void emul(RegLit src1, RegLit src2, RegisterIndex dest);
+        void ediv(RegLit src1, RegLit src2, RegisterIndex dest);
+
         void remi(int dest, int src0, int src1);
         void remo(int dest, int src0, int src1);
         void modi(int dest, int src0, int src1);
-
         void shlo(int dest, int src0, int src1);
         void shli(int dest, int src0, int src1);
         void shro(int dest, int src0, int src1);
