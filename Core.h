@@ -158,6 +158,7 @@ namespace i960
         ShortInteger loadShortInteger(Address address) noexcept { return memoryController.loadValue(address, TreatAsShortInteger{}); }
         void storeShortInteger (Address address, ShortInteger value) noexcept { memoryController.storeValue(address, value, TreatAsShortInteger{}); }
     private: // data movement operations
+        // mem reg {
         void ld(int dest, int src, Integer offset);
         void ldob(int dest, int src, Integer offset);
         void ldos(int dest, int src, Integer offset);
@@ -176,12 +177,14 @@ namespace i960
         void stt(int dest, int src, Integer offset);
         void stq(int dest, int src, Integer offset);
 
+        void lda(int dest, int src, Integer offset);
+        // }
+
         void mov(RegLit src, RegisterIndex dest);
         void movl(RegLit src, RegisterIndex dest);
         void movt(RegLit src, RegisterIndex dest);
         void movq(RegLit src, RegisterIndex dest);
 
-        void lda(int dest, int src, Integer offset);
     private: // arithmetic
         using RegLit = std::variant<RegisterIndex, Literal>;
         static constexpr Ordinal extractValue(RegLit value, TreatAsOrdinal) noexcept {
@@ -255,57 +258,65 @@ namespace i960
         void modify(RegLit bitpos, RegLit len, RegisterIndex srcDest);
         void scanbyte(RegLit src1, RegLit src2);
     private: // compare and increment or decrement
-        void cmpinci(int dest, int src0, int src1);
-        void cmpinco(int dest, int src0, int src1);
-        void cmpdeci(int dest, int src0, int src1);
-        void cmpdeco(int dest, int src0, int src1);
+        void concmpi(RegLit src1, RegLit src2);
+        void concmpo(RegLit src1, RegLit src2);
+        void cmpinci(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpinco(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpi(RegLit src1, RegLit src2);
+        void cmpo(RegLit src1, RegLit src2);
     private: // branching
         /// @todo figure out correct signatures
-        void b(Integer dest);
-        void bx(Integer dest);
-        void bal(Integer dest);
-        void balx(Integer dest);
+        void b(Displacement targ);
+        void bx(Integer dest); // mem
+        void bal(Displacement targ);
+        void balx(Integer dest); // mem, reg
 
         /// @todo figure out correct signatures
-        void be(Integer dest);
-        void bne(Integer dest);
-        void bl(Integer dest);
-        void ble(Integer dest);
-        void bg(Integer dest);
-        void bge(Integer dest);
+        void be(Displacement dest);
+        void bne(Displacement dest);
+        void bl(Displacement dest);
+        void ble(Displacement dest);
+        void bg(Displacement dest);
+        void bge(Displacement dest);
     private: // compare and branch
         /// @todo figure out correct signatures
-        void cmpibe(Integer dest);
-        void cmpibne(Integer dest);
-        void cmpibl(Integer dest);
-        void cmpible(Integer dest);
-        void cmpibg(Integer dest);
-        void cmpibge(Integer dest);
-        void cmpobe(Integer dest);
-        void cmpobne(Integer dest);
-        void cmpobl(Integer dest);
-        void cmpoble(Integer dest);
-        void cmpobg(Integer dest);
-        void cmpobge(Integer dest);
-        void bbs(Integer dest);
-        void bbc(Integer dest);
+        void cmpibe(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpobe(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpibne(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpobne(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpibl(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpobl(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpible(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpoble(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpibg(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpobg(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpibge(RegLit src1, RegisterIndex src2, Displacement targ);
+        void cmpobge(RegLit src1, RegisterIndex src2, Displacement targ);
+        void bbs(RegLit bitpos, RegisterIndex src, Displacement targ);
+        void bbc(RegLit bitpos, RegisterIndex src, Displacement targ);
     private: // test condition codes
-        /// @todo figure out correct signatures
-        void teste(Integer dest);
-        void testne(Integer dest);
-        void testl(Integer dest);
-        void testle(Integer dest);
-        void testg(Integer dest);
-        void testge(Integer dest);
+        void teste(RegisterIndex dest);
+        void testne(RegisterIndex dest);
+        void testl(RegisterIndex dest);
+        void testle(RegisterIndex dest);
+        void testg(RegisterIndex dest);
+        void testge(RegisterIndex dest);
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
-        void call(Integer dest);
-        void callx(Integer dest);
+        void call(Displacement targ);
+        void callx(Integer targ); // mem
         void ret();
         /// @todo implement faults as exceptions
     private: // processor management
         void flushreg(); // noop right now
         void modac(RegLit mask, RegLit src, RegisterIndex dest);
+    private: // Numerics Architecture addons
+        void dmovt(RegisterIndex src, RegisterIndex dest);
+        void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+    private:
     private:
         void loadRegister(Address address, int index, TreatAsOrdinal) noexcept;
         void loadRegister(Address address, int index, TreatAsInteger) noexcept;
