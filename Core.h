@@ -50,7 +50,7 @@ namespace i960
         int32_t value : 22;
     };
 
-    using InstructionArgument = std::variant<std::monostate, RegisterIndex, Literal, Displacement>;
+    using RegLit = std::variant<RegisterIndex, Literal>;
     template<typename T> constexpr T add(T a, T b) noexcept { return a + b; }
     template<typename T> constexpr T subtract(T a, T b) noexcept { return a - b; }
     template<typename T> constexpr T multiply(T a, T b) noexcept { return a * b; }
@@ -186,9 +186,8 @@ namespace i960
         void movq(RegLit src, RegisterIndex dest);
 
     private: // arithmetic
-        using RegLit = std::variant<RegisterIndex, Literal>;
-        static constexpr Ordinal extractValue(RegLit value, TreatAsOrdinal) noexcept {
-            return std::visit([this](auto&& value) {
+        Ordinal extractValue(RegLit value, TreatAsOrdinal) const noexcept {
+            return std::visit([this](auto&& value) -> Ordinal {
                 using K = std::decay_t<decltype(value)>;
                 if constexpr (std::is_same_v<K, Literal>) {
                     return static_cast<Ordinal>(toInteger(value));
@@ -196,11 +195,12 @@ namespace i960
                     return getRegister(value).getOrdinal();
                 } else {
                     static_assert(DependentFalse<K>, "Unimplemented type!");
+                    return 0;
                 }
-            }
+            }, value);
         }
-        static constexpr Integer extractValue(RegLit value, TreatAsInteger) noexcept {
-            return std::visit([this](auto&& value) {
+        Integer extractValue(RegLit value, TreatAsInteger) const noexcept {
+            return std::visit([this](auto&& value) -> Integer{
                 using K = std::decay_t<decltype(value)>;
                 if constexpr (std::is_same_v<K, Literal>) {
                     return static_cast<Integer>(toInteger(value));
@@ -208,8 +208,9 @@ namespace i960
                     return getRegister(value).getInteger();
                 } else {
                     static_assert(DependentFalse<K>, "Unimplemented type!");
+                    return 0;
                 }
-            }
+            }, value);
         }
         /// @todo figure out the different code forms
         void addi(RegLit src1, RegLit src2, RegisterIndex dest);
