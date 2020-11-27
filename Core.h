@@ -131,8 +131,6 @@ namespace i960
     using RegisterFile = std::array<Register, 16>;
     class Core {
     public:
-        using Pins = TargetBoardPinout;
-    public:
         Core(MemoryInterface& mi);
         void cycle();
     private:

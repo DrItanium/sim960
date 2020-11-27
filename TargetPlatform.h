@@ -1,7 +1,9 @@
 #ifndef I960_TARGET_PLATFORM_H__
 #define I960_TARGET_PLATFORM_H__
-#ifdef ARDUINO_GRAND_CENTRAL_M4
+#if defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
 #include "GrandCentralM4.h"
+#elif defined(ADAFRUIT_METRO_M4_EXPRESS) || defined(ARDUINO_METRO_M4)
+#include "MetroM4Express.h"
 #else
 #error "Unknown Board"
 #endif
