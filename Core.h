@@ -44,12 +44,28 @@ namespace i960
      */
     class Displacement {
     public:
-        Displacement(int32_t disp) : value(disp) { }
+        constexpr Displacement(int32_t disp) noexcept : value(disp) { }
         constexpr auto getValue() const noexcept { return value; }
     private:
         int32_t value : 22;
     };
+    class AbsoluteOffset {
+    public:
+        constexpr AbsoluteOffset(int32_t offset) noexcept : value(offset) { }
+        constexpr auto getValue() const noexcept { return value; }
+    private:
+        int32_t value;
+    };
+    class RegisterIndirect {
+    public:
+        constexpr RegisterIndirect(RegisterIndex abase) noexcept : idx(abase) { }
+        constexpr auto getAbase() const noexcept { return idx; }
+    private:
+        RegisterIndex idx;
+    };
+    /// @todo add classes to describe the other memory modes
 
+    using MemoryAddressing = std::variant<AbsoluteOffset, RegisterIndirect>; // continue to add new targets here
     using RegLit = std::variant<RegisterIndex, Literal>;
     template<typename T> constexpr T add(T a, T b) noexcept { return a + b; }
     template<typename T> constexpr T subtract(T a, T b) noexcept { return a - b; }
@@ -159,25 +175,25 @@ namespace i960
         void storeShortInteger (Address address, ShortInteger value) noexcept { memoryController.storeValue(address, value, TreatAsShortInteger{}); }
     private: // data movement operations
         // mem reg {
-        void ld(int dest, int src, Integer offset);
-        void ldob(int dest, int src, Integer offset);
-        void ldos(int dest, int src, Integer offset);
-        void ldib(int dest, int src, Integer offset);
-        void ldis(int dest, int src, Integer offset);
-        void ldl(int dest, int src, Integer offset);
-        void ldt(int dest, int src, Integer offset);
-        void ldq(int dest, int src, Integer offset);
+        void ld(MemoryAddressing mem, RegisterIndex dest);
+        void ldob(MemoryAddressing mem, RegisterIndex dest);
+        void ldos(MemoryAddressing mem, RegisterIndex dest);
+        void ldib(MemoryAddressing mem, RegisterIndex dest);
+        void ldis(MemoryAddressing mem, RegisterIndex dest);
+        void ldl(MemoryAddressing mem, RegisterIndex dest);
+        void ldt(MemoryAddressing mem, RegisterIndex dest);
+        void ldq(MemoryAddressing mem, RegisterIndex dest);
 
-        void st(int dest, int src, Integer offset);
-        void stob(int dest, int src, Integer offset);
-        void stib(int dest, int src, Integer offset);
-        void stos(int dest, int src, Integer offset);
-        void stis(int dest, int src, Integer offset);
-        void stl(int dest, int src, Integer offset);
-        void stt(int dest, int src, Integer offset);
-        void stq(int dest, int src, Integer offset);
+        void st(MemoryAddressing mem, RegisterIndex dest);
+        void stob(MemoryAddressing mem, RegisterIndex dest);
+        void stos(MemoryAddressing mem, RegisterIndex dest);
+        void stib(MemoryAddressing mem, RegisterIndex dest);
+        void stis(MemoryAddressing mem, RegisterIndex dest);
+        void stl(MemoryAddressing mem, RegisterIndex dest);
+        void stt(MemoryAddressing mem, RegisterIndex dest);
+        void stq(MemoryAddressing mem, RegisterIndex dest);
 
-        void lda(int dest, int src, Integer offset);
+        void lda(MemoryAddressing mem, RegisterIndex dest); // efa is another accepted value
         // }
 
         void mov(RegLit src, RegisterIndex dest);
@@ -270,9 +286,9 @@ namespace i960
     private: // branching
         /// @todo figure out correct signatures
         void b(Displacement targ);
-        void bx(Integer dest); // mem
+        void bx(MemoryAddressing targ);
         void bal(Displacement targ);
-        void balx(Integer dest); // mem, reg
+        void balx(MemoryAddressing targ, RegisterIndex dest); // mem, reg
 
         /// @todo figure out correct signatures
         void be(Displacement dest);
@@ -307,7 +323,7 @@ namespace i960
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
         void call(Displacement targ);
-        void callx(Integer targ); // mem
+        void callx(MemoryAddressing targ); // mem
         void ret();
         /// @todo implement faults as exceptions
     private: // processor management
