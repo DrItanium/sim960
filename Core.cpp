@@ -183,4 +183,98 @@ namespace i960 {
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(((s2 / s1) * s1));
     }
+    void
+    Core::shlo(RegLit len, RegLit src, RegisterIndex dest) {
+        auto theLength = extractValue(len, TreatAsOrdinal{});
+        auto theSrc = extractValue(src, TreatAsOrdinal{});
+        if (theLength < 32) {
+            getRegister(dest).setOrdinal(theSrc << theLength);
+        } else {
+            getRegister(dest).setOrdinal(0);
+        }
+    }
+    void
+    Core::shro(RegLit len, RegLit src, RegisterIndex dest) {
+        auto theLength = extractValue(len, TreatAsOrdinal{});
+        auto theSrc = extractValue(src, TreatAsOrdinal{});
+        if (theLength < 32) {
+            getRegister(dest).setOrdinal(theSrc >> theLength);
+        } else {
+            getRegister(dest).setOrdinal(0);
+        }
+    }
+    void
+    Core::shli(RegLit len, RegLit src, RegisterIndex dest) {
+        auto theLength = extractValue(len, TreatAsInteger{});
+        auto theSrc = extractValue(src, TreatAsInteger{});
+        getRegister(dest).setInteger(theSrc << theLength);
+    }
+    /// @todo correctly implement shri and shrdi
+
+    void
+    Core::subi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsInteger{}) ;
+        auto s2 = extractValue(src2, TreatAsInteger{}) ;
+        getRegister(dest).setInteger(s2 - s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::subo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+        auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+        getRegister(dest).setOrdinal(s2 - s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::logicalXor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{}));
+    }
+    void
+    Core::logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(~(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{})));
+    }
+    void
+    Core::mov(RegLit src, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+    }
+    void
+    Core::movl(RegLit src, RegisterIndex dest) {
+        // so this is a bit of a hack but according to the i960Hx manual only the least significant register gets the literal
+        if (!divisibleByTwo(dest) || (isRegisterIndex(src) && !divisibleByTwo(std::get<RegisterIndex>(src)))) {
+            getRegister(dest).setInteger(-1);
+            getRegister(nextRegisterIndex(dest)).setInteger(-1);
+            /// @todo generate a fault here!
+        } else {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+        }
+    }
+    void
+    Core::movt(RegLit src, RegisterIndex dest) {
+        if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
+            getRegister(dest).setInteger(-1);
+            getRegister(nextRegisterIndex(dest)).setInteger(-1);
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
+            /// @todo generate a fault here!
+        } else {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
+        }
+    }
+    void
+    Core::movq(RegLit src, RegisterIndex dest) {
+        if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
+            getRegister(dest).setInteger(-1);
+            getRegister(nextRegisterIndex(dest)).setInteger(-1);
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
+            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setInteger(-1);
+            /// @todo generate a fault here!
+        } else {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
+        }
+    }
 } // end namespace i960

@@ -38,6 +38,11 @@ namespace i960
         // make sure we are in the range 0...31
         return static_cast<RegisterIndex>(chopped & 0b11111);
     }
+    constexpr RegisterIndex nextRegisterIndex(RegisterIndex value) noexcept {
+        return toRegisterIndex(toInteger(value)  + 1);
+    }
+    constexpr bool divisibleByTwo(RegisterIndex value) noexcept { return (toInteger(value) & 0b1) == 0; }
+    constexpr bool divisibleByFour(RegisterIndex value) noexcept { return (toInteger(value) & 0b11) == 0; }
 
     /**
      * @brief A register index
@@ -67,27 +72,8 @@ namespace i960
 
     using MemoryAddressing = std::variant<AbsoluteOffset, RegisterIndirect>; // continue to add new targets here
     using RegLit = std::variant<RegisterIndex, Literal>;
-    template<typename T> constexpr T add(T a, T b) noexcept { return a + b; }
-    template<typename T> constexpr T subtract(T a, T b) noexcept { return a - b; }
-    template<typename T> constexpr T multiply(T a, T b) noexcept { return a * b; }
-    template<typename T> constexpr T divide(T a, T b) noexcept { return a / b; }
-    template<typename T> constexpr T remainder(T a, T b) noexcept { return a % b; }
-    template<typename T> constexpr T bitwiseOr(T a, T b) noexcept { return a | b; }
-    template<typename T> constexpr T bitwiseAnd(T a, T b) noexcept { return a & b; }
-    template<typename T> constexpr T bitwiseNot(T a) noexcept { return ~a; }
-    template<typename T> constexpr T bitwiseXor(T a, T b) noexcept { return a ^ b; }
-    template<typename T> constexpr T bitwiseXnor(T a, T b) noexcept { return bitwiseNot(bitwiseXor(a, b)); }
-
-    // taken from the i960 manual
-    template<typename T> constexpr T bitwiseNand(T src1, T src2) noexcept { return bitwiseOr(bitwiseNot(src2), bitwiseNot(src1)); }
-    template<typename T> constexpr T bitwiseNor(T src1, T src2) noexcept { return bitwiseAnd(bitwiseNot(src2), bitwiseNot(src1)); }
-    template<typename T> constexpr T bitwiseNotAnd(T src1, T src2) noexcept { return bitwiseAnd(bitwiseNot(src2), src1); }
-    template<typename T> constexpr T bitwiseNotOr(T src1, T src2) noexcept { return bitwiseOr(bitwiseNot(src2), src1); }
-    template<typename T> constexpr T bitwiseOrNot(T src1, T src2) noexcept { return bitwiseOr(src2, bitwiseNot(src1)); }
-    template<typename T> constexpr T bitwiseAndNot(T src1, T src2) noexcept { return bitwiseAnd(src2, bitwiseNot(src1)); }
-    static_assert(bitwiseNand<uint8_t>(0x1, 0x2) == 0xFF);
-    static_assert(bitwiseNand<uint8_t>(0x1, 0x1) == 0xFE);
-    static_assert(bitwiseNand<uint8_t>(0x1, 0x3) == static_cast<uint8_t>((~(0x1 & 0x3))));
+    constexpr bool isRegisterIndex(RegLit value) noexcept { return std::holds_alternative<RegisterIndex>(value); }
+    constexpr bool isLiteral(RegLit value) noexcept { return std::holds_alternative<Literal>(value); }
     class Register {
     public:
         constexpr Register() : ordValue(0) { }
@@ -231,6 +217,19 @@ namespace i960
                 }
             }, value);
         }
+        RegLit nextValue(RegLit value) const noexcept {
+            return std::visit([this](auto&& value) -> RegLit {
+                using K = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<K, Literal>) {
+                    // in this case it should always be zero
+                    return toLiteral(0);
+                } else if constexpr (std::is_same_v<K, RegisterIndex>) {
+                    return nextRegisterIndex(value);
+                } else {
+                    static_assert(DependentFalse<K>, "Unimplemented type!");
+                }
+            }, value);
+        }
         /// @todo figure out the different code forms
         void addi(RegLit src1, RegLit src2, RegisterIndex dest);
         void addo(RegLit src1, RegLit src2, RegisterIndex dest);
@@ -348,7 +347,6 @@ namespace i960
          * @param dest The destination register to store the result in
          */
         void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-    private:
     private:
         void loadRegister(Address address, RegisterIndex index, TreatAsOrdinal) noexcept;
         void loadRegister(Address address, RegisterIndex index, TreatAsInteger) noexcept;
