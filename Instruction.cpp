@@ -42,11 +42,17 @@ namespace i960 {
     Ordinal
     MEMFormatInstruction::computeAddress_MEMB(Core &referenceCore) const noexcept {
         // bit 12 of the instruction has to be 1 to get into this code, eight possible combos
+        union {
+            Ordinal next;
+            Integer optionalDisplacement;
+        } disp;
+        disp.next = 0;
         switch (memb.mode) {
             case 0b0100: // register indirect
                 return referenceCore.getRegister(toRegisterIndex(memb.abase)).getOrdinal();
             case 0b0101: // ip with displacement
-                return static_cast<Ordinal>(referenceCore.getIP().getInteger() + optionalDisplacement + 8);
+                disp.next = referenceCore.getWordAtIP(true);
+                return static_cast<Ordinal>(referenceCore.getIP().getInteger() + disp.optionalDisplacement + 8);
             case 0b0110: // reserved
                 return -1;
             case 0b0111: // register indirect with index
@@ -54,19 +60,23 @@ namespace i960 {
                        referenceCore.getRegister(toRegisterIndex(memb.index)).getOrdinal() *
                        computeScale(referenceCore);
             case 0b1100: // absolute displacement
-                return static_cast<Ordinal>(optionalDisplacement);
+                disp.next = referenceCore.getWordAtIP(true);
+                return static_cast<Ordinal>(disp.optionalDisplacement);
             case 0b1101: // register indirect with displacement
+                disp.next = referenceCore.getWordAtIP(true);
                 return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() +
-                                            optionalDisplacement);
+                                            disp.optionalDisplacement);
             case 0b1110: // index with displacement
+                disp.next = referenceCore.getWordAtIP(true);
                 return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.index)).getInteger() *
                                             computeScale(referenceCore) +
-                                            optionalDisplacement);
+                                            disp.optionalDisplacement);
             case 0b1111: // register indirect with index and displacement
+                disp.next = referenceCore.getWordAtIP(true);
                 return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() +
                                             referenceCore.getRegister(toRegisterIndex(memb.index)).getInteger() *
                                             computeScale(referenceCore) +
-                                            optionalDisplacement);
+                                            disp.optionalDisplacement);
             default:
                 return -1;
         }

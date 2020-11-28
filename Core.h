@@ -103,7 +103,7 @@ namespace i960
     class Core;
     class MEMFormatInstruction {
     public:
-        constexpr explicit MEMFormatInstruction(Ordinal lowerHalf, Ordinal upperHalf = 0) noexcept : lower(lowerHalf), upper(upperHalf) { }
+        constexpr explicit MEMFormatInstruction(Ordinal lowerHalf) noexcept : lower(lowerHalf) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
         Ordinal computeAddress(Core& referenceCore) const noexcept;
     private:
@@ -140,11 +140,8 @@ namespace i960
                 unsigned int opcode : 8;
             } memb;
         };
-        union {
-            Ordinal upper;
-            Integer optionalDisplacement;
-        };
     };
+
     using RegisterFile = std::array<Register, 16>;
     class Core {
     public:
@@ -155,6 +152,12 @@ namespace i960
         const Register& getRegister(int index) const noexcept;
         inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
         const Register& getIP() const noexcept { return ip; }
+        /**
+         * @brief Retrieve the word at the ip address
+         * @param advance
+         * @return
+         */
+        Ordinal getWordAtIP(bool advance = false) noexcept;
     private:
         // classic risc pipeline stages
         /// @todo flesh out
@@ -167,6 +170,7 @@ namespace i960
         void execute(const RegFormatInstruction& inst);
         void execute(const COBRInstruction& inst);
         void execute(const CTRLInstruction& inst);
+        void execute(const MEMFormatInstruction& inst);
     private: // common internal functions
         void saveLocals() noexcept;
         void restoreLocals() noexcept;
@@ -376,8 +380,7 @@ namespace i960
         TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
         Register ip, ac; // always start at address zero
-        Ordinal _instructionPrimary = 0;
-        Ordinal _instructionPartTwo = 0;
+        Ordinal currentInstruction = 0;
     };
 
 }

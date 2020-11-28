@@ -23,13 +23,11 @@ namespace i960 {
 
     void
     Core::fetchInstruction() {
-        _instructionPrimary = theBoard.loadValue(ip.getOrdinal(), TreatAsOrdinal{});
-        // just retrieve 64 bits just in case
-        _instructionPartTwo = theBoard.loadValue(ip.getOrdinal() + 4, TreatAsOrdinal{});
-        /// @todo figure out when to increment the
+        currentInstruction = getWordAtIP(true);
     }
     void
     Core::decodeInstruction() {
+
     }
     void
     Core::executeInstruction() {
@@ -529,4 +527,14 @@ namespace i960 {
         getRegister(dest).setOrdinal(tmp);
 
     }
+
+    Ordinal
+    Core::getWordAtIP(bool advance) noexcept {
+        auto ipLoc = ip.getOrdinal();
+        if (advance) {
+            ip.setOrdinal(ipLoc + 4);
+        }
+        return loadOrdinal(ipLoc);
+    }
+
 } // end namespace i960
