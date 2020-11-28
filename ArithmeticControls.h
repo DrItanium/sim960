@@ -18,6 +18,8 @@ namespace i960 {
         void setIntegerOverflowFlag(bool value) noexcept;
         void setIntegerOverflowMask(bool value) noexcept;
         void setNoImpreciseFaults(bool value) noexcept;
+        void setRawValue(Ordinal value) noexcept { _targetRegister.setOrdinal(value); }
+        constexpr Ordinal getRawValue() const noexcept { return _targetRegister.getOrdinal(); }
     private:
         Register& _targetRegister;
     };

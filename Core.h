@@ -31,8 +31,15 @@ namespace i960
             }
         }
         constexpr RegisterIndex getDestination() const noexcept {
-            // NO SFR so don't check m3
             return toRegisterIndex(srcDest);
+        }
+        constexpr RegLit getSrcDest() const noexcept {
+            if (!m3) {
+                return getDestination();
+            } else {
+               // can be a literal when src/dest is used as a source
+               return toLiteral(srcDest);
+            }
         }
         constexpr ShortOrdinal getOpcode() const noexcept {
             return ((static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0) | (static_cast<ShortOrdinal>(opcode) & 0x000F);
@@ -307,7 +314,7 @@ namespace i960
         /// @todo implement faults as exceptions
     private: // processor management
         void flushreg(); // noop right now
-        void modac(RegLit mask, RegLit src, RegisterIndex dest);
+        void modac(const RegFormatInstruction& inst);
     private: // Numerics Architecture addons
         void dmovt(RegisterIndex src, RegisterIndex dest);
         void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);

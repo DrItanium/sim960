@@ -1,4 +1,6 @@
 #include "Core.h"
+#include "DependentFalse.h"
+#include "ArithmeticControls.h"
 
 namespace i960 {
     Register&
@@ -435,11 +437,14 @@ namespace i960 {
                 break;
 
                 /// @todo inspect this one, the arguments are backwards
-                //case 0x645: modac(inst.getDestination(), inst.getSrc2(), inst.getSrc1()); break;
+            case 0x645: // modac
+                // this one is a little strange and has to be unpacked differently
+                modac(inst);
+                break;
             case 0x650: modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x651: extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                //case 0x654: modtc(inst.getDestination(), inst.getSrc2(), inst.getSrc1()); break;
-                //case 0x655: modpc(inst.getDestination(), inst.getSrc2(), inst.getSrc1()); break;
+                //case 0x654: modtc(inst); break;
+                //case 0x655: modpc(inst); break;
                 //case 0x658: intctl(inst.getSrc1(), inst.getDestination()); break;
                 //case 0x659: sysctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x65B: icctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -500,5 +505,28 @@ namespace i960 {
                 //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
         }
+    }
+    void
+    Core::modac(const RegFormatInstruction &inst) {
+        // in this case, mask is src/dst
+        // src is src2
+        // dest is src1
+        auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
+        auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
+        auto dest = std::visit([](auto&& value) -> RegisterIndex {
+            using K = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<K, RegisterIndex>) {
+                return value;
+            } else if constexpr (std::is_same_v<K, Literal>) {
+                return toRegisterIndex(toInteger(value));
+            } else {
+                static_assert(DependentFalse<K>, "Unresolved type!");
+            }
+        }, inst.getSrc1());
+        ArithmeticControls theAC(ac);
+        auto tmp = theAC.getRawValue();
+        theAC.setRawValue((src & mask) | (tmp & (~mask)));
+        getRegister(dest).setOrdinal(tmp);
+
     }
 } // end namespace i960
