@@ -11,7 +11,93 @@
 namespace i960
 {
 
-
+    class RegFormatInstruction {
+    public:
+        constexpr RegFormatInstruction(Ordinal value) noexcept : _value(value) { }
+        constexpr RegLit getSrc1() const noexcept {
+            // no sfr check
+            if (m1) {
+                return toLiteral(src1);
+            } else {
+                return toRegisterIndex(src1);
+            }
+        }
+        constexpr RegLit getSrc2() const noexcept {
+            // no sfr check
+            if (m2) {
+                return toLiteral(src2);
+            } else {
+                return toRegisterIndex(src2);
+            }
+        }
+        constexpr RegisterIndex getDestination() const noexcept {
+            // NO SFR so don't check m3
+            return toRegisterIndex(srcDest);
+        }
+        constexpr ShortOrdinal getOpcode() const noexcept {
+            return ((static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0) | (static_cast<ShortOrdinal>(opcode) & 0x000F);
+        }
+    private:
+        union {
+            Ordinal _value;
+            struct {
+                int src1 : 5;
+                int s1 : 1;
+                int s2 : 1;
+                int opcodeExt : 4;
+                int m1 : 1;
+                int m2 : 1;
+                int m3 : 1;
+                int src2 : 5;
+                int srcDest : 5;
+                int opcode : 8;
+            };
+        };
+    };
+    class COBRInstruction {
+    public:
+        constexpr COBRInstruction(Ordinal value) noexcept : _value(value) { }
+        constexpr ShortOrdinal getOpcode() const noexcept { return (static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0; }
+        constexpr RegisterIndex getSrc2() const noexcept { return toRegisterIndex(src2); }
+        constexpr RegisterIndex getSrc1() const noexcept { return toRegisterIndex(src1); }
+        constexpr bool getTBit() const noexcept { return t; }
+        constexpr ShortInteger getDisplacement() const noexcept { return displacement; }
+    private:
+        union {
+            Ordinal _value;
+            struct {
+                int s2 : 1;
+                int t : 1;
+                int displacement : 11;
+                int m1 : 1;
+                int src2 : 5;
+                int src1 : 5;
+                int opcode : 8;
+            };
+        };
+    };
+    class CTRLInstruction {
+    public:
+        constexpr CTRLInstruction(Ordinal value) noexcept : _value(value) { }
+        constexpr ShortOrdinal getOpcode() const noexcept { return (static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0; }
+        constexpr bool getTBit() const noexcept { return t; }
+        constexpr Integer getDisplacement() const noexcept { return displacement; }
+    private:
+        union {
+            Ordinal _value;
+            struct {
+                int unused : 1;
+                int t : 1;
+                int displacement : 22;
+                int opcode : 8;
+            };
+        };
+    };
+    /// @todo implement MEMA and MEMB format instructions
+    using DecodedInstruction = std::variant<std::monostate,
+            RegFormatInstruction,
+            COBRInstruction,
+            CTRLInstruction>;
     using RegisterFile = std::array<Register, 16>;
     class Core {
     public:
@@ -25,7 +111,10 @@ namespace i960
         void executeInstruction();
         void memoryAccess();
         void writeback();
-
+    private: // execution routines
+        void execute(const RegFormatInstruction& inst);
+        void execute(const COBRInstruction& inst);
+        void execute(const CTRLInstruction& inst);
     private: // common internal functions
         Register& getRegister(int index) noexcept;
         inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
@@ -175,34 +264,34 @@ namespace i960
         void cmpo(RegLit src1, RegLit src2);
     private: // branching
         /// @todo figure out correct signatures
-        void b(Displacement targ);
+        void b(Displacement22 targ);
         void bx(MemoryAddressing targ);
-        void bal(Displacement targ);
+        void bal(Displacement22 targ);
         void balx(MemoryAddressing targ, RegisterIndex dest); // mem, reg
 
         /// @todo figure out correct signatures
-        void be(Displacement dest);
-        void bne(Displacement dest);
-        void bl(Displacement dest);
-        void ble(Displacement dest);
-        void bg(Displacement dest);
-        void bge(Displacement dest);
+        void be(Displacement22 dest);
+        void bne(Displacement22 dest);
+        void bl(Displacement22 dest);
+        void ble(Displacement22 dest);
+        void bg(Displacement22 dest);
+        void bge(Displacement22 dest);
     private: // compare and branch
         /// @todo figure out correct signatures
-        void cmpibe(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpobe(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpibne(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpobne(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpibl(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpobl(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpible(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpoble(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpibg(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpobg(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpibge(RegLit src1, RegisterIndex src2, Displacement targ);
-        void cmpobge(RegLit src1, RegisterIndex src2, Displacement targ);
-        void bbs(RegLit bitpos, RegisterIndex src, Displacement targ);
-        void bbc(RegLit bitpos, RegisterIndex src, Displacement targ);
+        void cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ);
+        void bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ);
     private: // test condition codes
         void teste(RegisterIndex dest);
         void testne(RegisterIndex dest);
@@ -212,7 +301,7 @@ namespace i960
         void testge(RegisterIndex dest);
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
-        void call(Displacement targ);
+        void call(Displacement22 targ);
         void callx(MemoryAddressing targ); // mem
         void ret();
         /// @todo implement faults as exceptions
@@ -236,28 +325,11 @@ namespace i960
          */
         void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
     private:
-        void loadRegister(Address address, RegisterIndex index, TreatAsOrdinal) noexcept;
-        void loadRegister(Address address, RegisterIndex index, TreatAsInteger) noexcept;
-        void loadRegister(Address address, RegisterIndex index, TreatAsByteInteger) noexcept;
-        void loadRegister(Address address, RegisterIndex index, TreatAsByteOrdinal) noexcept;
-        void loadRegister(Address address, RegisterIndex index, TreatAsShortInteger) noexcept;
-        void loadRegister(Address address, RegisterIndex index, TreatAsShortOrdinal) noexcept;
-        void storeRegister(Address address, RegisterIndex index, TreatAsOrdinal) noexcept;
-        void storeRegister(Address address, RegisterIndex index, TreatAsInteger) noexcept;
-        void storeRegister(Address address, RegisterIndex index, TreatAsByteInteger) noexcept;
-        void storeRegister(Address address, RegisterIndex index, TreatAsByteOrdinal) noexcept;
-        void storeRegister(Address address, RegisterIndex index, TreatAsShortInteger) noexcept;
-        void storeRegister(Address address, RegisterIndex index, TreatAsShortOrdinal) noexcept;
-        void storeLongRegister(Address address, RegisterIndex baseIndex) noexcept;
-        void loadLongRegister(Address address, RegisterIndex baseIndex) noexcept;
-        void storeTripleRegister(Address address, RegisterIndex baseIndex) noexcept;
-        void loadTripleRegister(Address address, RegisterIndex baseIndex) noexcept;
-        void storeQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
-        void loadQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
-    private:
         TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
         Register ip, ac; // always start at address zero
+        Ordinal _instructionPrimary = 0;
+        Ordinal _instructionPartTwo = 0;
     };
 
 }

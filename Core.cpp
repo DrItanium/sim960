@@ -21,11 +21,13 @@ namespace i960 {
 
     void
     Core::fetchInstruction() {
-
+        _instructionPrimary = theBoard.loadValue(ip.getOrdinal(), TreatAsOrdinal{});
+        // just retrieve 64 bits just in case
+        _instructionPartTwo = theBoard.loadValue(ip.getOrdinal() + 4, TreatAsOrdinal{});
+        /// @todo figure out when to increment the
     }
     void
     Core::decodeInstruction() {
-
     }
     void
     Core::executeInstruction() {
@@ -101,11 +103,11 @@ namespace i960 {
                 (~extractValue(src1, TreatAsOrdinal{})));
     }
     void
-    Core::b(Displacement targ) {
+    Core::b(Displacement22 targ) {
         ip.setInteger(ip.getInteger() + targ.getValue());
     }
     void
-    Core::bal(Displacement targ) {
+    Core::bal(Displacement22 targ) {
         globals[14].setOrdinal(ip.getOrdinal() + 4);
         // make sure that the code is consistent
         b(targ);
@@ -297,5 +299,38 @@ namespace i960 {
     void
     Core::begin() {
        theBoard.begin();
+    }
+
+    void
+    Core::execute(const COBRInstruction &inst) noexcept {
+        switch (inst.getOpcode()) {
+            case 0x300: bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x370: bbs(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x3A0: cmpibe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x3D0: cmpibne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x3C0: cmpibl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x3E0: cmpible(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x390: cmpibg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x3B0: cmpibge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            //case 0x3F0: cmpibo(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            //case 0x380: cmpibno(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x320: cmpobe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x350: cmpobne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x340: cmpobl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x360: cmpoble(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x310: cmpobg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x330: cmpobge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            default:
+                /// @todo raise an error at this point
+                break;
+        }
+    }
+    void
+    Core::execute(const CTRLInstruction &inst) noexcept {
+
+    }
+    void
+    Core::execute(const RegFormatInstruction& inst) noexcept {
+
     }
 } // end namespace i960

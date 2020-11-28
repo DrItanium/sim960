@@ -45,12 +45,21 @@ namespace i960 {
     /**
      * @brief A register index
      */
-    class Displacement {
+    class Displacement22 {
     public:
-        constexpr Displacement(int32_t disp) noexcept : value(disp) { }
+        constexpr Displacement22(int32_t disp) noexcept : value(disp) { }
         constexpr auto getValue() const noexcept { return value; }
     private:
         int32_t value : 22;
+    };
+    class Displacement11 {
+    public:
+        static constexpr int16_t DisplacementMask = 0b0111'1111'1111;
+    public:
+        constexpr Displacement11(int32_t disp) noexcept : value(disp) { }
+        [[nodiscard]] constexpr auto getValue() const noexcept { return value; }
+    private:
+        int32_t value : 11;
     };
     class AbsoluteOffset {
     public:
