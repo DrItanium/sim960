@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include <SD.h>
+
 Integer
 GrandCentralM4Board::loadValue(Address address, TreatAsInteger)  {
     return 0;
@@ -56,6 +57,24 @@ GrandCentralM4Board::storeValue(Address address, ShortInteger value, TreatAsShor
 
 void
 GrandCentralM4Board::begin() {
+    /*
+     * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
+     * available memory. On board devices are mapped into the implicit onboard device area of [0xFF00'0000,0xFFFF'FFFF]. The IO device bus
+     * exists here as extra "modules" such as:
+     * - Clock Generator
+     * - RTC
+     * - ESP32 Wifi Coprocessor
+     * - Display
+     * - Sharp Memory Display
+     * - GPIOs from the Grand Central
+     * - SPI IO Expanders
+     * - Speaker
+     * - Control Registers
+     * - 2 MB Onboard SPI Flash directly mapped into IO Device Space
+     * - OPL3 Device
+     * - Neopixels
+     * - etc
+     */
     if (!_initialized) {
         _initialized = true;
         Serial.begin(9600);
