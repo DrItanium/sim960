@@ -146,7 +146,7 @@ namespace i960
     using RegisterFile = std::array<Register, 16>;
     class Core {
     public:
-        Core(TargetBoard& tb);
+        void begin();
         void cycle();
     private:
         // classic risc pipeline stages
@@ -386,9 +386,10 @@ namespace i960
         void storeQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
         void loadQuadRegister(Address address, RegisterIndex baseIndex) noexcept;
     private:
-        TargetBoard& theBoard;
+        TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
         Register ip; // always start at address zero
     };
+
 }
 #endif // end I960_CORE_H__

@@ -18,6 +18,8 @@ public:
     void storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal) override;
     void storeValue(Address address, ShortInteger value, TreatAsShortInteger) override;
     void begin() override;
+private:
+    bool _initialized = false;
 };
 using TargetBoard = GrandCentralM4Board;
 #endif // end I960_GRAND_CENTRAL_M4__

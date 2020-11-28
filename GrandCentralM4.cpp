@@ -4,6 +4,7 @@
 #include "GrandCentralM4.h"
 #include <SPI.h>
 #include <Arduino.h>
+#include <SD.h>
 Integer
 GrandCentralM4Board::loadValue(Address address, TreatAsInteger)  {
     return 0;
@@ -55,12 +56,20 @@ GrandCentralM4Board::storeValue(Address address, ShortInteger value, TreatAsShor
 
 void
 GrandCentralM4Board::begin() {
-    Serial.begin(9600);
-    while(!Serial);
-    Serial.println("i960 Simulator Starting up");
-    pinMode(LED_BUILTIN, OUTPUT);
-    Serial.print("Starting up SPI...");
-    SPI.begin();
-    Serial.println("Done");
+    if (!_initialized) {
+        _initialized = true;
+        Serial.begin(9600);
+        while (!Serial);
+        Serial.println("i960 Simulator Starting up");
+        pinMode(LED_BUILTIN, OUTPUT);
+        Serial.print("Starting up SPI...");
+        SPI.begin();
+        Serial.println("Done");
+        if (!SD.begin(SDCARD_SS_PIN)) {
+            Serial.println("no sd card installed");
+        } else {
+            Serial.println("SD Card found");
+        }
+    }
 }
 

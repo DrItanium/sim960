@@ -19,7 +19,6 @@ namespace i960 {
         }
     }
 
-    Core::Core(TargetBoard& mi) : theBoard(mi) { }
     void
     Core::fetchInstruction() {
 
@@ -294,5 +293,9 @@ namespace i960 {
             getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
             getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
         }
+    }
+    void
+    Core::begin() {
+       theBoard.begin();
     }
 } // end namespace i960
