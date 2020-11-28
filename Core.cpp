@@ -340,7 +340,7 @@ namespace i960 {
             case 0x090: call(inst.getDisplacement()); break;
             case 0x0A0: ret(); break;
             case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
-            //case 0x100: bno(Displacement22{inst.getDisplacement()}); break;
+                //case 0x100: bno(Displacement22{inst.getDisplacement()}); break;
             case 0x110: bg(Displacement22{inst.getDisplacement()}); break;
             case 0x120: be(Displacement22{inst.getDisplacement()}); break;
             case 0x130: bge(Displacement22{inst.getDisplacement()}); break;
@@ -369,7 +369,7 @@ namespace i960 {
             case 0x582: andnot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x583: setbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x584: notand(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            // case 0x585: break;
+                // case 0x585: break;
             case 0x586: logicalXor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x587: logicalOr(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x588: logicalNor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -384,14 +384,14 @@ namespace i960 {
             case 0x591: addi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x592: subo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x593: subi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            case 0x594: cmpob(inst.getSrc1(), inst.getSrc2()); break;
-            case 0x595: cmpib(inst.getSrc1(), inst.getSrc2()); break;
-            case 0x596: cmpos(inst.getSrc1(), inst.getSrc2()); break;
-            case 0x597: cmpis(inst.getSrc1(), inst.getSrc2()); break;
+                //case 0x594: cmpob(inst.getSrc1(), inst.getSrc2()); break;
+                //case 0x595: cmpib(inst.getSrc1(), inst.getSrc2()); break;
+                //case 0x596: cmpos(inst.getSrc1(), inst.getSrc2()); break;
+                //case 0x597: cmpis(inst.getSrc1(), inst.getSrc2()); break;
             case 0x598: shro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x599: break;
-            //case 0x59A: shrdi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                case 0x59B: shri(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x599: break;
+                //case 0x59A: shrdi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x59B: shri(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x59C: shlo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x59D: rotate(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x59E: shli(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -404,14 +404,14 @@ namespace i960 {
             case 0x5A6: cmpdeco(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x5A7: cmpdeci(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x5AC: scanbyte(inst.getSrc1(), inst.getSrc2()); break;
-            //case 0x5AD: bswap(inst.getSrc1(), inst.getSrc2()); break;
+                //case 0x5AD: bswap(inst.getSrc1(), inst.getSrc2()); break;
             case 0x5AE: chkbit(inst.getSrc1(), inst.getSrc2()); break;
             case 0x5B0: addc(inst.getSrc1(), inst.getSrc2(),inst.getDestination()); break;
             case 0x5B2: subc(inst.getSrc1(), inst.getSrc2(),inst.getDestination()); break;
                 // case 0x5B4: intdis(); break;
                 // case 0x5B5: inten(); break;
             case 0x5CC: mov(inst.getSrc1(), inst.getDestination()); break;
-            //case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x5DC: movl(inst.getSrc1(), inst.getDestination()); break;
             case 0x5EC: movt(inst.getSrc1(), inst.getDestination()); break;
             case 0x5FC: movq(inst.getSrc1(), inst.getDestination()); break;
@@ -419,8 +419,23 @@ namespace i960 {
                 // case 0x612: atadd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x640: spanbit(inst.getSrc1(), inst.getDestination()); break;
             case 0x641: scanbit(inst.getSrc1(), inst.getDestination()); break;
-            /// @todo inspect this one, the arguments are backwards
-            case 0x645: modac(inst.getDestination(), inst.getSrc2(), inst.getSrc1()); break;
+            case 0x642:
+                daddc(std::get<RegisterIndex>(inst.getSrc1()),
+                      std::get<RegisterIndex>(inst.getSrc2()),
+                      inst.getDestination());
+                break;
+            case 0x643:
+                dsubc(std::get<RegisterIndex>(inst.getSrc1()),
+                      std::get<RegisterIndex>(inst.getSrc2()),
+                      inst.getDestination());
+                break;
+            case 0x644:
+                dmovt(std::get<RegisterIndex>(inst.getSrc1()),
+                      inst.getDestination());
+                break;
+
+                /// @todo inspect this one, the arguments are backwards
+                //case 0x645: modac(inst.getDestination(), inst.getSrc2(), inst.getSrc1()); break;
             case 0x650: modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x651: extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x654: modtc(inst.getDestination(), inst.getSrc2(), inst.getSrc1()); break;
@@ -444,46 +459,46 @@ namespace i960 {
             case 0x749: modi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x74B: divi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
 
-            //case 0x780: addono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x781: addino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x782: subono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x783: subino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x784: selno(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x790: addog(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x791: addig(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x792: subog(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x793: subig(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x794: selg(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7A0: addoe(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7A1: addie(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7A2: suboe(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7A3: subie(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7A4: sele(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7B0: addoge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7B1: addige(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7B2: suboge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7B3: subige(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7B4: selge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7C0: addol(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7C1: addil(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7C2: subol(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7C3: subil(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7C4: sell(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7D0: addone(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7D1: addine(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7D2: subone(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7D3: subine(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7D4: selne(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7E0: addole(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7E1: addile(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7E2: subole(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7E3: subile(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7E4: selle(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7F0: addoo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7F1: addio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7F2: suboo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x780: addono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x781: addino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x782: subono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x783: subino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x784: selno(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x790: addog(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x791: addig(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x792: subog(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x793: subig(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x794: selg(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7A0: addoe(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7A1: addie(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7A2: suboe(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7A3: subie(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7A4: sele(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7B0: addoge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7B1: addige(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7B2: suboge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7B3: subige(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7B4: selge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7C0: addol(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7C1: addil(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7C2: subol(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7C3: subil(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7C4: sell(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7D0: addone(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7D1: addine(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7D2: subone(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7D3: subine(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7D4: selne(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7E0: addole(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7E1: addile(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7E2: subole(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7E3: subile(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7E4: selle(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7F0: addoo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7F1: addio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7F2: suboo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
         }
     }
 } // end namespace i960
