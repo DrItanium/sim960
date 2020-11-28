@@ -9,7 +9,7 @@
 namespace i960 {
     class ArithmeticControls {
     public:
-        ArithmeticControls(Register& target) : _targetRegister(target) { }
+        explicit ArithmeticControls(Register& target) : _targetRegister(target) { }
         constexpr ByteOrdinal getConditionCode() const noexcept { return _targetRegister.getByteOrdinal() & 0b111; }
         constexpr bool getIntegerOverflowFlag() const noexcept { return (_targetRegister.getOrdinal() >> 8) & 1; }
         constexpr bool getIntegerOverflowMask() const noexcept { return (_targetRegister.getOrdinal() >> 12) & 1; }

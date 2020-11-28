@@ -257,7 +257,7 @@ namespace i960
     private:
         TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
-        Register ip; // always start at address zero
+        Register ip, ac; // always start at address zero
     };
 
 }
