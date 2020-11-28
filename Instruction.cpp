@@ -5,7 +5,7 @@
 
 namespace i960 {
     Ordinal
-    MEMFormatInstruction::computeAddress(const Core& referenceCore) const noexcept {
+    MEMFormatInstruction::computeAddress(Core& referenceCore) const noexcept {
         if (isMEMAFormat()) {
             return computeAddress_MEMA(referenceCore);
         } else {

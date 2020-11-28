@@ -103,8 +103,6 @@ namespace i960
     class Core;
     class MEMFormatInstruction {
     public:
-        using IntegerOrOrdinal = std::variant<Integer, Ordinal>
-    public:
         constexpr explicit MEMFormatInstruction(Ordinal lowerHalf, Ordinal upperHalf = 0) noexcept : lower(lowerHalf), upper(upperHalf) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
         Ordinal computeAddress(Core& referenceCore) const noexcept;
@@ -119,27 +117,27 @@ namespace i960
             Ordinal lower;
             struct {
                 // generic view
-                int differentiationBlock : 12;
-                int modeMajor : 2;
-                int abase : 5;
-                int srcDest : 5;
-                int opcode : 8;
+                unsigned int differentiationBlock : 12;
+                unsigned int modeMajor : 2;
+                unsigned int abase : 5;
+                unsigned int srcDest : 5;
+                unsigned int opcode : 8;
             };
             struct {
                 unsigned int offset : 12;
-                int mode : 2;
-                int abase : 5;
-                int srcDest : 5;
-                int opcode : 8;
+                unsigned int mode : 2;
+                unsigned int abase : 5;
+                unsigned int srcDest : 5;
+                unsigned int opcode : 8;
             } mema;
             struct {
-                int index : 5;
-                int unused0 : 2;
-                int scale : 3;
-                int mode : 4;
-                int abase : 5;
-                int srcDest : 5;
-                int opcode : 8;
+                unsigned int index : 5;
+                unsigned int unused0 : 2;
+                unsigned int scale : 3;
+                unsigned int mode : 4;
+                unsigned int abase : 5;
+                unsigned int srcDest : 5;
+                unsigned int opcode : 8;
             } memb;
         };
         union {
