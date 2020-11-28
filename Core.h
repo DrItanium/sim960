@@ -100,16 +100,63 @@ namespace i960
             };
         };
     };
-    /// @todo implement MEMA and MEMB format instructions
-    using DecodedInstruction = std::variant<std::monostate,
-            RegFormatInstruction,
-            COBRInstruction,
-            CTRLInstruction>;
+    class Core;
+    class MEMFormatInstruction {
+    public:
+        using IntegerOrOrdinal = std::variant<Integer, Ordinal>
+    public:
+        constexpr explicit MEMFormatInstruction(Ordinal lowerHalf, Ordinal upperHalf = 0) noexcept : lower(lowerHalf), upper(upperHalf) { }
+        constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
+        Ordinal computeAddress(Core& referenceCore) const noexcept;
+    private:
+        constexpr bool isMEMAFormat() const noexcept { return modeMajor & 1 == 0; }
+        constexpr bool isMEMBFormat() const noexcept { return modeMajor & 1 != 0; }
+        Ordinal computeAddress_MEMA(Core& referenceCore) const noexcept;
+        Ordinal computeAddress_MEMB(Core& referenceCore) const noexcept;
+        Ordinal computeScale(Core& referenceCore) const noexcept;
+    private:
+        union {
+            Ordinal lower;
+            struct {
+                // generic view
+                int differentiationBlock : 12;
+                int modeMajor : 2;
+                int abase : 5;
+                int srcDest : 5;
+                int opcode : 8;
+            };
+            struct {
+                unsigned int offset : 12;
+                int mode : 2;
+                int abase : 5;
+                int srcDest : 5;
+                int opcode : 8;
+            } mema;
+            struct {
+                int index : 5;
+                int unused0 : 2;
+                int scale : 3;
+                int mode : 4;
+                int abase : 5;
+                int srcDest : 5;
+                int opcode : 8;
+            } memb;
+        };
+        union {
+            Ordinal upper;
+            Integer optionalDisplacement;
+        };
+    };
     using RegisterFile = std::array<Register, 16>;
     class Core {
     public:
         void begin();
         void cycle();
+        Register& getRegister(int index) noexcept;
+        inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
+        const Register& getRegister(int index) const noexcept;
+        inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
+        const Register& getIP() const noexcept { return ip; }
     private:
         // classic risc pipeline stages
         /// @todo flesh out
@@ -123,10 +170,6 @@ namespace i960
         void execute(const COBRInstruction& inst);
         void execute(const CTRLInstruction& inst);
     private: // common internal functions
-        Register& getRegister(int index) noexcept;
-        inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
-        const Register& getRegister(int index) const noexcept;
-        inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
         void saveLocals() noexcept;
         void restoreLocals() noexcept;
         bool getCarryFlag() const noexcept;
