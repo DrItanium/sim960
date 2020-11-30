@@ -84,10 +84,12 @@ GrandCentralM4Board::begin() {
         Serial.print("Starting up SPI...");
         SPI.begin();
         Serial.println("Done");
-        if (!SD.begin(SDCARD_SS_PIN)) {
-            Serial.println("no sd card installed");
-        } else {
-            Serial.println("SD Card found");
+        if constexpr (hasBuiltinSDCard()) {
+            if (!SD.begin(SDCARD_SS_PIN)) {
+                Serial.println("no sd card installed");
+            } else {
+                Serial.println("SD Card found");
+            }
         }
     }
 }
