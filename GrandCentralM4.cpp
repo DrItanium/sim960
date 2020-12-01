@@ -1,6 +1,7 @@
 //
 // Created by jwscoggins on 11/27/20.
 //
+#if defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
 #include "GrandCentralM4.h"
 #include <SPI.h>
 #include <Arduino.h>
@@ -84,13 +85,12 @@ GrandCentralM4Board::begin() {
         Serial.print("Starting up SPI...");
         SPI.begin();
         Serial.println("Done");
-        if constexpr (hasBuiltinSDCard()) {
-            if (!SD.begin(SDCARD_SS_PIN)) {
-                Serial.println("no sd card installed");
-            } else {
-                Serial.println("SD Card found");
-            }
+        if (!SD.begin(SDCARD_SS_PIN)) {
+            Serial.println("no sd card installed");
+        } else {
+            Serial.println("SD Card found");
         }
     }
 }
+#endif // end defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
 

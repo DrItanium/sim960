@@ -1,16 +1,7 @@
 #ifndef I960_GRAND_CENTRAL_M4_H__
 #define I960_GRAND_CENTRAL_M4_H__
 #include "MemoryInterface.h"
-constexpr auto hasBuiltinSDCard() noexcept {
-#ifdef SDCARD_SS_PIIN
-    return true;
-#else
-    return false;
-#endif
-}
-#if !defined(ARDUINO_GRAND_CENTRAL_M4) || !defined(ADAFRUIT_GRAND_CENTRAL_M4)
-#define SDCARD_SS_PIN -1
-#endif
+#if defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
 class GrandCentralM4Board : public MemoryInterface {
 public:
     using MemoryInterface::MemoryInterface;
@@ -32,4 +23,5 @@ private:
     bool _initialized = false;
 };
 using TargetBoard = GrandCentralM4Board;
+#endif // end defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
 #endif // end I960_GRAND_CENTRAL_M4__
