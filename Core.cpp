@@ -788,7 +788,6 @@ namespace i960 {
     }
     void
     Core::callx(Ordinal targ) {
-
     }
     void
     Core::call(Displacement22 targ) {
@@ -797,7 +796,7 @@ namespace i960 {
 
     void
     Core::bx(Ordinal targ) {
-
+        ip.setOrdinal(targ);
     }
     void
     Core::teste(RegisterIndex dest) {
@@ -879,13 +878,36 @@ namespace i960 {
     Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
 
     }
+    constexpr Ordinal computeCheckBitMask(Ordinal value) noexcept {
+        return 1 << (value & 0b11111);
+    }
     void
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
-
+        auto bpos = extractValue(bitpos, TreatAsOrdinal{});
+        auto theSrc = getRegister(src).getOrdinal();
+        auto theMask = computeCheckBitMask(bpos);
+        constexpr Ordinal startingConditionCode = 0b010;
+        constexpr Ordinal onConditionMet = 0b000;
+        constexpr Ordinal compareAgainst = 0;
+        ac.setConditionCode(startingConditionCode);
+        if ((theSrc & theMask) == compareAgainst) {
+            ac.setConditionCode(onConditionMet);
+            ip.setInteger(ip.getInteger() + targ);
+        }
     }
     void
     Core::bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
-
+        auto bpos = extractValue(bitpos, TreatAsOrdinal{});
+        auto theSrc = getRegister(src).getOrdinal();
+        auto theMask = computeCheckBitMask(bpos);
+        constexpr Ordinal startingConditionCode = 0b000;
+        constexpr Ordinal onConditionMet = 0b010;
+        constexpr Ordinal compareAgainst = 1;
+        ac.setConditionCode(startingConditionCode);
+        if ((theSrc & theMask) == compareAgainst) {
+            ac.setConditionCode(onConditionMet);
+            ip.setInteger(ip.getInteger() + targ);
+        }
     }
     void
     Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
