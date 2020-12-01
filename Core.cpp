@@ -688,6 +688,7 @@ namespace i960 {
             case 0x860: callx(address); break;
             case 0x880: ldos(address, inst.getSrcDest()); break;
             case 0x8A0: stos(inst.getSrcDest(), address); break;
+            case 0x8C0: lda(address, inst.getSrcDest()); break;
             case 0x900: ld(address, inst.getSrcDest()); break;
             case 0x920: st(inst.getSrcDest(), address); break;
             case 0x980: ldl(address, inst.getSrcDest()); break;
