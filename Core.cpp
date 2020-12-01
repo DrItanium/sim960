@@ -1,10 +1,18 @@
 #include "Core.h"
 #include "DependentFalse.h"
 
+#include <algorithm>
+
 namespace i960 {
+
     constexpr Ordinal computeSingleBitShiftMask(Ordinal value) noexcept {
         return 1 << (value & 0b11111);
     }
+
+    constexpr Ordinal rotateOperation(Ordinal src, Ordinal length) noexcept {
+        return (src << length) | (src >> ((-length) & 31u));
+    }
+
     Register&
     Core::getRegister(int index) noexcept {
         if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
@@ -777,17 +785,34 @@ namespace i960 {
     Core::ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
 
     }
+
     void
     Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
 
     }
+
     void
     Core::modi(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        // taken from the manual
+        auto denominator = extractValue(src1, TreatAsInteger{});
+        auto numerator = extractValue(src2, TreatAsInteger{});
+        if (denominator == 0) {
+            // @todo raise Arithmetic Zero Divide fault
+            return;
+        }
+        auto theDestValue = numerator - ((numerator / denominator) * denominator);
+        auto& dReg = getRegister(dest);
+        dReg.setInteger(theDestValue);
+        if (((numerator * denominator) < 0) && (theDestValue != 0)) {
+            dReg.setInteger(theDestValue + denominator);
+        }
     }
+
     void
     Core::extract(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        // taken from the i960Hx manual
+        getRegister(dest).setOrdinal((extractValue(dest, TreatAsOrdinal{}) >> std::min(extractValue(src1, TreatAsOrdinal{}), static_cast<Ordinal>(32))) &
+                                     (~(0xFFFF'FFFF << extractValue(src2, TreatAsOrdinal{}))));
     }
     void
     Core::callx(Ordinal targ) {
@@ -936,9 +961,12 @@ namespace i960 {
         auto bitposModified = ~(computeSingleBitShiftMask(bitpos));
         getRegister(dest).setOrdinal(src & bitposModified);
     }
+
     void
     Core::rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto len = extractValue(src1, TreatAsOrdinal {});
+        auto src = extractValue(src2, TreatAsOrdinal {});
+        getRegister(dest).setOrdinal(rotateOperation(src, len));
     }
     void
     Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -1036,11 +1064,14 @@ namespace i960 {
     }
     void
     Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
-
+        /// @todo implement... such a baffling design...BCD...
     }
     void
     Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
-
+        auto srcValue = extractValue(src1, TreatAsOrdinal { });
+        getRegister(dest).setOrdinal(srcValue);
+        auto lowest8 = static_cast<ByteOrdinal>(srcValue);
+        ac.setConditionCode(((lowest8 >= 0b0011'0000) && (lowest8 <= 0b0011'1001)) ? 0b000 : 0b010);
     }
     void
     Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
