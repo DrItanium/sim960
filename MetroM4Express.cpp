@@ -10,6 +10,7 @@
 #include <Adafruit_ST7735.h>
 #include <Adafruit_seesaw.h>
 #include <Adafruit_TFTShield18.h>
+#include <Adafruit_NeoPixel.h>
 
 // this design has the adafruit 1.8" TFT shield with microsd card 5-way nav + 3 buttons shield attached to the top
 Adafruit_TFTShield18 ss;
@@ -19,6 +20,9 @@ constexpr auto TFT_DC = 8;
 constexpr auto TFT_RESET = -1;
 
 Adafruit_ST7735 tft(TFT_CS, TFT_DC, TFT_RESET);
+constexpr auto OnboardLEDPin = 40;
+constexpr auto OnboardLEDCount = 1;
+Adafruit_NeoPixel onboardStrip(OnboardLEDCount, OnboardLEDPin, NEO_GRB + NEO_KHZ800);
 
 Integer
 MetroM4ExpressBoard::loadValue(Address address, TreatAsInteger)  {
@@ -97,8 +101,14 @@ startupTFTShield() {
    } else {
        Serial.println("OK!");
    }
-
-
+}
+void
+setupOnboardNeoPixel() {
+    onboardStrip.begin();
+    onboardStrip.show();
+    delay(1000);
+    onboardStrip.setPixelColor(0, 0x7F, 0, 0x7F);
+    onboardStrip.show();
 }
 void
 MetroM4ExpressBoard::begin() {
@@ -111,6 +121,7 @@ MetroM4ExpressBoard::begin() {
         Serial.println("i960 Simulator Starting up");
         pinMode(LED_BUILTIN, OUTPUT);
         startupTFTShield();
+        setupOnboardNeoPixel();
     }
 }
 #endif // defined ADAFRUIT_METRO_M4_EXPRESS || defined ARDUINO_METRO_M4
