@@ -593,30 +593,25 @@ namespace i960 {
     Core::stl(RegisterIndex src, Ordinal address) {
         if (!divisibleByTwo(src)) {
             /// @todo raise a operation.invalid_operand fault
-        } else if ((address & 0b111) != 0) {
-            // if unaligned fault is enabled we go down this path
-            storeOrdinal(address, getRegister(src).getOrdinal());
-            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-            /// @todo generate an Operation.Unaligned fault
         } else {
             storeOrdinal(address, getRegister(src).getOrdinal());
             storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED fault
+            }
         }
     }
     void
     Core::stt(RegisterIndex src, Ordinal address) {
         if (!divisibleByFour(src)) {
             /// @todo raise a operation.invalid_operand fault
-        } else if ((address & 0b1111) != 0) {
-            // if unaligned fault is enabled we go down this path
-            storeOrdinal(address, getRegister(src).getOrdinal());
-            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-            /// @todo generate an Operation.Unaligned fault
         } else {
             storeOrdinal(address, getRegister(src).getOrdinal());
             storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
             storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+            }
         }
     }
 
@@ -624,18 +619,60 @@ namespace i960 {
     Core::stq(RegisterIndex src, Ordinal address) {
         if (!divisibleByFour(src)) {
             /// @todo raise a operation.invalid_operand fault
-        } else if ((address & 0b1111) != 0) {
-            // if unaligned fault is enabled we go down this path
-            storeOrdinal(address, getRegister(src).getOrdinal());
-            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-            storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-            /// @todo generate an Operation.Unaligned fault
         } else {
             storeOrdinal(address, getRegister(src).getOrdinal());
             storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
             storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
             storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+            }
+        }
+    }
+
+    void
+    Core::ldl(Ordinal mem, RegisterIndex dest) {
+        if(!divisibleByTwo(dest)) {
+           /// @todo raise invalid_operand fault
+           // the Hx docs state that dest is modified
+           getRegister(dest).setOrdinal(-1);
+        } else {
+            getRegister(dest).setOrdinal(loadOrdinal(mem));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+            if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+            }
+        }
+    }
+    void
+    Core::ldt(Ordinal mem, RegisterIndex dest) {
+        if(!divisibleByFour(dest)) {
+            /// @todo raise invalid_operand fault
+            // the Hx docs state that dest is modified
+            getRegister(dest).setOrdinal(-1);
+        } else {
+            getRegister(dest).setOrdinal(loadOrdinal(mem));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
+            if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+            }
+        }
+    }
+    void
+    Core::ldq(Ordinal mem, RegisterIndex dest) {
+        if(!divisibleByFour(dest)) {
+            /// @todo raise invalid_operand fault
+            // the Hx docs state that dest is modified
+            getRegister(dest).setOrdinal(-1);
+        } else {
+            getRegister(dest).setOrdinal(loadOrdinal(mem));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
+            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(loadOrdinal(mem+12));
+            if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+            }
         }
     }
 } // end namespace i960

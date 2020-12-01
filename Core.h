@@ -381,6 +381,7 @@ namespace i960
         RegisterFile globals, locals;
         Register ip, ac; // always start at address zero
         Ordinal currentInstruction = 0;
+        bool _unalignedFaultEnabled = false;
     };
 
 }
