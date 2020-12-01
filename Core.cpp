@@ -588,4 +588,54 @@ namespace i960 {
     Core::stos(RegisterIndex src, Ordinal dest) {
         storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
     }
+
+    void
+    Core::stl(RegisterIndex src, Ordinal address) {
+        if (!divisibleByTwo(src)) {
+            /// @todo raise a operation.invalid_operand fault
+        } else if ((address & 0b111) != 0) {
+            // if unaligned fault is enabled we go down this path
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            /// @todo generate an Operation.Unaligned fault
+        } else {
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+        }
+    }
+    void
+    Core::stt(RegisterIndex src, Ordinal address) {
+        if (!divisibleByFour(src)) {
+            /// @todo raise a operation.invalid_operand fault
+        } else if ((address & 0b1111) != 0) {
+            // if unaligned fault is enabled we go down this path
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            /// @todo generate an Operation.Unaligned fault
+        } else {
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+        }
+    }
+
+    void
+    Core::stq(RegisterIndex src, Ordinal address) {
+        if (!divisibleByFour(src)) {
+            /// @todo raise a operation.invalid_operand fault
+        } else if ((address & 0b1111) != 0) {
+            // if unaligned fault is enabled we go down this path
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            /// @todo generate an Operation.Unaligned fault
+        } else {
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+        }
+    }
 } // end namespace i960
