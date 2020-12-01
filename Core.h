@@ -193,25 +193,25 @@ namespace i960
         void storeShortInteger (Address address, ShortInteger value) noexcept { theBoard.storeValue(address, value, TreatAsShortInteger{}); }
     private: // data movement operations
         // mem reg {
-        void ld(MemoryAddressing mem, RegisterIndex dest);
-        void ldob(MemoryAddressing mem, RegisterIndex dest);
-        void ldos(MemoryAddressing mem, RegisterIndex dest);
-        void ldib(MemoryAddressing mem, RegisterIndex dest);
-        void ldis(MemoryAddressing mem, RegisterIndex dest);
-        void ldl(MemoryAddressing mem, RegisterIndex dest);
-        void ldt(MemoryAddressing mem, RegisterIndex dest);
-        void ldq(MemoryAddressing mem, RegisterIndex dest);
+        void ld(Ordinal mem, RegisterIndex dest);
+        void ldob(Ordinal mem, RegisterIndex dest);
+        void ldos(Ordinal mem, RegisterIndex dest);
+        void ldib(Ordinal mem, RegisterIndex dest);
+        void ldis(Ordinal mem, RegisterIndex dest);
+        void ldl(Ordinal mem, RegisterIndex dest);
+        void ldt(Ordinal mem, RegisterIndex dest);
+        void ldq(Ordinal mem, RegisterIndex dest);
 
-        void st(MemoryAddressing mem, RegisterIndex dest);
-        void stob(MemoryAddressing mem, RegisterIndex dest);
-        void stos(MemoryAddressing mem, RegisterIndex dest);
-        void stib(MemoryAddressing mem, RegisterIndex dest);
-        void stis(MemoryAddressing mem, RegisterIndex dest);
-        void stl(MemoryAddressing mem, RegisterIndex dest);
-        void stt(MemoryAddressing mem, RegisterIndex dest);
-        void stq(MemoryAddressing mem, RegisterIndex dest);
+        void st(Ordinal mem, RegisterIndex dest);
+        void stob(Ordinal mem, RegisterIndex dest);
+        void stos(Ordinal mem, RegisterIndex dest);
+        void stib(Ordinal mem, RegisterIndex dest);
+        void stis(Ordinal mem, RegisterIndex dest);
+        void stl(Ordinal mem, RegisterIndex dest);
+        void stt(Ordinal mem, RegisterIndex dest);
+        void stq(Ordinal mem, RegisterIndex dest);
 
-        void lda(MemoryAddressing mem, RegisterIndex dest); // efa is another accepted value
+        void lda(Ordinal mem, RegisterIndex dest); // efa is another accepted value
         // }
 
         void mov(RegLit src, RegisterIndex dest);

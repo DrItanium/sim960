@@ -536,5 +536,31 @@ namespace i960 {
         }
         return loadOrdinal(ipLoc);
     }
+    void
+    Core::lda(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(mem);
+    }
+    void
+    Core::ld(Ordinal address, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(loadOrdinal(address));
+    }
+    void
+    Core::ldob(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setByteOrdinal(loadByteOrdinal(mem));
+    }
 
+    void
+    Core::ldos(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setShortOrdinal(loadShortOrdinal(mem));
+    }
+
+    void
+    Core::ldib(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setByteInteger(loadByteInteger(mem));
+    }
+
+    void
+    Core::ldis(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setShortInteger(loadShortInteger(mem));
+    }
 } // end namespace i960
