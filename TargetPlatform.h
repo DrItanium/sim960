@@ -9,6 +9,8 @@
 #include "MetroM0Express.h"
 #elif defined(ADAFRUIT_TRINKET_M0) || defined(ARDUINO_TRINKET_M0)
 #include "TrinketM0.h"
+#elif defined(ARDUINO_ITSYBITSY_M4) || defined(ADAFRUIT_ITSYBITSY_M4)
+#include "ItsyBitsyM4.h"
 #else
 #error "Unknown Board"
 #endif
