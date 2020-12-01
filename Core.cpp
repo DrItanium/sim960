@@ -1,6 +1,5 @@
 #include "Core.h"
 #include "DependentFalse.h"
-#include "ArithmeticControls.h"
 
 namespace i960 {
     Register&
@@ -306,9 +305,8 @@ namespace i960 {
                 static_assert(DependentFalse<K>, "Unresolved type!");
             }
         }, inst.getSrc1());
-        ArithmeticControls theAC(ac);
-        auto tmp = theAC.getRawValue();
-        theAC.setRawValue((src & mask) | (tmp & (~mask)));
+        auto tmp = ac.getRawValue();
+        ac.setRawValue((src & mask) | (tmp & (~mask)));
         getRegister(dest).setOrdinal(tmp);
 
     }
@@ -751,6 +749,18 @@ namespace i960 {
 
     }
     void
+    Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::modi(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::extract(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
     Core::callx(Ordinal targ) {
 
     }
@@ -842,5 +852,29 @@ namespace i960 {
     void
     Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
 
+    }
+    void
+    Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
+
+    }
+    void
+    Core::bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
+
+    }
+    void
+    Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::flushreg() {
+
+    }
+    void
+    Core::setbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    bool
+    Core::getCarryFlag() const noexcept {
+        return ac.carryFlagSet();
     }
 } // end namespace i960

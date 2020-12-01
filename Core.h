@@ -8,6 +8,7 @@
 #include "TargetPlatform.h"
 #include "Register.h"
 #include "DependentFalse.h"
+#include "ArithmeticControls.h"
 namespace i960
 {
 
@@ -385,7 +386,8 @@ namespace i960
     private:
         TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
-        Register ip, ac; // always start at address zero
+        Register ip; // always start at address zero
+        ArithmeticControls ac;
         bool _unalignedFaultEnabled = false;
     };
 
