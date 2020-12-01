@@ -1001,10 +1001,21 @@ namespace i960 {
     }
     void
     Core::concmpo(RegLit src1, RegLit src2) {
-
+        // don't care what the least significant two bits are of the cond code so just mask them out
+        if ((ac.getConditionCode() & 0b100) == 0) {
+            auto s1 = extractValue(src1, TreatAsOrdinal{});
+            auto s2 = extractValue(src2, TreatAsOrdinal{});
+            ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
+        }
     }
     void
     Core::concmpi(RegLit src1, RegLit src2) {
+        // don't care what the least significant two bits are of the cond code so just mask them out
+        if ((ac.getConditionCode() & 0b100) == 0) {
+            auto s1 = extractValue(src1, TreatAsInteger{});
+            auto s2 = extractValue(src2, TreatAsInteger{});
+            ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
+        }
 
     }
     void
