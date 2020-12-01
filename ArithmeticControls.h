@@ -24,6 +24,15 @@ namespace i960 {
         void setCarryFlag(bool value) noexcept;
         void setOverflowFlag(bool value) noexcept;
         void clearConditionCode() noexcept;
+
+        constexpr bool conditionIsUnordered() const noexcept { return getConditionCode() == 0b000; }
+        constexpr bool conditionIsGreaterThan() const noexcept { return getConditionCode() & 0b001; }
+        constexpr bool conditionIsEqualTo() const noexcept { return getConditionCode() & 0b010; }
+        constexpr bool conditionIsGreaterThanOrEqualTo() const noexcept { return getConditionCode() & 0b011; }
+        constexpr bool conditionIsLessThan() const noexcept { return getConditionCode() & 0b100; }
+        constexpr bool conditionIsNotEqual() const noexcept { return getConditionCode() & 0b101; }
+        constexpr bool conditionIsLessThanOrEqual() const noexcept { return getConditionCode() & 0b110; }
+        constexpr bool conditionIsOrdered() const noexcept { return static_cast<bool>(getConditionCode()); }
     private:
         Ordinal value = 0;
     };
