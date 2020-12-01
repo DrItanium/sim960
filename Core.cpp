@@ -107,7 +107,7 @@ namespace i960 {
                 // case 0x5B4: intdis(); break;
                 // case 0x5B5: inten(); break;
             case 0x5CC: mov(inst.getSrc1(), inst.getDestination()); break;
-                //case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x5DC: movl(inst.getSrc1(), inst.getDestination()); break;
             case 0x5EC: movt(inst.getSrc1(), inst.getDestination()); break;
             case 0x5FC: movq(inst.getSrc1(), inst.getDestination()); break;
@@ -1163,5 +1163,9 @@ namespace i960 {
     Core::cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
         cmpi(src1, src2);
         bno(Displacement22{targ});
+    }
+    void
+    Core::eshro(RegLit src1, RegLit src2, RegisterIndex dest) {
+
     }
 } // end namespace i960

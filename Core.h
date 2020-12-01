@@ -375,6 +375,8 @@ namespace i960
         void flushreg(); // noop right now
         void modac(const RegFormatInstruction& inst);
         void syncf();
+    private:
+        void eshro(RegLit src1, RegLit src2, RegisterIndex dest);
     private: // Numerics Architecture addons
         void dmovt(RegisterIndex src, RegisterIndex dest);
         void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
