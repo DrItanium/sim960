@@ -354,6 +354,8 @@ namespace i960
         void cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ);
         void bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ);
         void bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ);
+        void cmpibo(RegLit src1, RegLit src2, ShortInteger targ);
+        void cmpibno(RegLit src1, RegLit src2, ShortInteger targ);
     private: // test condition codes
         void teste(RegisterIndex dest);
         void testne(RegisterIndex dest);

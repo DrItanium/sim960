@@ -236,8 +236,8 @@ namespace i960 {
             case 0x3E0: cmpible(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
             case 0x390: cmpibg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
             case 0x3B0: cmpibge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-                //case 0x3F0: cmpibo(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-                //case 0x380: cmpibno(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x3F0: cmpibo(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x380: cmpibno(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
             case 0x320: cmpobe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
             case 0x350: cmpobne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
             case 0x340: cmpobl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
@@ -1153,5 +1153,15 @@ namespace i960 {
             return;
         }
         // do a noop
+    }
+    void
+    Core::cmpibo(RegLit src1, RegLit src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bo(Displacement22{targ});
+    }
+    void
+    Core::cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bno(Displacement22{targ});
     }
 } // end namespace i960
