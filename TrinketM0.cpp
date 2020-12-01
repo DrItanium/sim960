@@ -2,6 +2,7 @@
 // Created by jwscoggins on 11/27/20.
 //
 #if defined(ARDUINO_TRINKET_M0) || defined(ADAFRUIT_TRINKET_M0)
+#include "CoreTypes.h"
 #include "TrinketM0.h"
 #include <SPI.h>
 #include <Arduino.h>
@@ -12,7 +13,25 @@ constexpr auto OnBoardDotstarDataPin = 7;
 constexpr auto OnBoardDotstarClockPin = 8;
 
 Adafruit_DotStar onboardStrip(OnBoardDotstarNumPixels, OnBoardDotstarDataPin, OnBoardDotstarClockPin, DOTSTAR_BGR);
-
+void
+setOnboardRGBLedColor(Ordinal value) {
+    // R - [0:7]
+    // G - [8:15]
+    // B - [16:23]
+    // unused - [24:31]
+    auto r = static_cast<uint8_t>(value);
+    auto g = static_cast<uint8_t>(value >> 8);
+    auto b = static_cast<uint8_t>(value >> 16);
+    onboardStrip.setPixelColor(0, r, g, b);
+}
+void
+updateOnboardRGBLedColorDisplay() {
+    onboardStrip.show();
+}
+void
+setOnboardRGBLedBrightness(ByteOrdinal value) {
+    onboardStrip.setBrightness(value);
+}
 Integer
 TrinketM0Board::loadValue(Address address, TreatAsInteger)  {
     return 0;
@@ -93,10 +112,11 @@ TrinketM0Board::begin() {
         Serial.println("Done");
         Serial.print("Starting up onboard DotStar LED...");
         onboardStrip.begin();
-        onboardStrip.setPixelColor(0, 0);
-        onboardStrip.show();
+        setOnboardRGBLedColor(0);
+        updateOnboardRGBLedColorDisplay();
         delay(1000);
-        onboardStrip.setPixelColor(0, 0x7F007F); // purple :)
+        setOnboardRGBLedColor(0x7F007F);
+        updateOnboardRGBLedColorDisplay();
         onboardStrip.show();
         Serial.println("Done");
     }
