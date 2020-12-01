@@ -2,6 +2,9 @@
 #include "DependentFalse.h"
 
 namespace i960 {
+    constexpr Ordinal computeSingleBitShiftMask(Ordinal value) noexcept {
+        return 1 << (value & 0b11111);
+    }
     Register&
     Core::getRegister(int index) noexcept {
         if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
@@ -878,14 +881,11 @@ namespace i960 {
     Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
 
     }
-    constexpr Ordinal computeCheckBitMask(Ordinal value) noexcept {
-        return 1 << (value & 0b11111);
-    }
     void
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
         auto theSrc = getRegister(src).getOrdinal();
-        auto theMask = computeCheckBitMask(bpos);
+        auto theMask = computeSingleBitShiftMask(bpos);
         constexpr Ordinal startingConditionCode = 0b010;
         constexpr Ordinal onConditionMet = 0b000;
         constexpr Ordinal compareAgainst = 0;
@@ -899,7 +899,7 @@ namespace i960 {
     Core::bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
         auto theSrc = getRegister(src).getOrdinal();
-        auto theMask = computeCheckBitMask(bpos);
+        auto theMask = computeSingleBitShiftMask(bpos);
         constexpr Ordinal startingConditionCode = 0b000;
         constexpr Ordinal onConditionMet = 0b010;
         constexpr Ordinal compareAgainst = 1;
@@ -931,7 +931,10 @@ namespace i960 {
     }
     void
     Core::clrbit(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto bitpos = extractValue(src1, TreatAsOrdinal{});
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        auto bitposModified = ~(computeSingleBitShiftMask(bitpos));
+        getRegister(dest).setOrdinal(src & bitposModified);
     }
     void
     Core::rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -939,19 +942,55 @@ namespace i960 {
     }
     void
     Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto s1 = extractValue(src1, TreatAsOrdinal{});
+        auto s2 = extractValue(src2, TreatAsOrdinal{});
+        if (s1 < s2) {
+            ac.setConditionCode(0b100);
+        } else if (s1 == s2) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b001);
+        }
+        getRegister(dest).setOrdinal(s2 + 1);
     }
     void
     Core::cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto s1 = extractValue(src1, TreatAsInteger{});
+        auto s2 = extractValue(src2, TreatAsInteger{});
+        if (s1 < s2) {
+            ac.setConditionCode(0b100);
+        } else if (s1 == s2) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b001);
+        }
+        getRegister(dest).setInteger(s2 + 1); // manual states that this instruction suppresses overflow
     }
     void
     Core::cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto s1 = extractValue(src1, TreatAsOrdinal{});
+        auto s2 = extractValue(src2, TreatAsOrdinal{});
+        if (s1 < s2) {
+            ac.setConditionCode(0b100);
+        } else if (s1 == s2) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b001);
+        }
+        getRegister(dest).setOrdinal(s2 - 1);
     }
     void
     Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto s1 = extractValue(src1, TreatAsInteger{});
+        auto s2 = extractValue(src2, TreatAsInteger{});
+        if (s1 < s2) {
+            ac.setConditionCode(0b100);
+        } else if (s1 == s2) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b001);
+        }
+        getRegister(dest).setInteger(s2 - 1); // manual states that this instruction suppresses overflow
     }
     void
     Core::subc(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -986,7 +1025,7 @@ namespace i960 {
     }
     void
     Core::chkbit(RegLit src1, RegLit src2) {
-
+        ac.setConditionCode(((extractValue(src2, TreatAsOrdinal{})& computeSingleBitShiftMask(extractValue(src1, TreatAsOrdinal{}))) == 0) ? 0b000 : 0b010);
     }
     void
     Core::spanbit(RegLit src1, RegisterIndex src2) {

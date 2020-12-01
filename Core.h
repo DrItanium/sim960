@@ -329,6 +329,7 @@ namespace i960
         void balx(Ordinal targ, RegisterIndex dest); // mem, reg
 
         /// @todo figure out correct signatures
+        /// @todo condense this operation set down to a single function since the mask is embedded in the opcode itself :)
         void be(Displacement22 dest);
         void bne(Displacement22 dest);
         void bl(Displacement22 dest);
