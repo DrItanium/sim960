@@ -11,6 +11,8 @@
 #include "TrinketM0.h"
 #elif defined(ARDUINO_ITSYBITSY_M4) || defined(ADAFRUIT_ITSYBITSY_M4)
 #include "ItsyBitsyM4.h"
+#elif defined(ARDUINO_HALLOWING_M4) || defined(ADAFRUIT_HALLOWING_M4)
+#include "HallowingM4.h"
 #else
 #error "Unknown Board"
 #endif
