@@ -101,6 +101,11 @@ startupTFTShield() {
    } else {
        Serial.println("OK!");
    }
+
+   for (int32_t i = TFTSHIELD_BACKLIGHT_OFF; i < TFTSHIELD_BACKLIGHT_ON; i+= 100) {
+       ss.setBacklight(i);
+       delay(1);
+   }
 }
 void
 setupOnboardNeoPixel() {
@@ -108,6 +113,9 @@ setupOnboardNeoPixel() {
     onboardStrip.show();
     delay(1000);
     onboardStrip.setPixelColor(0, 0x7F, 0, 0x7F);
+    onboardStrip.show();
+    delay(1000);
+    onboardStrip.setPixelColor(0, 0);
     onboardStrip.show();
 }
 void
