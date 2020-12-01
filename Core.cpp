@@ -942,54 +942,26 @@ namespace i960 {
     }
     void
     Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
+        cmpo(src1, src2);
         auto s2 = extractValue(src2, TreatAsOrdinal{});
-        if (s1 < s2) {
-            ac.setConditionCode(0b100);
-        } else if (s1 == s2) {
-            ac.setConditionCode(0b010);
-        } else {
-            ac.setConditionCode(0b001);
-        }
         getRegister(dest).setOrdinal(s2 + 1);
     }
     void
     Core::cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
-        auto s1 = extractValue(src1, TreatAsInteger{});
+        cmpi(src1, src2);
         auto s2 = extractValue(src2, TreatAsInteger{});
-        if (s1 < s2) {
-            ac.setConditionCode(0b100);
-        } else if (s1 == s2) {
-            ac.setConditionCode(0b010);
-        } else {
-            ac.setConditionCode(0b001);
-        }
         getRegister(dest).setInteger(s2 + 1); // manual states that this instruction suppresses overflow
     }
     void
     Core::cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
+        cmpo(src1, src2);
         auto s2 = extractValue(src2, TreatAsOrdinal{});
-        if (s1 < s2) {
-            ac.setConditionCode(0b100);
-        } else if (s1 == s2) {
-            ac.setConditionCode(0b010);
-        } else {
-            ac.setConditionCode(0b001);
-        }
         getRegister(dest).setOrdinal(s2 - 1);
     }
     void
     Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
-        auto s1 = extractValue(src1, TreatAsInteger{});
+        cmpi(src1, src2);
         auto s2 = extractValue(src2, TreatAsInteger{});
-        if (s1 < s2) {
-            ac.setConditionCode(0b100);
-        } else if (s1 == s2) {
-            ac.setConditionCode(0b010);
-        } else {
-            ac.setConditionCode(0b001);
-        }
         getRegister(dest).setInteger(s2 - 1); // manual states that this instruction suppresses overflow
     }
     void
@@ -1005,11 +977,27 @@ namespace i960 {
     }
     void
     Core::cmpo(RegLit src1, RegLit src2) {
-
+        auto s1 = extractValue(src1, TreatAsOrdinal{});
+        auto s2 = extractValue(src2, TreatAsOrdinal{});
+        if (s1 < s2) {
+            ac.setConditionCode(0b100);
+        } else if (s1 == s2) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b001);
+        }
     }
     void
     Core::cmpi(RegLit src1, RegLit src2) {
-
+        auto s1 = extractValue(src1, TreatAsInteger{});
+        auto s2 = extractValue(src2, TreatAsInteger{});
+        if (s1 < s2) {
+            ac.setConditionCode(0b100);
+        } else if (s1 == s2) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b001);
+        }
     }
     void
     Core::concmpo(RegLit src1, RegLit src2) {
