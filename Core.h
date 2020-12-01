@@ -142,9 +142,14 @@ namespace i960
             } memb;
         };
     };
-
     using RegisterFile = std::array<Register, 16>;
     class Core {
+    private:
+        using DecodedInstruction = std::variant<RegFormatInstruction,
+                MEMFormatInstruction,
+                COBRInstruction,
+                CTRLInstruction>;
+        static DecodedInstruction decode(Ordinal value) noexcept;
     public:
         void begin();
         void cycle();
@@ -162,9 +167,9 @@ namespace i960
     private:
         // classic risc pipeline stages
         /// @todo flesh out
-        void fetchInstruction();
-        void decodeInstruction();
-        void executeInstruction();
+        Ordinal fetchInstruction();
+        DecodedInstruction decodeInstruction(Ordinal value);
+        void executeInstruction(const DecodedInstruction& inst);
         void memoryAccess();
         void writeback();
     private: // execution routines
@@ -381,7 +386,6 @@ namespace i960
         TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
         Register ip, ac; // always start at address zero
-        Ordinal currentInstruction = 0;
         bool _unalignedFaultEnabled = false;
     };
 
