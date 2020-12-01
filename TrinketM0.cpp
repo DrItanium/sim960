@@ -5,7 +5,13 @@
 #include "TrinketM0.h"
 #include <SPI.h>
 #include <Arduino.h>
-#include <SD.h>
+#include <Adafruit_DotStar.h>
+
+constexpr auto OnBoardDotstarNumPixels = 1;
+constexpr auto OnBoardDotstarDataPin = 7;
+constexpr auto OnBoardDotstarClockPin = 7;
+
+Adafruit_DotStar onboardStrip(OnBoardDotstarNumPixels, OnBoardDotstarDataPin, OnBoardDotstarClockPin, DOTSTAR_BGR);
 
 Integer
 TrinketM0Board::loadValue(Address address, TreatAsInteger)  {
@@ -85,6 +91,11 @@ TrinketM0Board::begin() {
         Serial.print("Starting up SPI...");
         SPI.begin();
         Serial.println("Done");
+        Serial.print("Starting up onboard DotStar LED...");
+        onboardStrip.begin();
+        onboardStrip.show();
+        Serial.println("Done");
+        strip.setPixelColor(0, 0x7F007F); // purple :)
     }
 }
 #endif // end defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
