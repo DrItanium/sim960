@@ -877,4 +877,80 @@ namespace i960 {
     Core::getCarryFlag() const noexcept {
         return ac.carryFlagSet();
     }
+    void
+    Core::setCarryFlag(bool value) noexcept {
+        ac.setCarryFlag(value);
+    }
+    void
+    Core::clrbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::subc(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::cmpo(RegLit src1, RegLit src2) {
+
+    }
+    void
+    Core::cmpi(RegLit src1, RegLit src2) {
+
+    }
+    void
+    Core::concmpo(RegLit src1, RegLit src2) {
+
+    }
+    void
+    Core::concmpi(RegLit src1, RegLit src2) {
+
+    }
+    void
+    Core::scanbyte(RegLit src1, RegLit src2) {
+
+    }
+    void
+    Core::chkbit(RegLit src1, RegLit src2) {
+
+    }
+    void
+    Core::spanbit(RegLit src1, RegisterIndex src2) {
+
+    }
+    void
+    Core::scanbit(RegLit src1, RegisterIndex src2) {
+
+    }
+    void
+    Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+
+    }
+    void
+    Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
+
+    }
+    void
+    Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
 } // end namespace i960
