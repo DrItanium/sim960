@@ -7,6 +7,8 @@
 #include "MetroM4Express.h"
 #elif defined(ADAFRUIT_METRO_M0_EXPRESS) || defined(ARDUINO_METRO_M0)
 #include "MetroM0Express.h"
+#elif defined(ADAFRUIT_TRINKET_M0) || defined(ARDUINO_TRINKET_M0)
+#include "TrinketM0.h"
 #else
 #error "Unknown Board"
 #endif
