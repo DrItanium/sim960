@@ -65,7 +65,6 @@ namespace i960 {
             case 0x582: andnot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x583: setbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x584: notand(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                // case 0x585: break;
             case 0x586: logicalXor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x587: logicalOr(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x588: logicalNor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -85,7 +84,6 @@ namespace i960 {
                 //case 0x596: cmpos(inst.getSrc1(), inst.getSrc2()); break;
                 //case 0x597: cmpis(inst.getSrc1(), inst.getSrc2()); break;
             case 0x598: shro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                //case 0x599: break;
             case 0x59A: shrdi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x59B: shri(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x59C: shlo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -198,6 +196,9 @@ namespace i960 {
                 //case 0x7F2: suboo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            default:
+                /// @todo raise an error at this point
+                break;
         }
     }
     void
@@ -223,6 +224,9 @@ namespace i960 {
             case 0xC20: stib(inst.getSrcDest(), address); break;
             case 0xC80: ldis(address, inst.getSrcDest()); break;
             case 0xCA0: stis(inst.getSrcDest(), address); break;
+            default:
+                /// @todo raise an error at this point
+                break;
         }
     }
     void
@@ -335,10 +339,6 @@ namespace i960 {
         auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
         getRegister(dest).setOrdinal(s2 + s1) ;
         /// @todo implement fault detection
-    }
-    void
-    Core::alterbit(RegLit bitpos, RegLit src, RegisterIndex dest) {
-        /// @todo implement this body
     }
     void
     Core::logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -724,11 +724,6 @@ namespace i960 {
         }
     }
     void
-    Core::ret()
-    {
-        /// @todo implement
-    }
-    void
     Core::bno(Displacement22 dest) {
         if (ac.conditionIsUnordered()) {
             ip.setInteger(ip.getInteger() + dest.getValue());
@@ -779,16 +774,8 @@ namespace i960 {
     }
     void
     Core::balx(Ordinal targ, RegisterIndex dest) {
-        /// @todo implement
-    }
-    void
-    Core::ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
-
-    }
-
-    void
-    Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ip.getOrdinal());
+        ip.setOrdinal(targ);
     }
 
     void
@@ -813,13 +800,6 @@ namespace i960 {
         // taken from the i960Hx manual
         getRegister(dest).setOrdinal((extractValue(dest, TreatAsOrdinal{}) >> std::min(extractValue(src1, TreatAsOrdinal{}), static_cast<Ordinal>(32))) &
                                      (~(0xFFFF'FFFF << extractValue(src2, TreatAsOrdinal{}))));
-    }
-    void
-    Core::callx(Ordinal targ) {
-    }
-    void
-    Core::call(Displacement22 targ) {
-
     }
 
     void
@@ -957,10 +937,6 @@ namespace i960 {
             ac.setConditionCode(onConditionMet);
             ip.setInteger(ip.getInteger() + targ);
         }
-    }
-    void
-    Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
-
     }
     void
     Core::flushreg() {
@@ -1140,14 +1116,6 @@ namespace i960 {
         ac.setConditionCode(((lowest8 >= 0b0011'0000) && (lowest8 <= 0b0011'1001)) ? 0b000 : 0b010);
     }
     void
-    Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
-
-    }
-    void
-    Core::shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
-
-    }
-    void
     Core::syncf() {
         if (ac.getNoImpreciseFaults()) {
             return;
@@ -1164,8 +1132,59 @@ namespace i960 {
         cmpi(src1, src2);
         bno(Displacement22{targ});
     }
+
+    void
+    Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto bitpos = extractValue(src1, TreatAsOrdinal{});
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        getRegister(dest).setOrdinal(src ^ (1 << (bitpos & 0b11111)));
+    }
+
+    void
+    Core::alterbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto bitpos = extractValue(src1, TreatAsOrdinal{});
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        if ((ac.getConditionCode() & 0b010) == 0) {
+            getRegister(dest).setOrdinal(src & (~(1 << (bitpos & 0b11111))));
+        } else {
+            getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
+        }
+    }
+
     void
     Core::eshro(RegLit src1, RegLit src2, RegisterIndex dest) {
 
+    }
+
+    void
+    Core::ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+
+    void
+    Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+
+    void
+    Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+
+    void
+    Core::shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
+
+    }
+
+    void
+    Core::callx(Ordinal targ) {
+    }
+    void
+    Core::call(Displacement22 targ) {
+
+    }
+    void
+    Core::ret() {
+        /// @todo implement
     }
 } // end namespace i960
