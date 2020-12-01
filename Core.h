@@ -335,6 +335,8 @@ namespace i960
         void ble(Displacement22 dest);
         void bg(Displacement22 dest);
         void bge(Displacement22 dest);
+        void bo(Displacement22 dest);
+        void bno(Displacement22 dest);
     private: // compare and branch
         /// @todo figure out correct signatures
         void cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ);

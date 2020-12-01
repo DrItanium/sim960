@@ -253,14 +253,14 @@ namespace i960 {
             case 0x090: call(inst.getDisplacement()); break;
             case 0x0A0: ret(); break;
             case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
-                //case 0x100: bno(Displacement22{inst.getDisplacement()}); break;
+            case 0x100: bno(Displacement22{inst.getDisplacement()}); break;
             case 0x110: bg(Displacement22{inst.getDisplacement()}); break;
             case 0x120: be(Displacement22{inst.getDisplacement()}); break;
             case 0x130: bge(Displacement22{inst.getDisplacement()}); break;
             case 0x140: bl(Displacement22{inst.getDisplacement()}); break;
             case 0x150: bne(Displacement22{inst.getDisplacement()}); break;
             case 0x160: ble(Displacement22{inst.getDisplacement()}); break;
-                //case 0x170: bo(Displacement22{inst.getDisplacement()}); break;
+            case 0x170: bo(Displacement22{inst.getDisplacement()}); break;
                 //case 0x180: faultno(); break;
                 //case 0x190: faultg(); break;
                 //case 0x1A0: faulte(); break;
@@ -716,6 +716,18 @@ namespace i960 {
     Core::ret()
     {
         /// @todo implement
+    }
+    void
+    Core::bno(Displacement22 dest) {
+        if (ac.conditionIsUnordered()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
+    }
+    void
+    Core::bo(Displacement22 dest) {
+        if (ac.conditionIsOrdered()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
     void
     Core::bg(Displacement22 dest) {
