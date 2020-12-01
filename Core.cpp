@@ -944,7 +944,9 @@ namespace i960 {
     }
     void
     Core::setbit(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+        auto bitpos = extractValue(src1, TreatAsOrdinal{}) ;
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
     }
     bool
     Core::getCarryFlag() const noexcept {
@@ -1063,11 +1065,25 @@ namespace i960 {
     Core::chkbit(RegLit src1, RegLit src2) {
         ac.setConditionCode(((extractValue(src2, TreatAsOrdinal{})& computeSingleBitShiftMask(extractValue(src1, TreatAsOrdinal{}))) == 0) ? 0b000 : 0b010);
     }
-    void
-    Core::spanbit(RegLit src1, RegisterIndex src2) {
-
-    }
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
+    void
+    Core::spanbit(RegLit src1, RegisterIndex dest) {
+        /**
+         * Find the most significant clear bit
+         */
+        auto result = largestOrdinal;
+        ac.clearConditionCode();
+        if (auto src = extractValue(src1, TreatAsOrdinal{}); src != largestOrdinal) {
+            for (Integer i = 31; i >= 0; --i) {
+                if (auto k = (1 << i); (src & k) == 0) {
+                    result = i;
+                    ac.setConditionCode(0b010);
+                    break;
+                }
+            }
+        }
+        getRegister(dest).setOrdinal(result);
+    }
     void
     Core::scanbit(RegLit src, RegisterIndex dest) {
         // find the most significant set bit
