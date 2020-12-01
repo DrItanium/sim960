@@ -9,7 +9,7 @@
 
 constexpr auto OnBoardDotstarNumPixels = 1;
 constexpr auto OnBoardDotstarDataPin = 7;
-constexpr auto OnBoardDotstarClockPin = 7;
+constexpr auto OnBoardDotstarClockPin = 8;
 
 Adafruit_DotStar onboardStrip(OnBoardDotstarNumPixels, OnBoardDotstarDataPin, OnBoardDotstarClockPin, DOTSTAR_BGR);
 
@@ -93,9 +93,12 @@ TrinketM0Board::begin() {
         Serial.println("Done");
         Serial.print("Starting up onboard DotStar LED...");
         onboardStrip.begin();
+        onboardStrip.setPixelColor(0, 0);
+        onboardStrip.show();
+        delay(1000);
+        onboardStrip.setPixelColor(0, 0x7F007F); // purple :)
         onboardStrip.show();
         Serial.println("Done");
-        onboardStrip.setPixelColor(0, 0x7F007F); // purple :)
     }
 }
 #endif // end defined(ARDUINO_GRAND_CENTRAL_M4) || defined(ADAFRUIT_GRAND_CENTRAL_M4)
