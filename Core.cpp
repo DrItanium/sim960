@@ -682,13 +682,23 @@ namespace i960 {
         auto address = inst.computeAddress(*this);
         switch (inst.getOpcode()) {
             case 0x800: ldob(address, inst.getSrcDest()); break;
+            case 0x820: stob(inst.getSrcDest(), address); break;
+            case 0x840: bx(address); break;
+            case 0x850: balx(address, inst.getSrcDest()); break;
+            case 0x860: callx(address); break;
             case 0x880: ldos(address, inst.getSrcDest()); break;
+            case 0x8A0: stos(inst.getSrcDest(), address); break;
             case 0x900: ld(address, inst.getSrcDest()); break;
+            case 0x920: st(inst.getSrcDest(), address); break;
             case 0x980: ldl(address, inst.getSrcDest()); break;
             case 0xA00: ldt(address, inst.getSrcDest()); break;
+            case 0xA20: stt(inst.getSrcDest(), address); break;
             case 0xB00: ldq(address, inst.getSrcDest()); break;
+            case 0xB20: stq(inst.getSrcDest(), address); break;
             case 0xC00: ldib(address, inst.getSrcDest()); break;
+            case 0xC20: stib(inst.getSrcDest(), address); break;
             case 0xC80: ldis(address, inst.getSrcDest()); break;
+            case 0xCA0: stis(inst.getSrcDest(), address); break;
         }
     }
 } // end namespace i960

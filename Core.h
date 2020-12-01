@@ -318,9 +318,9 @@ namespace i960
     private: // branching
         /// @todo figure out correct signatures
         void b(Displacement22 targ);
-        void bx(MemoryAddressing targ);
+        void bx(Ordinal targ);
         void bal(Displacement22 targ);
-        void balx(MemoryAddressing targ, RegisterIndex dest); // mem, reg
+        void balx(Ordinal targ, RegisterIndex dest); // mem, reg
 
         /// @todo figure out correct signatures
         void be(Displacement22 dest);
@@ -355,7 +355,7 @@ namespace i960
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
         void call(Displacement22 targ);
-        void callx(MemoryAddressing targ); // mem
+        void callx(Ordinal targ); // mem
         void ret();
         /// @todo implement faults as exceptions
     private: // processor management
