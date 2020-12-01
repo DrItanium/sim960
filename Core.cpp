@@ -250,8 +250,8 @@ namespace i960 {
             case 0x260: testle(inst.getSrc1()); break;
             case 0x210: testg(inst.getSrc1()); break;
             case 0x230: testge(inst.getSrc1()); break;
-                //case 0x270: testo(inst.getSrc1()); break;
-                //case 0x200: testno(inst.getSrc1()); break;
+            case 0x270: testo(inst.getSrc1()); break;
+            case 0x200: testno(inst.getSrc1()); break;
             default:
                 /// @todo raise an error at this point
                 break;
