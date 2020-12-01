@@ -504,6 +504,8 @@ namespace i960 {
                 //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
         }
     }
+
+
     void
     Core::modac(const RegFormatInstruction &inst) {
         // in this case, mask is src/dst
@@ -673,6 +675,20 @@ namespace i960 {
             if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
             }
+        }
+    }
+    void
+    Core::execute(const MEMFormatInstruction &inst) noexcept {
+        auto address = inst.computeAddress(*this);
+        switch (inst.getOpcode()) {
+            case 0x800: ldob(address, inst.getSrcDest()); break;
+            case 0x880: ldos(address, inst.getSrcDest()); break;
+            case 0x900: ld(address, inst.getSrcDest()); break;
+            case 0x980: ldl(address, inst.getSrcDest()); break;
+            case 0xA00: ldt(address, inst.getSrcDest()); break;
+            case 0xB00: ldq(address, inst.getSrcDest()); break;
+            case 0xC00: ldib(address, inst.getSrcDest()); break;
+            case 0xC80: ldis(address, inst.getSrcDest()); break;
         }
     }
 } // end namespace i960

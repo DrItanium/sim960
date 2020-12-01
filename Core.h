@@ -106,6 +106,7 @@ namespace i960
         constexpr explicit MEMFormatInstruction(Ordinal lowerHalf) noexcept : lower(lowerHalf) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
         Ordinal computeAddress(Core& referenceCore) const noexcept;
+        constexpr RegisterIndex getSrcDest() const noexcept { return static_cast<RegisterIndex>(srcDest); }
     private:
         constexpr bool isMEMAFormat() const noexcept { return modeMajor & 1 == 0; }
         constexpr bool isMEMBFormat() const noexcept { return modeMajor & 1 != 0; }
