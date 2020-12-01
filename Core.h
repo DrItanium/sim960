@@ -201,17 +201,17 @@ namespace i960
         void ldl(Ordinal mem, RegisterIndex dest);
         void ldt(Ordinal mem, RegisterIndex dest);
         void ldq(Ordinal mem, RegisterIndex dest);
-
-        void st(Ordinal mem, RegisterIndex dest);
-        void stob(Ordinal mem, RegisterIndex dest);
-        void stos(Ordinal mem, RegisterIndex dest);
-        void stib(Ordinal mem, RegisterIndex dest);
-        void stis(Ordinal mem, RegisterIndex dest);
-        void stl(Ordinal mem, RegisterIndex dest);
-        void stt(Ordinal mem, RegisterIndex dest);
-        void stq(Ordinal mem, RegisterIndex dest);
-
         void lda(Ordinal mem, RegisterIndex dest); // efa is another accepted value
+
+        void st(RegisterIndex src, Ordinal mem);
+        void stob(RegisterIndex src, Ordinal mem);
+        void stos(RegisterIndex src, Ordinal mem);
+        void stib(RegisterIndex src, Ordinal mem);
+        void stis(RegisterIndex src, Ordinal mem);
+        void stl(RegisterIndex src, Ordinal mem);
+        void stt(RegisterIndex src, Ordinal mem);
+        void stq(RegisterIndex src, Ordinal mem);
+
         // }
 
         void mov(RegLit src, RegisterIndex dest);

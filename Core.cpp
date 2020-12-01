@@ -563,4 +563,29 @@ namespace i960 {
     Core::ldis(Ordinal mem, RegisterIndex dest) {
         getRegister(dest).setShortInteger(loadShortInteger(mem));
     }
+
+    void
+    Core::st(RegisterIndex src, Ordinal dest) {
+        storeOrdinal(dest, getRegister(src).getOrdinal());
+    }
+
+    void
+    Core::stob(RegisterIndex src, Ordinal dest) {
+        storeByteOrdinal(dest, getRegister(src).getByteOrdinal());
+    }
+
+    void
+    Core::stib(RegisterIndex src, Ordinal dest) {
+        storeByteInteger(dest, getRegister(src).getByteInteger());
+    }
+
+    void
+    Core::stis(RegisterIndex src, Ordinal dest) {
+        storeShortInteger(dest, getRegister(src).getShortInteger());
+    }
+
+    void
+    Core::stos(RegisterIndex src, Ordinal dest) {
+        storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
+    }
 } // end namespace i960
