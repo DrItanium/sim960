@@ -1048,7 +1048,16 @@ namespace i960 {
     }
     void
     Core::scanbyte(RegLit src1, RegLit src2) {
-
+        ac.clearConditionCode();
+        if (auto s1 = extractValue(src1, TreatAsOrdinal{}), s2 = extractValue(src2, TreatAsOrdinal{});
+                ((s1 & 0x0000'00FF) == (s2 & 0x0000'00FF)) ||
+                ((s1 & 0x0000'FF00) == (s2 & 0x0000'FF00)) ||
+                ((s1 & 0x00FF'0000) == (s2 & 0x00FF'0000)) ||
+                ((s1 & 0xFF00'0000) == (s2 & 0xFF00'0000))) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b000);
+        }
     }
     void
     Core::chkbit(RegLit src1, RegLit src2) {
@@ -1058,9 +1067,26 @@ namespace i960 {
     Core::spanbit(RegLit src1, RegisterIndex src2) {
 
     }
+    constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
     void
-    Core::scanbit(RegLit src1, RegisterIndex src2) {
-
+    Core::scanbit(RegLit src, RegisterIndex dest) {
+        // find the most significant set bit
+        auto result = largestOrdinal;
+        ac.clearConditionCode();
+        // while the psuedo-code in the programmers manual talks about setting
+        // the destination to all ones if src is equal to zero, there is no short
+        // circuit in the action section for not iterating through the loop when
+        // src is zero. A small optimization
+        if (auto theSrc = extractValue(src, TreatAsOrdinal{}); theSrc != 0) {
+            for (Integer i = 31; i >= 0; --i) {
+                if (auto k = 1 << i; (theSrc & k) != 0) {
+                    ac.setConditionCode(0b010);
+                    result = i;
+                    break;
+                }
+            }
+        }
+        getRegister(dest).setOrdinal(result);
     }
     void
     Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
