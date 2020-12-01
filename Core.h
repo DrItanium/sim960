@@ -361,6 +361,8 @@ namespace i960
         void testle(RegisterIndex dest);
         void testg(RegisterIndex dest);
         void testge(RegisterIndex dest);
+        void testno(RegisterIndex dest);
+        void testo(RegisterIndex dest);
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
         void call(Displacement22 targ);
@@ -370,6 +372,7 @@ namespace i960
     private: // processor management
         void flushreg(); // noop right now
         void modac(const RegFormatInstruction& inst);
+        void syncf();
     private: // Numerics Architecture addons
         void dmovt(RegisterIndex src, RegisterIndex dest);
         void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);

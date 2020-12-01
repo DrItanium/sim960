@@ -147,7 +147,7 @@ namespace i960 {
                 //case 0x66B: mark(); break;
                 //case 0x66C: fmark(); break;
             case 0x66D: flushreg(); break;
-                //case 0x66E: syncf(); break;
+            case 0x66F: syncf(); break;
             case 0x670: emul(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x671: ediv(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x701: mulo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -827,84 +827,108 @@ namespace i960 {
         ip.setOrdinal(targ);
     }
     void
+    Core::testo(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsOrdered() ? 1 : 0);
+    }
+    void
+    Core::testno(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.getConditionCode() == 0 ? 1 : 0);
+    }
+    void
     Core::teste(RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ac.conditionIsEqualTo() ? 1 : 0);
     }
     void
     Core::testne(RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ac.conditionIsNotEqual() ? 1 : 0);
     }
     void
     Core::testl(RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ac.conditionIsLessThan() ? 1 : 0);
     }
     void
     Core::testle(RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ac.conditionIsLessThanOrEqual() ? 1 : 0);
     }
     void
     Core::testg(RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ac.conditionIsGreaterThan() ? 1 : 0);
     }
+
     void
     Core::testge(RegisterIndex dest) {
-
+        getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
     }
+
     void
     Core::cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpi(src1, src2);
+        bg(Displacement22{targ});
     }
 
     void
     Core::cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        ble(Displacement22{targ});
 
     }
 
     void
     Core::cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        be(Displacement22{targ});
 
     }
 
     void
     Core::cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpi(src1, src2);
+        bne(Displacement22{targ});
     }
 
     void
     Core::cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpi(src1, src2);
+        bl(Displacement22{targ});
     }
     void
     Core::cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpi(src1, src2);
+        bge(Displacement22{targ});
     }
     void
     Core::cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpo(src1, src2);
+        bg(Displacement22{targ});
     }
 
     void
     Core::cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpo(src1, src2);
+        ble(Displacement22{targ});
     }
 
     void
     Core::cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpo(src1, src2);
+        be(Displacement22{targ});
     }
 
     void
     Core::cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpo(src1, src2);
+        bne(Displacement22{targ});
     }
 
     void
     Core::cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpo(src1, src2);
+        bl(Displacement22{targ});
     }
     void
     Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-
+        cmpo(src1, src2);
+        bge(Displacement22{targ});
     }
     void
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
@@ -1122,5 +1146,12 @@ namespace i960 {
     void
     Core::shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
 
+    }
+    void
+    Core::syncf() {
+        if (ac.getNoImpreciseFaults()) {
+            return;
+        }
+        // do a noop
     }
 } // end namespace i960
