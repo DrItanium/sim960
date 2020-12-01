@@ -719,28 +719,40 @@ namespace i960 {
     }
     void
     Core::bg(Displacement22 dest) {
-        /// @todo implement
+        if (ac.conditionIsGreaterThan()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
     void
     Core::be(Displacement22 dest) {
-        /// @todo implement
+        if (ac.conditionIsEqualTo()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
 
     void
     Core::bge(Displacement22 dest) {
-        /// @todo implement
+        if (ac.conditionIsGreaterThanOrEqualTo()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
     void
     Core::bl(Displacement22 dest) {
-        /// @todo implement
+        if (ac.conditionIsLessThan()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
     void
     Core::bne(Displacement22 dest) {
-        /// @todo implement
+        if (ac.conditionIsNotEqual()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
     void
     Core::ble(Displacement22 dest) {
-        /// @todo implement
+        if (ac.conditionIsLessThanOrEqual()) {
+            ip.setInteger(ip.getInteger() + dest.getValue());
+        }
     }
     void
     Core::balx(Ordinal targ, RegisterIndex dest) {
