@@ -7,7 +7,7 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include <Adafruit_DotStar.h>
-
+constexpr auto FRAM_ENABLE = 0;
 Integer
 TrinketM0Board::loadValue(Address address, TreatAsInteger)  {
     return 0;
@@ -59,30 +59,14 @@ TrinketM0Board::storeValue(Address address, ShortInteger value, TreatAsShortInte
 
 void
 TrinketM0Board::begin() {
-    /*
-     * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
-     * available memory. On board devices are mapped into the implicit onboard device area of [0xFF00'0000,0xFFFF'FFFF]. The IO device bus
-     * exists here as extra "modules" such as:
-     * - Clock Generator
-     * - RTC
-     * - ESP32 Wifi Coprocessor
-     * - Display
-     * - Sharp Memory Display
-     * - GPIOs from the Grand Central
-     * - SPI IO Expanders
-     * - Speaker
-     * - Control Registers
-     * - 2 MB Onboard SPI Flash directly mapped into IO Device Space
-     * - OPL3 Device
-     * - Neopixels
-     * - etc
-     */
     if (!_initialized) {
         _initialized = true;
         Serial.begin(9600);
         while (!Serial);
         Serial.println("i960 Simulator Starting up");
         pinMode(LED_BUILTIN, OUTPUT);
+        pinMode(FRAM_ENABLE, OUTPUT);
+        digitalWrite(FRAM_ENABLE, HIGH);
         Serial.print("Starting up SPI...");
         SPI.begin();
         Serial.println("Done");
