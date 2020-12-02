@@ -1,7 +1,6 @@
 //
 // Created by jwscoggins on 11/27/20.
 //
-#define ARDUINO_TRINKET_M0
 #if defined(ARDUINO_TRINKET_M0) || defined(ADAFRUIT_TRINKET_M0)
 #include "CoreTypes.h"
 #include "TrinketM0.h"
@@ -138,51 +137,51 @@ void writeFram(uint32_t address, uint64_t value) {
 }
 Integer
 TrinketM0Board::loadValue(Address address, TreatAsInteger)  {
-    return 0;
+    return static_cast<Integer>(read32<FRAM_ENABLE>(address));
 }
 Ordinal
 TrinketM0Board::loadValue(Address address, TreatAsOrdinal)  {
-    return 0;
+    return read32<FRAM_ENABLE>(address);
 }
 void
 TrinketM0Board::storeValue(Address address, Ordinal value, TreatAsOrdinal) {
-
+    writeFram<FRAM_ENABLE>(address, value);
 }
 void
 TrinketM0Board::storeValue(Address address, Integer value, TreatAsInteger)  {
-
+    writeFram<FRAM_ENABLE>(address, static_cast<Ordinal>(value));
 }
 ByteInteger
 TrinketM0Board::loadValue(Address address, TreatAsByteInteger)  {
-    return 0;
+    return static_cast<ByteInteger>(read8<FRAM_ENABLE>(address));
 }
 ByteOrdinal
 TrinketM0Board::loadValue(Address address, TreatAsByteOrdinal)  {
-    return 0;
+    return read8<FRAM_ENABLE>(address);
 }
 void
 TrinketM0Board::storeValue(Address address, ByteOrdinal value, TreatAsByteOrdinal)  {
-
+    writeFram<FRAM_ENABLE>(address, value);
 }
 void
 TrinketM0Board::storeValue(Address address, ByteInteger value, TreatAsByteInteger)  {
-
+    writeFram<FRAM_ENABLE>(address, static_cast<ByteOrdinal>(value));
 }
 ShortInteger
 TrinketM0Board::loadValue(Address address, TreatAsShortInteger)  {
-    return 0;
+    return static_cast<ShortInteger>(read16<FRAM_ENABLE>(address));
 }
 ShortOrdinal
 TrinketM0Board::loadValue(Address address, TreatAsShortOrdinal)  {
-    return 0;
+    return static_cast<ShortOrdinal>(read16<FRAM_ENABLE>(address));
 }
 void
 TrinketM0Board::storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal)  {
-
+    writeFram<FRAM_ENABLE>(address, value);
 }
 void
 TrinketM0Board::storeValue(Address address, ShortInteger value, TreatAsShortInteger)  {
-
+    writeFram<FRAM_ENABLE>(address, static_cast<ShortOrdinal>(value));
 }
 void
 TrinketM0Board::testFRAMArray() {
