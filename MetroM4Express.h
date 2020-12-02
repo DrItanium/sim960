@@ -7,6 +7,17 @@
 #if defined(ADAFRUIT_METRO_M4_EXPRESS) || defined(ARDUINO_METRO_M4)
 #include "MemoryInterface.h"
 #include "HasOnboardNeoPixel.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
+#include <Adafruit_seesaw.h>
+#include <Adafruit_TFTShield18.h>
+#include <Adafruit_NeoPixel.h>
+
+constexpr auto SD_CS = 4;
+constexpr auto TFT_CS = 10;
+constexpr auto TFT_DC = 8;
+constexpr auto TFT_RESET = -1;
+
 class MetroM4ExpressBoard : public MemoryInterface, public HasOnboardNeoPixel {
 public:
     MetroM4ExpressBoard();
@@ -25,7 +36,11 @@ public:
     void storeValue(Address address, ShortInteger value, TreatAsShortInteger) override;
     void begin() override;
 private:
+    void startupTFTShield();
+private:
     bool _initialized = false;
+    Adafruit_ST7735 tft;
+    Adafruit_TFTShield18 ss;
 };
 using TargetBoard = MetroM4ExpressBoard;
 #endif // defined ADAFRUIT_METRO_M4_EXPRESS || defined ARDUINO_METRO_M4

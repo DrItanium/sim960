@@ -6,20 +6,8 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include <SD.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_ST7735.h>
-#include <Adafruit_seesaw.h>
-#include <Adafruit_TFTShield18.h>
-#include <Adafruit_NeoPixel.h>
 
 // this design has the adafruit 1.8" TFT shield with microsd card 5-way nav + 3 buttons shield attached to the top
-Adafruit_TFTShield18 ss;
-constexpr auto SD_CS = 4;
-constexpr auto TFT_CS = 10;
-constexpr auto TFT_DC = 8;
-constexpr auto TFT_RESET = -1;
-
-Adafruit_ST7735 tft(TFT_CS, TFT_DC, TFT_RESET);
 
 Integer
 MetroM4ExpressBoard::loadValue(Address address, TreatAsInteger)  {
@@ -70,7 +58,7 @@ MetroM4ExpressBoard::storeValue(Address address, ShortInteger value, TreatAsShor
 
 }
 void
-startupTFTShield() {
+MetroM4ExpressBoard::startupTFTShield() {
    pinMode(TFT_CS, OUTPUT);
    digitalWrite(TFT_CS, HIGH);
    pinMode(SD_CS, OUTPUT);
@@ -105,12 +93,6 @@ startupTFTShield() {
    }
 }
 void
-setupOnboardNeoPixel() {
-    setNeoPixelColor(0x7F, 0, 0x7F);
-    delay(1000);
-    setNeoPixelColor(0);
-}
-void
 MetroM4ExpressBoard::begin() {
     // Unlike the grand central m4, the metro m4 does not have a built in sd card slot, I will need to use a shield for this purpose instead.
     // Adafruit has a wonderful shield for just this purpose and I do have one :). It comes with a builtin screen as well!
@@ -122,9 +104,12 @@ MetroM4ExpressBoard::begin() {
         pinMode(LED_BUILTIN, OUTPUT);
         startupTFTShield();
         HasOnboardNeoPixel::begin();
+        setNeoPixelColor(0x7F, 0, 0x7F);
+        delay(1000);
+        setNeoPixelColor(0, 0, 0);
     }
 }
 
-MetroM4ExpressBoard::MetroM4ExpressBoard() : MemoryInterface(), HasOnboardNeoPixel(40, NEO_GRB + NEO_KHZ800) { }
+MetroM4ExpressBoard::MetroM4ExpressBoard() : MemoryInterface(), HasOnboardNeoPixel(40, NEO_GRB + NEO_KHZ800), tft(TFT_CS, TFT_DC, TFT_RESET) { }
 #endif // defined ADAFRUIT_METRO_M4_EXPRESS || defined ARDUINO_METRO_M4
 

@@ -13,7 +13,7 @@ HasOnboardNeoPixel::begin() {
 }
 
 void
-HasOnboardNeoPixel::setNeoPixelColor(int r, int g, int b, bool update) noexcept {
+HasOnboardNeoPixel::setNeoPixelColor(uint8_t r, uint8_t g, uint8_t b, bool update) noexcept {
     np.setPixelColor(0, r, g, b);
     if (update) {
         np.show();
