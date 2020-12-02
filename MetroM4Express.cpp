@@ -110,6 +110,6 @@ MetroM4ExpressBoard::begin() {
     }
 }
 
-MetroM4ExpressBoard::MetroM4ExpressBoard() : MemoryInterface(), HasOnboardNeoPixel(40, NEO_GRB + NEO_KHZ800), tft(TFT_CS, TFT_DC, TFT_RESET) { }
+MetroM4ExpressBoard::MetroM4ExpressBoard() : MemoryInterface(), HasOnboardNeoPixel(), tft(TFT_CS, TFT_DC, TFT_RESET) { }
 #endif // defined ADAFRUIT_METRO_M4_EXPRESS || defined ARDUINO_METRO_M4
 

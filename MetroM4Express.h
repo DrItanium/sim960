@@ -18,7 +18,7 @@ constexpr auto TFT_CS = 10;
 constexpr auto TFT_DC = 8;
 constexpr auto TFT_RESET = -1;
 
-class MetroM4ExpressBoard : public MemoryInterface, public HasOnboardNeoPixel {
+class MetroM4ExpressBoard : public MemoryInterface, public HasOnboardNeoPixel<40> {
 public:
     MetroM4ExpressBoard();
     ~MetroM4ExpressBoard() override = default;
