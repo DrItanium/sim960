@@ -8,30 +8,6 @@
 #include <Arduino.h>
 #include <Adafruit_DotStar.h>
 
-constexpr auto OnBoardDotstarNumPixels = 1;
-constexpr auto OnBoardDotstarDataPin = 7;
-constexpr auto OnBoardDotstarClockPin = 8;
-
-Adafruit_DotStar onboardStrip(OnBoardDotstarNumPixels, OnBoardDotstarDataPin, OnBoardDotstarClockPin, DOTSTAR_BGR);
-void
-setOnboardRGBLedColor(Ordinal value) {
-    // R - [0:7]
-    // G - [8:15]
-    // B - [16:23]
-    // unused - [24:31]
-    auto r = static_cast<uint8_t>(value);
-    auto g = static_cast<uint8_t>(value >> 8);
-    auto b = static_cast<uint8_t>(value >> 16);
-    onboardStrip.setPixelColor(0, r, g, b);
-}
-void
-updateOnboardRGBLedColorDisplay() {
-    onboardStrip.show();
-}
-void
-setOnboardRGBLedBrightness(ByteOrdinal value) {
-    onboardStrip.setBrightness(value);
-}
 Integer
 TrinketM0Board::loadValue(Address address, TreatAsInteger)  {
     return 0;
@@ -111,13 +87,12 @@ TrinketM0Board::begin() {
         SPI.begin();
         Serial.println("Done");
         Serial.print("Starting up onboard DotStar LED...");
-        onboardStrip.begin();
-        setOnboardRGBLedColor(0);
-        updateOnboardRGBLedColorDisplay();
+        HasOnboardDotStar::begin();
+        setDotstarPixelValue(0,0,0);
         delay(1000);
-        setOnboardRGBLedColor(0x7F007F);
-        updateOnboardRGBLedColorDisplay();
-        onboardStrip.show();
+        setDotstarPixelValue(0x7F,0, 0x7F);
+        delay(1000);
+        setDotstarPixelValue(0,0,0);
         Serial.println("Done");
     }
 }

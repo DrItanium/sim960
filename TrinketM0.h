@@ -5,8 +5,9 @@
 #ifndef I960_PROTOTYPE_SIMULATOR_TRINKET_M0_H
 #define I960_PROTOTYPE_SIMULATOR_TRINKET_M0_H
 #include "MemoryInterface.h"
+#include "HasOnboardDotstarPixel.h"
 #if defined(ARDUINO_TRINKET_M0) || defined(ADAFRUIT_TRINKET_M0)
-class TrinketM0Board : public MemoryInterface {
+class TrinketM0Board : public MemoryInterface, public HasOnboardDotStar<7, 8>{
 public:
     using MemoryInterface::MemoryInterface;
     ~TrinketM0Board() override = default;
