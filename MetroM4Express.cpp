@@ -20,9 +20,6 @@ constexpr auto TFT_DC = 8;
 constexpr auto TFT_RESET = -1;
 
 Adafruit_ST7735 tft(TFT_CS, TFT_DC, TFT_RESET);
-constexpr auto OnboardLEDPin = 40;
-constexpr auto OnboardLEDCount = 1;
-Adafruit_NeoPixel onboardStrip(OnboardLEDCount, OnboardLEDPin, NEO_GRB + NEO_KHZ800);
 
 Integer
 MetroM4ExpressBoard::loadValue(Address address, TreatAsInteger)  {
@@ -109,14 +106,9 @@ startupTFTShield() {
 }
 void
 setupOnboardNeoPixel() {
-    onboardStrip.begin();
-    onboardStrip.show();
+    setNeoPixelColor(0x7F, 0, 0x7F);
     delay(1000);
-    onboardStrip.setPixelColor(0, 0x7F, 0, 0x7F);
-    onboardStrip.show();
-    delay(1000);
-    onboardStrip.setPixelColor(0, 0);
-    onboardStrip.show();
+    setNeoPixelColor(0);
 }
 void
 MetroM4ExpressBoard::begin() {
@@ -129,8 +121,10 @@ MetroM4ExpressBoard::begin() {
         Serial.println("i960 Simulator Starting up");
         pinMode(LED_BUILTIN, OUTPUT);
         startupTFTShield();
-        setupOnboardNeoPixel();
+        HasOnboardNeoPixel::begin();
     }
 }
+
+MetroM4ExpressBoard::MetroM4ExpressBoard() : MemoryInterface(), HasOnboardNeoPixel(40, NEO_GRB + NEO_KHZ800) { }
 #endif // defined ADAFRUIT_METRO_M4_EXPRESS || defined ARDUINO_METRO_M4
 

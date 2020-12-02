@@ -6,9 +6,10 @@
 #define I960_PROTOTYPE_SIMULATOR_METROM4EXPRESS_H
 #if defined(ADAFRUIT_METRO_M4_EXPRESS) || defined(ARDUINO_METRO_M4)
 #include "MemoryInterface.h"
-class MetroM4ExpressBoard : public MemoryInterface {
+#include "HasOnboardNeoPixel.h"
+class MetroM4ExpressBoard : public MemoryInterface, public HasOnboardNeoPixel {
 public:
-    using MemoryInterface::MemoryInterface;
+    MetroM4ExpressBoard();
     ~MetroM4ExpressBoard() override = default;
     Integer loadValue(Address address, TreatAsInteger) override;
     Ordinal loadValue(Address address, TreatAsOrdinal) override;

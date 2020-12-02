@@ -9,7 +9,10 @@
 class HasOnboardNeoPixel {
 public:
     HasOnboardNeoPixel(int pinIndex, int flags);
+    void begin();
     auto& get() noexcept { return np; }
+    void setNeoPixelColor(uint8_t r, uint8_t g, uint8_t b, bool update = true) noexcept;
+    void updateNeoPixel() noexcept;
 private:
     Adafruit_NeoPixel np;
 };

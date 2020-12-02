@@ -5,3 +5,21 @@
 #include "HasOnboardNeoPixel.h"
 
 HasOnboardNeoPixel::HasOnboardNeoPixel(int pinIndex, int flags) : np(1, pinIndex, flags) { }
+
+void
+HasOnboardNeoPixel::begin() {
+    np.begin();
+    np.show(); // shut off the neo pixel immediately
+}
+
+void
+HasOnboardNeoPixel::setNeoPixelColor(int r, int g, int b, bool update) noexcept {
+    np.setPixelColor(0, r, g, b);
+    if (update) {
+        np.show();
+    }
+}
+void
+HasOnboardNeoPixel::updateNeoPixel() noexcept {
+    np.show();
+}
