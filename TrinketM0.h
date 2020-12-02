@@ -25,6 +25,8 @@ public:
     void storeValue(Address address, ShortInteger value, TreatAsShortInteger) override;
     void begin() override;
 private:
+    void testFRAMArray();
+private:
     bool _initialized = false;
 };
 using TargetBoard = TrinketM0Board;
