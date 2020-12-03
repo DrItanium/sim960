@@ -4,6 +4,7 @@
 #include <map>
 #include <SD.h>
 #include <SPI.h>
+#include <Adafruit_NeoPixel.h>
 #include "PinSetup.h"
 #include "Core.h"
 
@@ -33,26 +34,32 @@ namespace i960 {
      */
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
+        return 0;
     }
 
     Integer
     Core::loadInteger(Address address) noexcept {
+        return 0;
     }
 
     ByteOrdinal
     Core::loadByteOrdinal(Address address) noexcept {
+        return 0;
     }
 
     ByteInteger
     Core::loadByteInteger(Address address) noexcept {
+        return 0;
     }
 
     ShortOrdinal
     Core::loadShortOrdinal(Address address) noexcept {
+        return 0;
     }
 
     ShortInteger
     Core::loadShortInteger(Address address) noexcept {
+        return 0;
     }
 
     void
@@ -96,7 +103,6 @@ void setup() {
     }
     onboardNeoPixel.begin();
     onboardNeoPixel.show();
-    cpuCore.begin();
 }
 
 void loop() {
