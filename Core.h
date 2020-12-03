@@ -948,7 +948,13 @@ namespace i960
 
         void
         shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+            auto src = extractValue(src2, TreatAsInteger{});
+            auto len = std::abs(extractValue(src1, TreatAsInteger{}));
+            auto result = src >> len;
+            if (src < 0 && result < 0) {
+                ++result;
+            }
+            getRegister(dest).setInteger(result);
         }
         void
         rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
