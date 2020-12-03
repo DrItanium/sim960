@@ -5,83 +5,14 @@
 #include <SD.h>
 #include <SPI.h>
 #include "PinSetup.h"
-#include "MemoryInterface.h"
 #include "Core.h"
-#include "HasOnboardNeoPixel.h"
 
 // Adapt this class to the target microcontroller board
 // Right now I am targeting a grand central m4
-class TargetBoard : public MemoryInterface, public HasOnboardNeoPixel<88> {
-public:
-    TargetBoard() : MemoryInterface(), HasOnboardNeoPixel<88>() { }
-    ~TargetBoard() override = default;
-    Integer loadValue(Address address, TreatAsInteger) override;
-    Ordinal loadValue(Address address, TreatAsOrdinal) override;
-    void storeValue(Address address, Ordinal value, TreatAsOrdinal) override;
-    void storeValue(Address address, Integer value, TreatAsInteger) override;
-    ByteInteger loadValue(Address address, TreatAsByteInteger) override;
-    ByteOrdinal loadValue(Address address, TreatAsByteOrdinal) override;
-    void storeValue(Address address, ByteOrdinal value, TreatAsByteOrdinal) override;
-    void storeValue(Address address, ByteInteger value, TreatAsByteInteger) override;
-    ShortInteger loadValue(Address address, TreatAsShortInteger) override;
-    ShortOrdinal loadValue(Address address, TreatAsShortOrdinal) override;
-    void storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal) override;
-    void storeValue(Address address, ShortInteger value, TreatAsShortInteger) override;
-    void begin() override;
-private:
-    bool _initialized = false;
-};
-Integer
-TargetBoard::loadValue(Address address, TreatAsInteger)  {
-    return 0;
-}
-Ordinal
-TargetBoard::loadValue(Address address, TreatAsOrdinal)  {
-    return 0;
-}
-void
-TargetBoard::storeValue(Address address, Ordinal value, TreatAsOrdinal) {
 
-}
-void
-TargetBoard::storeValue(Address address, Integer value, TreatAsInteger)  {
+Adafruit_NeoPixel onboardNeoPixel(1, 88, NEO_GRB + NEO_KHZ800);
 
-}
-ByteInteger
-TargetBoard::loadValue(Address address, TreatAsByteInteger)  {
-    return 0;
-}
-ByteOrdinal
-TargetBoard::loadValue(Address address, TreatAsByteOrdinal)  {
-    return 0;
-}
-void
-TargetBoard::storeValue(Address address, ByteOrdinal value, TreatAsByteOrdinal)  {
-
-}
-void
-TargetBoard::storeValue(Address address, ByteInteger value, TreatAsByteInteger)  {
-
-}
-ShortInteger
-TargetBoard::loadValue(Address address, TreatAsShortInteger)  {
-    return 0;
-}
-ShortOrdinal
-TargetBoard::loadValue(Address address, TreatAsShortOrdinal)  {
-    return 0;
-}
-void
-TargetBoard::storeValue(Address address, ShortOrdinal value, TreatAsShortOrdinal)  {
-
-}
-void
-TargetBoard::storeValue(Address address, ShortInteger value, TreatAsShortInteger)  {
-
-}
-
-void
-TargetBoard::begin() {
+namespace i960 {
     /*
      * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
      * available memory. On board devices are mapped into the implicit onboard device area of [0xFF00'0000,0xFFFF'FFFF]. The IO device bus
@@ -100,26 +31,71 @@ TargetBoard::begin() {
      * - Neopixels
      * - etc
      */
-    if (!_initialized) {
-        _initialized = true;
-        Serial.begin(9600);
-        while (!Serial);
-        Serial.println("i960 Simulator Starting up");
-        pinMode(LED_BUILTIN, OUTPUT);
-        Serial.print("Starting up SPI...");
-        SPI.begin();
-        Serial.println("Done");
-        if (!SD.begin(SDCARD_SS_PIN)) {
-            Serial.println("no sd card installed");
-        } else {
-            Serial.println("SD Card found");
-        }
-        HasOnboardNeoPixel<88>::begin();
+    Ordinal
+    Core::loadOrdinal(Address address) noexcept {
+    }
+
+    Integer
+    Core::loadInteger(Address address) noexcept {
+    }
+
+    ByteOrdinal
+    Core::loadByteOrdinal(Address address) noexcept {
+    }
+
+    ByteInteger
+    Core::loadByteInteger(Address address) noexcept {
+    }
+
+    ShortOrdinal
+    Core::loadShortOrdinal(Address address) noexcept {
+    }
+
+    ShortInteger
+    Core::loadShortInteger(Address address) noexcept {
+    }
+
+    void
+    Core::storeOrdinal(Address address, Ordinal value) noexcept {
+    }
+
+    void
+    Core::storeByteInteger(Address address, ByteInteger value) {
+    }
+
+    void
+    Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
+    }
+
+    void
+    Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
+    }
+
+    void
+    Core::storeShortInteger(Address address, ShortInteger value) noexcept {
+    }
+
+    void
+    Core::storeInteger(Address address, Integer value) noexcept {
     }
 }
-i960::Core<TargetBoard> cpuCore;
+i960::Core cpuCore;
 /// @todo implement the register frames "in hardware"
 void setup() {
+    Serial.begin(9600);
+    while (!Serial);
+    Serial.println("i960 Simulator Starting up");
+    pinMode(LED_BUILTIN, OUTPUT);
+    Serial.print("Starting up SPI...");
+    SPI.begin();
+    Serial.println("Done");
+    if (!SD.begin(SDCARD_SS_PIN)) {
+        Serial.println("no sd card installed");
+    } else {
+        Serial.println("SD Card found");
+    }
+    onboardNeoPixel.begin();
+    onboardNeoPixel.show();
     cpuCore.begin();
 }
 

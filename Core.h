@@ -214,7 +214,6 @@ namespace i960
             } memb;
         };
     };
-    template<typename TargetBoard>
     class Core {
     private:
         static constexpr Ordinal computeSingleBitShiftMask(Ordinal value) noexcept {
@@ -243,7 +242,6 @@ namespace i960
     public:
         using RegisterFile = std::array<Register, 16>;
     public:
-        void begin() { theBoard.begin(); }
         void cycle() {
             executeInstruction(decodeInstruction(fetchInstruction()));
             memoryAccess();
@@ -279,6 +277,21 @@ namespace i960
             }
             return loadOrdinal(ipLoc);
         }
+    private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
+        Ordinal loadOrdinal(Address address) noexcept;
+        void storeOrdinal (Address address, Ordinal value) noexcept;
+        Integer loadInteger(Address address) noexcept;
+        void storeInteger (Address address, Integer value) noexcept;
+
+        ByteOrdinal loadByteOrdinal(Address address) noexcept;
+        void storeByteOrdinal (Address address, ByteOrdinal value) noexcept;
+        ByteInteger loadByteInteger(Address address) noexcept;
+        void storeByteInteger (Address address, ByteInteger value);
+
+        ShortOrdinal loadShortOrdinal(Address address) noexcept;
+        void storeShortOrdinal (Address address, ShortOrdinal value) noexcept;
+        ShortInteger loadShortInteger(Address address) noexcept;
+        void storeShortInteger (Address address, ShortInteger value) noexcept;
     private:
         // classic risc pipeline stages
         DecodedInstruction
@@ -551,21 +564,6 @@ namespace i960
         setCarryFlag(bool value) noexcept {
             ac.setCarryFlag(value);
         }
-    private: // memory controller interface routines for abstraction purposes
-        Ordinal loadOrdinal(Address address) noexcept { return theBoard.loadValue(address, TreatAsOrdinal{}); }
-        void storeOrdinal (Address address, Ordinal value) noexcept { theBoard.storeValue(address, value, TreatAsOrdinal{}); }
-        Integer loadInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsInteger{}); }
-        void storeInteger (Address address, Integer value) noexcept { theBoard.storeValue(address, value, TreatAsInteger{}); }
-
-        ByteOrdinal loadByteOrdinal(Address address) noexcept { return theBoard.loadValue(address, TreatAsByteOrdinal{}); }
-        void storeByteOrdinal (Address address, ByteOrdinal value) noexcept { theBoard.storeValue(address, value, TreatAsByteOrdinal{}); }
-        ByteInteger loadByteInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsByteInteger{}); }
-        void storeByteInteger (Address address, ByteInteger value) noexcept { theBoard.storeValue(address, value, TreatAsByteInteger{}); }
-
-        ShortOrdinal loadShortOrdinal(Address address) noexcept { return theBoard.loadValue(address, TreatAsShortOrdinal{}); }
-        void storeShortOrdinal (Address address, ShortOrdinal value) noexcept { theBoard.storeValue(address, value, TreatAsShortOrdinal{}); }
-        ShortInteger loadShortInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsShortInteger{}); }
-        void storeShortInteger (Address address, ShortInteger value) noexcept { theBoard.storeValue(address, value, TreatAsShortInteger{}); }
     private: // data movement operations
         void
         lda(Ordinal mem, RegisterIndex dest) {
@@ -1484,7 +1482,6 @@ namespace i960
             dst.setByteOrdinal((s2.getByteOrdinal() & 0xF0) | (outcome & 0x0F));
         }
     private:
-        TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
         Register ip; // always start at address zero
         ArithmeticControls ac;
