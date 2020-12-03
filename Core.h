@@ -943,13 +943,18 @@ namespace i960
         /// @todo correctly implement shri and shrdi
         void
         shri(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+            auto src = extractValue(src2, TreatAsInteger{});
+            auto len = abs(extractValue(src1, TreatAsInteger{}));
+            if (len > 32)  {
+                len = 32;
+            }
+            getRegister(dest).setInteger(src >> len);
         }
 
         void
         shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
             auto src = extractValue(src2, TreatAsInteger{});
-            auto len = std::abs(extractValue(src1, TreatAsInteger{}));
+            auto len = abs(extractValue(src1, TreatAsInteger{}));
             auto result = src >> len;
             if (src < 0 && result < 0) {
                 ++result;
