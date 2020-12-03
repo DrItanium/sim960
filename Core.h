@@ -242,6 +242,10 @@ namespace i960
     public:
         using RegisterFile = std::array<Register, 16>;
     public:
+        explicit Core(unsigned int salign = 1) : _salign(salign) { }
+        constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
+            return (_salign * 16) - 1;
+        }
         void cycle() {
             executeInstruction(decodeInstruction(fetchInstruction()));
             memoryAccess();
@@ -1401,16 +1405,63 @@ namespace i960
         testge(RegisterIndex dest) {
             getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
         }
+    private:
+        static constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
+        static constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
+        static constexpr RegisterIndex RIP = static_cast<RegisterIndex>(0b00010);
+        static constexpr RegisterIndex FP = static_cast<RegisterIndex>(0b11111);
+        Ordinal
+        getStackPointerAddress() const noexcept {
+            return getRegister(SP).getOrdinal();
+        }
+        void
+        setRIP(const Register& ip) noexcept {
+            getRegister(RIP).setOrdinal(ip.getOrdinal());
+        }
+        Ordinal
+        getFramePointerAddress() const noexcept {
+            return getRegister(FP).getOrdinal();
+        }
+        void
+        setPFP(Ordinal value) noexcept {
+            getRegister(PFP).setOrdinal(value);
+        }
+        void
+        setFramePointer(Ordinal value) noexcept {
+            getRegister(FP).setOrdinal(value);
+        }
+        void
+        setStackPointer(Ordinal value) noexcept {
+            getRegister(SP).setOrdinal(value);
+        }
+        void
+        allocateNewLocalRegisterSet() {
+            /// @todo implement at some point
+        }
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
-        void call(Displacement22 targ) {
-
+        void
+        call(Displacement22 targ) {
+            auto newAddress = targ.getValue();
+            // the and operation clears out the least significant N bits of this new address
+            // make a new stack frame
+            auto tmp = (getStackPointerAddress() + computeAlignmentBoundaryConstant()) &
+                    (~computeAlignmentBoundaryConstant());
+            setRIP(ip);
+            saveLocals();
+            allocateNewLocalRegisterSet();
+            auto addr = ip.getInteger();
+            ip.setInteger(addr + newAddress);
+            setPFP(getFramePointerAddress());
+            setFramePointer(tmp);
+            setStackPointer(tmp + 64);
         }
         void callx(Ordinal targ) {
 
         }
         void ret() {
-            /// @todo implement
+            syncf();
+            /// @todo continue implementing
         }
         /// @todo implement faults as exceptions
     private: // processor management
@@ -1486,6 +1537,7 @@ namespace i960
         Register ip; // always start at address zero
         ArithmeticControls ac;
         bool _unalignedFaultEnabled = false;
+        unsigned int _salign = 1;
     };
 
 }

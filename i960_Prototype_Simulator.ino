@@ -1,12 +1,15 @@
+// we are defining a fake i960Zx series processor, this processor does not exist but will be what I'm calling my simulated design
+// It has an SALIGN value of 4 like the i960Kx,i960Sx, and i960MC processors
+
 // Adapt this class to the target microcontroller board
 // Right now I am targeting a grand central m4
 #include <Adafruit_NeoPixel.h>
-#include <SdFat.h>
-#include <Adafruit_SPIFlash.h>
+#include <SPI.h>
 #include <SD.h>
 #include "PinSetup.h"
 #include "Core.h"
-// the onboard neo pixel :D
+
+constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, 88, NEO_GRB + NEO_KHZ800);
 //Adafruit_FlashTransport_QSPI flashTransport;
 //Adafruit_SPIFlash flash(&flashTransport);
@@ -84,7 +87,7 @@ namespace i960 {
     Core::storeInteger(Address address, Integer value) noexcept {
     }
 }
-i960::Core cpuCore;
+i960::Core cpuCore(i960Zx_SALIGN);
 /// @todo implement the register frames "in hardware"
 void setup() {
     Serial.begin(9600);
@@ -96,6 +99,7 @@ void setup() {
     Serial.print("Starting up SPI...");
     SPI.begin();
     Serial.println("Done");
+#if 0
     Serial.print("Starting up onboard QSPI Flash...");
     flash.begin();
     Serial.println("Done");
@@ -105,7 +109,6 @@ void setup() {
     Serial.print("Flash size: ");
     Serial.print(flash.size() / 1024);
     Serial.println(" KB");
-#if 0
     Serial.print("Initializing fileysstem on external flash...");
     if (!fatfs.begin(&flash)) {
         Serial.println("Error: filesystem does not exist! Please try SdFat_format example to make one!");
