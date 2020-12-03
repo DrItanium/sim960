@@ -201,7 +201,7 @@ namespace i960
          * @return
          */
         Ordinal
-        Core::getWordAtIP(bool advance = false) noexcept {
+        getWordAtIP(bool advance = false) noexcept {
             auto ipLoc = ip.getOrdinal();
             if (advance) {
                 ip.setOrdinal(ipLoc + 4);
@@ -763,7 +763,7 @@ namespace i960
             /// @todo implement fault detection
         }
         void
-        Core::subc(RegLit src1, RegLit src2, RegisterIndex dest) {
+        subc(RegLit src1, RegLit src2, RegisterIndex dest) {
             auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
             auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
             auto c = getCarryFlag() ? 1 : 0;
@@ -802,17 +802,17 @@ namespace i960
             /// @todo implement fault detection
         }
         void
-        Core::eshro(RegLit src1, RegLit src2, RegisterIndex dest) {
+        eshro(RegLit src1, RegLit src2, RegisterIndex dest) {
 
         }
 
         void
-        Core::ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
+        ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
 
         }
 
         void
-        Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
+        emul(RegLit src1, RegLit src2, RegisterIndex dest) {
 
         }
         void
@@ -871,12 +871,12 @@ namespace i960
         }
         /// @todo correctly implement shri and shrdi
         void
-        Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
+        shri(RegLit src1, RegLit src2, RegisterIndex dest) {
 
         }
 
         void
-        Core::shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
 
         }
         void
@@ -939,7 +939,7 @@ namespace i960
         }
     private: // bit and bit-field operations
         void
-        Core::setbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        setbit(RegLit src1, RegLit src2, RegisterIndex dest) {
             auto bitpos = extractValue(src1, TreatAsOrdinal{}) ;
             auto src = extractValue(src2, TreatAsOrdinal{});
             getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
@@ -952,14 +952,14 @@ namespace i960
             getRegister(dest).setOrdinal(src & bitposModified);
         }
         void
-        Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
             auto bitpos = extractValue(src1, TreatAsOrdinal{});
             auto src = extractValue(src2, TreatAsOrdinal{});
             getRegister(dest).setOrdinal(src ^ (1 << (bitpos & 0b11111)));
         }
 
         void
-        Core::alterbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        alterbit(RegLit src1, RegLit src2, RegisterIndex dest) {
             auto bitpos = extractValue(src1, TreatAsOrdinal{});
             auto src = extractValue(src2, TreatAsOrdinal{});
             if ((ac.getConditionCode() & 0b010) == 0) {
@@ -969,12 +969,12 @@ namespace i960
             }
         }
         void
-        Core::chkbit(RegLit src1, RegLit src2) {
+        chkbit(RegLit src1, RegLit src2) {
             ac.setConditionCode(((extractValue(src2, TreatAsOrdinal{})& computeSingleBitShiftMask(extractValue(src1, TreatAsOrdinal{}))) == 0) ? 0b000 : 0b010);
         }
         static constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
         void
-        Core::spanbit(RegLit src1, RegisterIndex dest) {
+        spanbit(RegLit src1, RegisterIndex dest) {
             /**
              * Find the most significant clear bit
              */
@@ -992,7 +992,7 @@ namespace i960
             getRegister(dest).setOrdinal(result);
         }
         void
-        Core::scanbit(RegLit src, RegisterIndex dest) {
+        scanbit(RegLit src, RegisterIndex dest) {
             // find the most significant set bit
             auto result = largestOrdinal;
             ac.clearConditionCode();
@@ -1039,7 +1039,7 @@ namespace i960
         }
     private: // compare and increment or decrement
         void
-        Core::cmpo(RegLit src1, RegLit src2) {
+        cmpo(RegLit src1, RegLit src2) {
             auto s1 = extractValue(src1, TreatAsOrdinal{});
             auto s2 = extractValue(src2, TreatAsOrdinal{});
             if (s1 < s2) {
@@ -1051,7 +1051,7 @@ namespace i960
             }
         }
         void
-        Core::cmpi(RegLit src1, RegLit src2) {
+        cmpi(RegLit src1, RegLit src2) {
             auto s1 = extractValue(src1, TreatAsInteger{});
             auto s2 = extractValue(src2, TreatAsInteger{});
             if (s1 < s2) {
@@ -1063,7 +1063,7 @@ namespace i960
             }
         }
         void
-        Core::concmpo(RegLit src1, RegLit src2) {
+        concmpo(RegLit src1, RegLit src2) {
             // don't care what the least significant two bits are of the cond code so just mask them out
             if ((ac.getConditionCode() & 0b100) == 0) {
                 auto s1 = extractValue(src1, TreatAsOrdinal{});
@@ -1072,7 +1072,7 @@ namespace i960
             }
         }
         void
-        Core::concmpi(RegLit src1, RegLit src2) {
+        concmpi(RegLit src1, RegLit src2) {
             // don't care what the least significant two bits are of the cond code so just mask them out
             if ((ac.getConditionCode() & 0b100) == 0) {
                 auto s1 = extractValue(src1, TreatAsInteger{});
@@ -1082,25 +1082,25 @@ namespace i960
 
         }
         void
-        Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
+        cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
             cmpo(src1, src2);
             auto s2 = extractValue(src2, TreatAsOrdinal{});
             getRegister(dest).setOrdinal(s2 + 1);
         }
         void
-        Core::cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
+        cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
             cmpi(src1, src2);
             auto s2 = extractValue(src2, TreatAsInteger{});
             getRegister(dest).setInteger(s2 + 1); // manual states that this instruction suppresses overflow
         }
         void
-        Core::cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
+        cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
             cmpo(src1, src2);
             auto s2 = extractValue(src2, TreatAsOrdinal{});
             getRegister(dest).setOrdinal(s2 - 1);
         }
         void
-        Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
+        cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
             cmpi(src1, src2);
             auto s2 = extractValue(src2, TreatAsInteger{});
             getRegister(dest).setInteger(s2 - 1); // manual states that this instruction suppresses overflow
@@ -1180,72 +1180,72 @@ namespace i960
     private: // compare and branch
         /// @todo figure out correct signatures
         void
-        Core::cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpi(src1, src2);
             bg(Displacement22{targ});
         }
 
         void
-        Core::cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpi(src1, src2);
             ble(Displacement22{targ});
 
         }
 
         void
-        Core::cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpi(src1, src2);
             be(Displacement22{targ});
 
         }
 
         void
-        Core::cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpi(src1, src2);
             bne(Displacement22{targ});
         }
 
         void
-        Core::cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpi(src1, src2);
             bl(Displacement22{targ});
         }
         void
-        Core::cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpi(src1, src2);
             bge(Displacement22{targ});
         }
         void
-        Core::cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpo(src1, src2);
             bg(Displacement22{targ});
         }
 
         void
-        Core::cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpo(src1, src2);
             ble(Displacement22{targ});
         }
 
         void
-        Core::cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpo(src1, src2);
             be(Displacement22{targ});
         }
 
         void
-        Core::cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpo(src1, src2);
             bne(Displacement22{targ});
         }
 
         void
-        Core::cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpo(src1, src2);
             bl(Displacement22{targ});
         }
         void
-        Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
             cmpo(src1, src2);
             bge(Displacement22{targ});
         }
@@ -1278,12 +1278,12 @@ namespace i960
             }
         }
         void
-        Core::cmpibo(RegLit src1, RegLit src2, ShortInteger targ) {
+        cmpibo(RegLit src1, RegLit src2, ShortInteger targ) {
             cmpi(src1, src2);
             bo(Displacement22{targ});
         }
         void
-        Core::cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
+        cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
             cmpi(src1, src2);
             bno(Displacement22{targ});
         }
@@ -1360,7 +1360,7 @@ namespace i960
             getRegister(dest).setOrdinal(tmp);
         }
         void
-        Core::syncf() {
+        syncf() {
             if (ac.getNoImpreciseFaults()) {
                 return;
             }
@@ -1368,11 +1368,11 @@ namespace i960
         }
     private: // Numerics Architecture addons
         void
-        Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+        dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
             /// @todo implement... such a baffling design...BCD...
         }
         void
-        Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
+        dmovt(RegisterIndex src1, RegisterIndex dest) {
             auto srcValue = extractValue(src1, TreatAsOrdinal { });
             getRegister(dest).setOrdinal(srcValue);
             auto lowest8 = static_cast<ByteOrdinal>(srcValue);
