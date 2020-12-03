@@ -6,7 +6,6 @@
 #include <algorithm>
 
 #include "CoreTypes.h"
-#include "TargetPlatform.h"
 #include "Register.h"
 #include "DependentFalse.h"
 #include "ArithmeticControls.h"
