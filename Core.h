@@ -3,6 +3,7 @@
 #include <array>
 #include <tuple>
 #include <variant>
+#include <algorithm>
 
 #include "CoreTypes.h"
 #include "TargetPlatform.h"
@@ -143,20 +144,56 @@ namespace i960
             } memb;
         };
     };
-    using RegisterFile = std::array<Register, 16>;
+    template<typename TargetBoard>
     class Core {
+    private:
+        static constexpr Ordinal computeSingleBitShiftMask(Ordinal value) noexcept {
+            return 1 << (value & 0b11111);
+        }
+
+        static constexpr Ordinal rotateOperation(Ordinal src, Ordinal length) noexcept {
+            return (src << length) | (src >> ((-length) & 31u));
+        }
     private:
         using DecodedInstruction = std::variant<RegFormatInstruction,
                 MEMFormatInstruction,
                 COBRInstruction,
                 CTRLInstruction>;
-        static DecodedInstruction decode(Ordinal value) noexcept;
+        static DecodedInstruction decode(Ordinal value) noexcept {
+            if (auto opcode = static_cast<ByteOrdinal>(value >> 24); opcode < 0x20) {
+                return CTRLInstruction(value);
+            } else if (opcode >= 0x20 && opcode < 0x58) {
+                return COBRInstruction(value);
+            } else if (opcode >= 0x58 && opcode < 0x80) {
+                return RegFormatInstruction(value);
+            } else {
+                return MEMFormatInstruction(value);
+            }
+        }
     public:
-        void begin();
-        void cycle();
-        Register& getRegister(int index) noexcept;
+        using RegisterFile = std::array<Register, 16>;
+    public:
+        void begin() { theBoard.begin(); }
+        void cycle() {
+            executeInstruction(decodeInstruction(fetchInstruction()));
+            memoryAccess();
+            writeback();
+        }
+        Register& getRegister(int index) noexcept {
+            if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
+                return locals[offset];
+            } else {
+                return globals[offset];
+            }
+        }
         inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
-        const Register& getRegister(int index) const noexcept;
+        const Register& getRegister(int index) const noexcept {
+            if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
+                return locals[offset];
+            } else {
+                return globals[offset];
+            }
+        }
         inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
         const Register& getIP() const noexcept { return ip; }
         /**
@@ -164,23 +201,278 @@ namespace i960
          * @param advance
          * @return
          */
-        Ordinal getWordAtIP(bool advance = false) noexcept;
+        Ordinal
+        Core::getWordAtIP(bool advance = false) noexcept {
+            auto ipLoc = ip.getOrdinal();
+            if (advance) {
+                ip.setOrdinal(ipLoc + 4);
+            }
+            return loadOrdinal(ipLoc);
+        }
     private:
         // classic risc pipeline stages
-        /// @todo flesh out
-        Ordinal fetchInstruction();
-        DecodedInstruction decodeInstruction(Ordinal value);
-        void executeInstruction(const DecodedInstruction& inst);
-        void memoryAccess();
-        void writeback();
+        DecodedInstruction
+        decodeInstruction(Ordinal currentInstruction) {
+            return decode(currentInstruction);
+        }
+        void
+        executeInstruction(const DecodedInstruction& inst) {
+            std::visit([this](auto&& theInst) { execute(theInst); }, inst);
+        }
+        Ordinal
+        fetchInstruction() {
+            return getWordAtIP(true);
+        }
+        void memoryAccess() {
+
+        }
+        void writeback() {
+
+        }
     private: // execution routines
-        void execute(const RegFormatInstruction& inst);
-        void execute(const COBRInstruction& inst);
-        void execute(const CTRLInstruction& inst);
-        void execute(const MEMFormatInstruction& inst);
+        void
+        execute(const RegFormatInstruction& inst) noexcept {
+            switch(inst.getOpcode()) {
+                case 0x580: notbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x581: logicalAnd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x582: andnot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x583: setbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x584: notand(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x586: logicalXor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x587: logicalOr(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x588: logicalNor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x589: logicalXnor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x58A: logicalNot(inst.getSrc1(), inst.getDestination()); break;
+                case 0x58B: ornot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x58C: clrbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x58D: notor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x58E: logicalNand(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x58F: alterbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x590: addo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x591: addi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x592: subo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x593: subi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x594: cmpob(inst.getSrc1(), inst.getSrc2()); break;
+                    //case 0x595: cmpib(inst.getSrc1(), inst.getSrc2()); break;
+                    //case 0x596: cmpos(inst.getSrc1(), inst.getSrc2()); break;
+                    //case 0x597: cmpis(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x598: shro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x59A: shrdi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x59B: shri(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x59C: shlo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x59D: rotate(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x59E: shli(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x5A0: cmpo(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x5A1: cmpi(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x5A2: concmpo(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x5A3: concmpi(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x5A4: cmpinco(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x5A5: cmpinci(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x5A6: cmpdeco(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x5A7: cmpdeci(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x5AC: scanbyte(inst.getSrc1(), inst.getSrc2()); break;
+                    //case 0x5AD: bswap(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x5AE: chkbit(inst.getSrc1(), inst.getSrc2()); break;
+                case 0x5B0: addc(inst.getSrc1(), inst.getSrc2(),inst.getDestination()); break;
+                case 0x5B2: subc(inst.getSrc1(), inst.getSrc2(),inst.getDestination()); break;
+                    // case 0x5B4: intdis(); break;
+                    // case 0x5B5: inten(); break;
+                case 0x5CC: mov(inst.getSrc1(), inst.getDestination()); break;
+                case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x5DC: movl(inst.getSrc1(), inst.getDestination()); break;
+                case 0x5EC: movt(inst.getSrc1(), inst.getDestination()); break;
+                case 0x5FC: movq(inst.getSrc1(), inst.getDestination()); break;
+                    // case 0x610: atmod(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    // case 0x612: atadd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x640: spanbit(inst.getSrc1(), inst.getDestination()); break;
+                case 0x641: scanbit(inst.getSrc1(), inst.getDestination()); break;
+                case 0x642:
+                    daddc(std::get<RegisterIndex>(inst.getSrc1()),
+                          std::get<RegisterIndex>(inst.getSrc2()),
+                          inst.getDestination());
+                    break;
+                case 0x643:
+                    dsubc(std::get<RegisterIndex>(inst.getSrc1()),
+                          std::get<RegisterIndex>(inst.getSrc2()),
+                          inst.getDestination());
+                    break;
+                case 0x644:
+                    dmovt(std::get<RegisterIndex>(inst.getSrc1()),
+                          inst.getDestination());
+                    break;
+
+                    /// @todo inspect this one, the arguments are backwards
+                case 0x645: // modac
+                    // this one is a little strange and has to be unpacked differently
+                    modac(inst);
+                    break;
+                case 0x650: modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x651: extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x654: modtc(inst); break;
+                    //case 0x655: modpc(inst); break;
+                    //case 0x658: intctl(inst.getSrc1(), inst.getDestination()); break;
+                    //case 0x659: sysctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x65B: icctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x65C: dcctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x660: calls(inst.getSrc1()); break;
+                    //case 0x66B: mark(); break;
+                    //case 0x66C: fmark(); break;
+                case 0x66D: flushreg(); break;
+                case 0x66F: syncf(); break;
+                case 0x670: emul(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x671: ediv(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x701: mulo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x708: remo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x70B: divo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x741: muli(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x748: remi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x749: modi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                case 0x74B: divi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+
+                    //case 0x780: addono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x781: addino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x782: subono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x783: subino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x784: selno(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x790: addog(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x791: addig(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x792: subog(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x793: subig(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x794: selg(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7A0: addoe(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7A1: addie(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7A2: suboe(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7A3: subie(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7A4: sele(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7B0: addoge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7B1: addige(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7B2: suboge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7B3: subige(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7B4: selge(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7C0: addol(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7C1: addil(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7C2: subol(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7C3: subil(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7C4: sell(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7D0: addone(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7D1: addine(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7D2: subone(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7D3: subine(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7D4: selne(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7E0: addole(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7E1: addile(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7E2: subole(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7E3: subile(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7E4: selle(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7F0: addoo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7F1: addio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7F2: suboo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                    //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                default:
+                    /// @todo raise an error at this point
+                    break;
+            }
+        }
+        void
+        execute(const MEMFormatInstruction &inst) noexcept {
+            auto address = inst.computeAddress(*this);
+            switch (inst.getOpcode()) {
+                case 0x800: ldob(address, inst.getSrcDest()); break;
+                case 0x820: stob(inst.getSrcDest(), address); break;
+                case 0x840: bx(address); break;
+                case 0x850: balx(address, inst.getSrcDest()); break;
+                case 0x860: callx(address); break;
+                case 0x880: ldos(address, inst.getSrcDest()); break;
+                case 0x8A0: stos(inst.getSrcDest(), address); break;
+                case 0x8C0: lda(address, inst.getSrcDest()); break;
+                case 0x900: ld(address, inst.getSrcDest()); break;
+                case 0x920: st(inst.getSrcDest(), address); break;
+                case 0x980: ldl(address, inst.getSrcDest()); break;
+                case 0xA00: ldt(address, inst.getSrcDest()); break;
+                case 0xA20: stt(inst.getSrcDest(), address); break;
+                case 0xB00: ldq(address, inst.getSrcDest()); break;
+                case 0xB20: stq(inst.getSrcDest(), address); break;
+                case 0xC00: ldib(address, inst.getSrcDest()); break;
+                case 0xC20: stib(inst.getSrcDest(), address); break;
+                case 0xC80: ldis(address, inst.getSrcDest()); break;
+                case 0xCA0: stis(inst.getSrcDest(), address); break;
+                default:
+                    /// @todo raise an error at this point
+                    break;
+            }
+        }
+        void
+        execute(const COBRInstruction &inst) noexcept {
+            switch (inst.getOpcode()) {
+                case 0x300: bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x370: bbs(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x3A0: cmpibe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x3D0: cmpibne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x3C0: cmpibl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x3E0: cmpible(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x390: cmpibg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x3B0: cmpibge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x3F0: cmpibo(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x380: cmpibno(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x320: cmpobe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x350: cmpobne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x340: cmpobl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x360: cmpoble(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x310: cmpobg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x330: cmpobge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+                case 0x220: teste(inst.getSrc1()); break;
+                case 0x250: testne(inst.getSrc1()); break;
+                case 0x240: testl(inst.getSrc1()); break;
+                case 0x260: testle(inst.getSrc1()); break;
+                case 0x210: testg(inst.getSrc1()); break;
+                case 0x230: testge(inst.getSrc1()); break;
+                case 0x270: testo(inst.getSrc1()); break;
+                case 0x200: testno(inst.getSrc1()); break;
+                default:
+                    /// @todo raise an error at this point
+                    break;
+            }
+        }
+        void
+        execute(const CTRLInstruction &inst) noexcept {
+            switch (inst.getOpcode()) {
+                case 0x080: b(inst.getDisplacement()); break;
+                case 0x090: call(inst.getDisplacement()); break;
+                case 0x0A0: ret(); break;
+                case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
+                case 0x100: bno(Displacement22{inst.getDisplacement()}); break;
+                case 0x110: bg(Displacement22{inst.getDisplacement()}); break;
+                case 0x120: be(Displacement22{inst.getDisplacement()}); break;
+                case 0x130: bge(Displacement22{inst.getDisplacement()}); break;
+                case 0x140: bl(Displacement22{inst.getDisplacement()}); break;
+                case 0x150: bne(Displacement22{inst.getDisplacement()}); break;
+                case 0x160: ble(Displacement22{inst.getDisplacement()}); break;
+                case 0x170: bo(Displacement22{inst.getDisplacement()}); break;
+                    //case 0x180: faultno(); break;
+                    //case 0x190: faultg(); break;
+                    //case 0x1A0: faulte(); break;
+                    //case 0x1B0: faultge(); break;
+                    //case 0x1C0: faultl(); break;
+                    //case 0x1D0: faultne(); break;
+                    //case 0x1E0: faultle(); break;
+                    //case 0x1F0: faulto(); break;
+                default:
+                    /// @todo raise illegal opcode fault
+                    break;
+            }
+        }
     private: // common internal functions
-        void saveLocals() noexcept;
-        void restoreLocals() noexcept;
+        void saveLocals() noexcept
+        {
+            // okay, we have to save all of the registers to the stack or the on board
+            // register cache (however, I'm not implementing that yet)
+        }
+        void restoreLocals() noexcept
+        {
+            // restore the local register frame, generally done when you return from a
+            // previous function
+        }
         bool getCarryFlag() const noexcept;
         void setCarryFlag(bool value) noexcept;
     private: // memory controller interface routines for abstraction purposes
@@ -199,32 +491,190 @@ namespace i960
         ShortInteger loadShortInteger(Address address) noexcept { return theBoard.loadValue(address, TreatAsShortInteger{}); }
         void storeShortInteger (Address address, ShortInteger value) noexcept { theBoard.storeValue(address, value, TreatAsShortInteger{}); }
     private: // data movement operations
-        // mem reg {
-        void ld(Ordinal mem, RegisterIndex dest);
-        void ldob(Ordinal mem, RegisterIndex dest);
-        void ldos(Ordinal mem, RegisterIndex dest);
-        void ldib(Ordinal mem, RegisterIndex dest);
-        void ldis(Ordinal mem, RegisterIndex dest);
-        void ldl(Ordinal mem, RegisterIndex dest);
-        void ldt(Ordinal mem, RegisterIndex dest);
-        void ldq(Ordinal mem, RegisterIndex dest);
-        void lda(Ordinal mem, RegisterIndex dest); // efa is another accepted value
+        void
+        lda(Ordinal mem, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(mem);
+        }
+        void
+        ld(Ordinal address, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(loadOrdinal(address));
+        }
+        void
+        ldob(Ordinal mem, RegisterIndex dest) {
+            getRegister(dest).setByteOrdinal(loadByteOrdinal(mem));
+        }
 
-        void st(RegisterIndex src, Ordinal mem);
-        void stob(RegisterIndex src, Ordinal mem);
-        void stos(RegisterIndex src, Ordinal mem);
-        void stib(RegisterIndex src, Ordinal mem);
-        void stis(RegisterIndex src, Ordinal mem);
-        void stl(RegisterIndex src, Ordinal mem);
-        void stt(RegisterIndex src, Ordinal mem);
-        void stq(RegisterIndex src, Ordinal mem);
+        void
+        ldos(Ordinal mem, RegisterIndex dest) {
+            getRegister(dest).setShortOrdinal(loadShortOrdinal(mem));
+        }
 
-        // }
+        void
+        ldib(Ordinal mem, RegisterIndex dest) {
+            getRegister(dest).setByteInteger(loadByteInteger(mem));
+        }
 
-        void mov(RegLit src, RegisterIndex dest);
-        void movl(RegLit src, RegisterIndex dest);
-        void movt(RegLit src, RegisterIndex dest);
-        void movq(RegLit src, RegisterIndex dest);
+        void
+        ldis(Ordinal mem, RegisterIndex dest) {
+            getRegister(dest).setShortInteger(loadShortInteger(mem));
+        }
+
+        void
+        st(RegisterIndex src, Ordinal dest) {
+            storeOrdinal(dest, getRegister(src).getOrdinal());
+        }
+
+        void
+        stob(RegisterIndex src, Ordinal dest) {
+            storeByteOrdinal(dest, getRegister(src).getByteOrdinal());
+        }
+
+        void
+        stib(RegisterIndex src, Ordinal dest) {
+            storeByteInteger(dest, getRegister(src).getByteInteger());
+        }
+
+        void
+        stis(RegisterIndex src, Ordinal dest) {
+            storeShortInteger(dest, getRegister(src).getShortInteger());
+        }
+
+        void
+        stos(RegisterIndex src, Ordinal dest) {
+            storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
+        }
+
+        void
+        stl(RegisterIndex src, Ordinal address) {
+            if (!divisibleByTwo(src)) {
+                /// @todo raise a operation.invalid_operand fault
+            } else {
+                storeOrdinal(address, getRegister(src).getOrdinal());
+                storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+                if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
+                    /// @todo generate an OPERATION.UNALIGNED fault
+                }
+            }
+        }
+        void
+        stt(RegisterIndex src, Ordinal address) {
+            if (!divisibleByFour(src)) {
+                /// @todo raise a operation.invalid_operand fault
+            } else {
+                storeOrdinal(address, getRegister(src).getOrdinal());
+                storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+                storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+                if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                    /// @todo generate an OPERATION.UNALIGNED_FAULT
+                }
+            }
+        }
+
+        void
+        stq(RegisterIndex src, Ordinal address) {
+            if (!divisibleByFour(src)) {
+                /// @todo raise a operation.invalid_operand fault
+            } else {
+                storeOrdinal(address, getRegister(src).getOrdinal());
+                storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+                storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+                storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+                if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                    /// @todo generate an OPERATION.UNALIGNED_FAULT
+                }
+            }
+        }
+
+        void
+        ldl(Ordinal mem, RegisterIndex dest) {
+            if(!divisibleByTwo(dest)) {
+                /// @todo raise invalid_operand fault
+                // the Hx docs state that dest is modified
+                getRegister(dest).setOrdinal(-1);
+            } else {
+                getRegister(dest).setOrdinal(loadOrdinal(mem));
+                getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+                if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
+                    /// @todo generate an OPERATION.UNALIGNED_FAULT
+                }
+            }
+        }
+        void
+        ldt(Ordinal mem, RegisterIndex dest) {
+            if(!divisibleByFour(dest)) {
+                /// @todo raise invalid_operand fault
+                // the Hx docs state that dest is modified
+                getRegister(dest).setOrdinal(-1);
+            } else {
+                getRegister(dest).setOrdinal(loadOrdinal(mem));
+                getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
+                if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
+                    /// @todo generate an OPERATION.UNALIGNED_FAULT
+                }
+            }
+        }
+        void
+        ldq(Ordinal mem, RegisterIndex dest) {
+            if(!divisibleByFour(dest)) {
+                /// @todo raise invalid_operand fault
+                // the Hx docs state that dest is modified
+                getRegister(dest).setOrdinal(-1);
+            } else {
+                getRegister(dest).setOrdinal(loadOrdinal(mem));
+                getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
+                getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(loadOrdinal(mem+12));
+                if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
+                    /// @todo generate an OPERATION.UNALIGNED_FAULT
+                }
+            }
+        }
+
+        void
+        mov(RegLit src, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+        }
+        void
+        movl(RegLit src, RegisterIndex dest) {
+            // so this is a bit of a hack but according to the i960Hx manual only the least significant register gets the literal
+            if (!divisibleByTwo(dest) || (isRegisterIndex(src) && !divisibleByTwo(std::get<RegisterIndex>(src)))) {
+                getRegister(dest).setInteger(-1);
+                getRegister(nextRegisterIndex(dest)).setInteger(-1);
+                /// @todo generate a fault here!
+            } else {
+                getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+                getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+            }
+        }
+        void
+        movt(RegLit src, RegisterIndex dest) {
+            if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
+                getRegister(dest).setInteger(-1);
+                getRegister(nextRegisterIndex(dest)).setInteger(-1);
+                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
+                /// @todo generate a fault here!
+            } else {
+                getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+                getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
+            }
+        }
+        void
+        movq(RegLit src, RegisterIndex dest) {
+            if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
+                getRegister(dest).setInteger(-1);
+                getRegister(nextRegisterIndex(dest)).setInteger(-1);
+                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
+                getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setInteger(-1);
+                /// @todo generate a fault here!
+            } else {
+                getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+                getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
+                getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
+            }
+        }
 
     private: // arithmetic
         Ordinal extractValue(RegLit value, TreatAsOrdinal) const noexcept {
@@ -267,40 +717,187 @@ namespace i960
             }, value);
         }
         /// @todo figure out the different code forms
-        void addi(RegLit src1, RegLit src2, RegisterIndex dest);
-        void addo(RegLit src1, RegLit src2, RegisterIndex dest);
-        void addc(RegLit src1, RegLit src2, RegisterIndex dest);
-        void subi(RegLit src1, RegLit src2, RegisterIndex dest);
-        void subo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void
+        addc(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
+            auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
+            auto c = getCarryFlag() ? 1 : 0;
+            auto result = s2 + s1 + c;
+            auto upperHalf = static_cast<Ordinal>(result >> 32);
+            setCarryFlag(upperHalf != 0) ;
+            getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
+            /// @todo check for integer overflow condition
+        }
+        void
+        addi(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsInteger{}) ;
+            auto s2 = extractValue(src2, TreatAsInteger{}) ;
+            getRegister(dest).setInteger(s2 + s1) ;
+            /// @todo implement fault detection
+        }
+
+        void
+        addo(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+            getRegister(dest).setOrdinal(s2 + s1) ;
+            /// @todo implement fault detection
+        }
+        void
+        subi(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsInteger{}) ;
+            auto s2 = extractValue(src2, TreatAsInteger{}) ;
+            getRegister(dest).setInteger(s2 - s1) ;
+            /// @todo implement fault detection
+        }
+        void
+        subo(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+            getRegister(dest).setOrdinal(s2 - s1) ;
+            /// @todo implement fault detection
+        }
         void subc(RegLit src1, RegLit src2, RegisterIndex dest);
-        void muli(RegLit src1, RegLit src2, RegisterIndex dest);
-        void mulo(RegLit src1, RegLit src2, RegisterIndex dest);
-        void divi(RegLit src1, RegLit src2, RegisterIndex dest);
-        void divo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void
+        muli(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsInteger{}) ;
+            auto s2 = extractValue(src2, TreatAsInteger{}) ;
+            getRegister(dest).setInteger(s2 * s1) ;
+            /// @todo implement fault detection
+        }
+        void
+        mulo(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+            getRegister(dest).setOrdinal(s2 * s1) ;
+            /// @todo implement fault detection
+        }
+        void
+        divi(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsInteger{}) ;
+            auto s2 = extractValue(src2, TreatAsInteger{}) ;
+            getRegister(dest).setInteger(s2 / s1) ;
+            /// @todo implement fault detection
+        }
+        void
+        divo(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+            getRegister(dest).setOrdinal(s2 / s1) ;
+            /// @todo implement fault detection
+        }
         void emul(RegLit src1, RegLit src2, RegisterIndex dest);
         void ediv(RegLit src1, RegLit src2, RegisterIndex dest);
-        void remi(RegLit src1, RegLit src2, RegisterIndex dest);
-        void remo(RegLit src1, RegLit src2, RegisterIndex dest);
-        void modi(RegLit src1, RegLit src2, RegisterIndex dest);
-        void shlo(RegLit src1, RegLit src2, RegisterIndex dest);
-        void shli(RegLit src1, RegLit src2, RegisterIndex dest);
-        void shro(RegLit src1, RegLit src2, RegisterIndex dest);
+        void
+        remi(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s2 = extractValue(src2, TreatAsInteger{});
+            auto s1 = extractValue(src1, TreatAsInteger{});
+            getRegister(dest).setInteger(((s2 / s1) * s1));
+        }
+        void
+        remo(RegLit src1, RegLit src2, RegisterIndex dest) {
+            auto s2 = extractValue(src2, TreatAsOrdinal{});
+            auto s1 = extractValue(src1, TreatAsOrdinal{});
+            getRegister(dest).setOrdinal(((s2 / s1) * s1));
+        }
+        void
+        modi(RegLit src1, RegLit src2, RegisterIndex dest) {
+            // taken from the manual
+            auto denominator = extractValue(src1, TreatAsInteger{});
+            auto numerator = extractValue(src2, TreatAsInteger{});
+            if (denominator == 0) {
+                // @todo raise Arithmetic Zero Divide fault
+                return;
+            }
+            auto theDestValue = numerator - ((numerator / denominator) * denominator);
+            auto& dReg = getRegister(dest);
+            dReg.setInteger(theDestValue);
+            if (((numerator * denominator) < 0) && (theDestValue != 0)) {
+                dReg.setInteger(theDestValue + denominator);
+            }
+        }
+        void
+        shlo(RegLit len, RegLit src, RegisterIndex dest) {
+            auto theLength = extractValue(len, TreatAsOrdinal{});
+            auto theSrc = extractValue(src, TreatAsOrdinal{});
+            if (theLength < 32) {
+                getRegister(dest).setOrdinal(theSrc << theLength);
+            } else {
+                getRegister(dest).setOrdinal(0);
+            }
+        }
+        void
+        shro(RegLit len, RegLit src, RegisterIndex dest) {
+            auto theLength = extractValue(len, TreatAsOrdinal{});
+            auto theSrc = extractValue(src, TreatAsOrdinal{});
+            if (theLength < 32) {
+                getRegister(dest).setOrdinal(theSrc >> theLength);
+            } else {
+                getRegister(dest).setOrdinal(0);
+            }
+        }
+        void
+        shli(RegLit len, RegLit src, RegisterIndex dest) {
+            auto theLength = extractValue(len, TreatAsInteger{});
+            auto theSrc = extractValue(src, TreatAsInteger{});
+            getRegister(dest).setInteger(theSrc << theLength);
+        }
+        /// @todo correctly implement shri and shrdi
         void shri(RegLit src1, RegLit src2, RegisterIndex dest);
         void shrdi(RegLit src1, RegLit src2, RegisterIndex dest);
         void rotate(RegLit len, RegLit src, RegisterIndex dest);
 
     private: // logical operations
-        void logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest);
-        void logicalOr(RegLit src1, RegLit src2, RegisterIndex dest);
-        void logicalXor(RegLit src1, RegLit src2, RegisterIndex dest);
-        void logicalNand(RegLit src1, RegLit src2, RegisterIndex dest);
-        void logicalNor(RegLit src1, RegLit src2, RegisterIndex dest);
-        void logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest);
-        void logicalNot(RegLit src, RegisterIndex dest);
-        void notand(RegLit src1, RegLit src2, RegisterIndex dest);
-        void andnot(RegLit src1, RegLit src2, RegisterIndex dest);
-        void notor(RegLit src1, RegLit src2, RegisterIndex dest);
-        void ornot(RegLit src1, RegLit src2, RegisterIndex dest);
+        void
+        logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(
+                    extractValue(src2, TreatAsOrdinal{}) &
+                    extractValue(src1, TreatAsOrdinal{}));
+        }
+        void
+        andnot(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(
+                    (extractValue(src2, TreatAsOrdinal{})) &
+                    (~extractValue(src1, TreatAsOrdinal{})));
+        }
+        void
+        logicalNand(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | (~extractValue(src1, TreatAsOrdinal{})));
+        }
+
+        void
+        logicalNor(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{})));
+        }
+
+        void
+        logicalNot(RegLit src, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(~extractValue(src, TreatAsOrdinal{}));
+        }
+        void
+        notand(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & extractValue(src1,TreatAsOrdinal{}));
+        }
+        void
+        notor(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | extractValue(src1,TreatAsOrdinal{}));
+        }
+        void
+        logicalOr(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | extractValue(src1,TreatAsOrdinal{}));
+        }
+        void
+        ornot(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | (~extractValue(src1,TreatAsOrdinal{})));
+        }
+        void
+        logicalXor(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{}));
+        }
+        void
+        logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(~(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{})));
+        }
     private: // bit and bit-field operations
         void setbit(RegLit bitpos, RegLit src, RegisterIndex dest);
         void clrbit(RegLit bitpos, RegLit src, RegisterIndex dest);
@@ -310,7 +907,13 @@ namespace i960
         void scanbit(RegLit src, RegisterIndex dest);
         void spanbit(RegLit src, RegisterIndex dest);
         void extract(RegLit bitpos, RegLit len, RegisterIndex srcDest);
-        void modify(RegLit bitpos, RegLit len, RegisterIndex srcDest);
+        void
+        modify(RegLit mask, RegLit src, RegisterIndex srcDest) {
+            auto& sd = getRegister(srcDest);
+            auto theMask = extractValue(mask, TreatAsOrdinal{});
+            sd.setOrdinal((extractValue(src, TreatAsOrdinal{}) & theMask)  | (sd.getOrdinal() & (~theMask)));
+        }
+
         void scanbyte(RegLit src1, RegLit src2);
     private: // compare and increment or decrement
         void concmpi(RegLit src1, RegLit src2);
@@ -323,21 +926,76 @@ namespace i960
         void cmpo(RegLit src1, RegLit src2);
     private: // branching
         /// @todo figure out correct signatures
-        void b(Displacement22 targ);
-        void bx(Ordinal targ);
-        void bal(Displacement22 targ);
-        void balx(Ordinal targ, RegisterIndex dest); // mem, reg
+        void
+        b(Displacement22 targ) {
+            ip.setInteger(ip.getInteger() + targ.getValue());
+        }
+        void
+        bal(Displacement22 targ) {
+            globals[14].setOrdinal(ip.getOrdinal() + 4);
+            // make sure that the code is consistent
+            b(targ);
+        }
+        void
+        bx(Ordinal targ) {
+            ip.setOrdinal(targ);
+        }
+        void
+        balx(Ordinal targ, RegisterIndex dest) {
+            getRegister(dest).setOrdinal(ip.getOrdinal());
+            ip.setOrdinal(targ);
+        }
 
-        /// @todo figure out correct signatures
         /// @todo condense this operation set down to a single function since the mask is embedded in the opcode itself :)
-        void be(Displacement22 dest);
-        void bne(Displacement22 dest);
-        void bl(Displacement22 dest);
-        void ble(Displacement22 dest);
-        void bg(Displacement22 dest);
-        void bge(Displacement22 dest);
-        void bo(Displacement22 dest);
-        void bno(Displacement22 dest);
+        void
+        bno(Displacement22 dest) {
+            if (ac.conditionIsUnordered()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+        void
+        bo(Displacement22 dest) {
+            if (ac.conditionIsOrdered()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+        void
+        bg(Displacement22 dest) {
+            if (ac.conditionIsGreaterThan()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+        void
+        be(Displacement22 dest) {
+            if (ac.conditionIsEqualTo()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+
+        void
+        bge(Displacement22 dest) {
+            if (ac.conditionIsGreaterThanOrEqualTo()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+        void
+        bl(Displacement22 dest) {
+            if (ac.conditionIsLessThan()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+        void
+        bne(Displacement22 dest) {
+            if (ac.conditionIsNotEqual()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
+        void
+        ble(Displacement22 dest) {
+            if (ac.conditionIsLessThanOrEqual()) {
+                ip.setInteger(ip.getInteger() + dest.getValue());
+            }
+        }
     private: // compare and branch
         /// @todo figure out correct signatures
         void cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ);
@@ -367,13 +1025,42 @@ namespace i960
         void testo(RegisterIndex dest);
     private: // call and return (note, no supervisor mode right now)
         /// @todo figure out correct signatures
-        void call(Displacement22 targ);
-        void callx(Ordinal targ); // mem
-        void ret();
+        void call(Displacement22 targ) {
+
+        }
+        void callx(Ordinal targ) {
+
+        }
+        void ret() {
+            /// @todo implement
+        }
         /// @todo implement faults as exceptions
     private: // processor management
-        void flushreg(); // noop right now
-        void modac(const RegFormatInstruction& inst);
+        void
+        flushreg() {
+            // noop right now
+        }
+        void
+        modac(const RegFormatInstruction &inst) {
+            // in this case, mask is src/dst
+            // src is src2
+            // dest is src1
+            auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
+            auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
+            auto dest = std::visit([](auto&& value) -> RegisterIndex {
+                using K = std::decay_t<decltype(value)>;
+                if constexpr (std::is_same_v<K, RegisterIndex>) {
+                    return value;
+                } else if constexpr (std::is_same_v<K, Literal>) {
+                    return toRegisterIndex(toInteger(value));
+                } else {
+                    static_assert(DependentFalse<K>, "Unresolved type!");
+                }
+            }, inst.getSrc1());
+            auto tmp = ac.getRawValue();
+            ac.setRawValue((src & mask) | (tmp & (~mask)));
+            getRegister(dest).setOrdinal(tmp);
+        }
         void syncf();
     private:
         void eshro(RegLit src1, RegLit src2, RegisterIndex dest);
@@ -392,7 +1079,17 @@ namespace i960
          * @param src2 The second bcd number
          * @param dest The destination register to store the result in
          */
-        void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void
+        daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+            const auto& s1 = getRegister(src1);
+            const auto& s2 = getRegister(src2);
+            auto& dst = getRegister(dest);
+            // transfer bits over
+            dst.setOrdinal(s2.getOrdinal());
+            auto outcome = (s2.getByteOrdinal() & 0xF) + (s1.getByteOrdinal() & 0xF) + (getCarryFlag() ? 1 : 0);
+            setCarryFlag((outcome & 0xF0) != 0);
+            dst.setByteOrdinal((s2.getByteOrdinal() & 0xF0) | (outcome & 0x0F));
+        }
     private:
         TargetBoard theBoard; // default constructible
         RegisterFile globals, locals;
