@@ -1,6 +1,8 @@
 // we are defining a fake i960Zx series processor, this processor does not exist but will be what I'm calling my simulated design
 // It has an SALIGN value of 4 like the i960Kx,i960Sx, and i960MC processors
 
+/// @todo figure out the arcada library to allow for QSPI and SDCard simultaneous interaction and write an example for the Adafruit_SPIFlash library when done
+
 // Adapt this class to the target microcontroller board
 // Right now I am targeting a grand central m4
 #include <Adafruit_NeoPixel.h>
