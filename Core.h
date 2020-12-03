@@ -101,19 +101,90 @@ namespace i960
             };
         };
     };
-    class Core;
     class MEMFormatInstruction {
     public:
         constexpr explicit MEMFormatInstruction(Ordinal lowerHalf) noexcept : lower(lowerHalf) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
-        Ordinal computeAddress(Core& referenceCore) const noexcept;
+        template<typename Core>
+        Ordinal computeAddress(Core& referenceCore) const noexcept {
+            if (isMEMAFormat()) {
+                return computeAddress_MEMA(referenceCore);
+            } else {
+                return computeAddress_MEMB(referenceCore);
+            }
+        }
         constexpr RegisterIndex getSrcDest() const noexcept { return static_cast<RegisterIndex>(srcDest); }
     private:
         constexpr bool isMEMAFormat() const noexcept { return modeMajor & 1 == 0; }
         constexpr bool isMEMBFormat() const noexcept { return modeMajor & 1 != 0; }
-        Ordinal computeAddress_MEMA(Core& referenceCore) const noexcept;
-        Ordinal computeAddress_MEMB(Core& referenceCore) const noexcept;
-        Ordinal computeScale(Core& referenceCore) const noexcept;
+        template<typename Core>
+        Ordinal computeAddress_MEMA(Core& referenceCore) const noexcept {
+            // the lsb of mema.mode will always be 0 to get to this point
+            if (mema.mode == 0b00) {
+                // absolute offset
+                return static_cast<Ordinal>(mema.offset);
+            } else {
+                // register indirect with offset
+                return static_cast<Ordinal>(mema.offset) + referenceCore.getRegister(toRegisterIndex(abase)).getOrdinal();
+            }
+
+        }
+        template<typename Core>
+        Ordinal computeAddress_MEMB(Core& referenceCore) const noexcept {
+            // bit 12 of the instruction has to be 1 to get into this code, eight possible combos
+            union {
+                Ordinal next;
+                Integer optionalDisplacement;
+            } disp;
+            disp.next = 0;
+            switch (memb.mode) {
+                case 0b0100: // register indirect
+                    return referenceCore.getRegister(toRegisterIndex(memb.abase)).getOrdinal();
+                case 0b0101: // ip with displacement
+                    disp.next = referenceCore.getWordAtIP(true);
+                    return static_cast<Ordinal>(referenceCore.getIP().getInteger() + disp.optionalDisplacement + 8);
+                case 0b0110: // reserved
+                    return -1;
+                case 0b0111: // register indirect with index
+                    return referenceCore.getRegister(toRegisterIndex(memb.abase)).getOrdinal() +
+                           referenceCore.getRegister(toRegisterIndex(memb.index)).getOrdinal() *
+                           computeScale(referenceCore);
+                case 0b1100: // absolute displacement
+                    disp.next = referenceCore.getWordAtIP(true);
+                    return static_cast<Ordinal>(disp.optionalDisplacement);
+                case 0b1101: // register indirect with displacement
+                    disp.next = referenceCore.getWordAtIP(true);
+                    return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() +
+                                                disp.optionalDisplacement);
+                case 0b1110: // index with displacement
+                    disp.next = referenceCore.getWordAtIP(true);
+                    return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.index)).getInteger() *
+                                                computeScale(referenceCore) +
+                                                disp.optionalDisplacement);
+                case 0b1111: // register indirect with index and displacement
+                    disp.next = referenceCore.getWordAtIP(true);
+                    return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() +
+                                                referenceCore.getRegister(toRegisterIndex(memb.index)).getInteger() *
+                                                computeScale(referenceCore) +
+                                                disp.optionalDisplacement);
+                default:
+                    return -1;
+            }
+        }
+        template<typename Core>
+        Ordinal computeScale(Core& referenceCore) const noexcept {
+
+            switch (memb.scale) {
+                case 0b000: return 1;
+                case 0b001: return 2;
+                case 0b010: return 4;
+                case 0b011: return 8;
+                case 0b100: return 16;
+                default:
+                    /// @todo raise an invalid opcode fault here using referenceCore
+                    return 1;
+            }
+        }
     private:
         union {
             Ordinal lower;

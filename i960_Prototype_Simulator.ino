@@ -5,7 +5,9 @@
 #include <SD.h>
 #include <SPI.h>
 #include "PinSetup.h"
+#include "MemoryInterface.h"
 #include "Core.h"
+
 // Adapt this class to the target microcontroller board
 // Right now I am targeting a metro m4
 class TargetBoard : public MemoryInterface {
