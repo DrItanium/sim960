@@ -7,12 +7,13 @@
 #include "PinSetup.h"
 #include "MemoryInterface.h"
 #include "Core.h"
+#include "HasOnboardNeoPixel.h"
 
 // Adapt this class to the target microcontroller board
-// Right now I am targeting a metro m4
-class TargetBoard : public MemoryInterface {
+// Right now I am targeting a grand central m4
+class TargetBoard : public MemoryInterface, public HasOnboardNeoPixel<88> {
 public:
-    using MemoryInterface::MemoryInterface;
+    TargetBoard() : MemoryInterface(), HasOnboardNeoPixel<88>() { }
     ~TargetBoard() override = default;
     Integer loadValue(Address address, TreatAsInteger) override;
     Ordinal loadValue(Address address, TreatAsOrdinal) override;
@@ -113,6 +114,7 @@ TargetBoard::begin() {
         } else {
             Serial.println("SD Card found");
         }
+        HasOnboardNeoPixel<88>::begin();
     }
 }
 i960::Core<TargetBoard> cpuCore;
