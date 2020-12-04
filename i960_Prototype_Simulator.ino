@@ -9,15 +9,27 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <Adafruit_SPIFlash.h>
+#include <ArduinoJson.h>
+#include <OPL3Duo.h>
 #include "PinSetup.h"
 #include "Core.h"
 
+constexpr auto OPL3Duo_A2 = 22;
+constexpr auto OPL3Duo_A1 = 23;
+constexpr auto OPL3Duo_A0 = 24;
+constexpr auto OPL3Duo_Latch = 25;
+constexpr auto OPL3Duo_Reset = 26;
 constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, 88, NEO_GRB + NEO_KHZ800);
 Adafruit_FlashTransport_QSPI flashTransport;
 Adafruit_SPIFlash flash(&flashTransport);
 FatFileSystem fatfs;
 SdFat sdCard; // use SDCARD_SS_PIN for this one
+OPL3Duo theOPL3Duo(OPL3Duo_A2,
+                   OPL3Duo_A1,
+                   OPL3Duo_A0,
+                   OPL3Duo_Latch,
+                   OPL3Duo_Reset);
 namespace i960 {
     /*
      * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
@@ -126,8 +138,13 @@ void setup() {
     } else {
         Serial.println("Card found!");
     }
+    Serial.print("Initialzing onboard NeoPixel...");
     onboardNeoPixel.begin();
     onboardNeoPixel.show();
+    Serial.println("Done");
+    Serial.print("Starting up OPL3Duo...");
+    theOPL3Duo.begin();
+    Serial.println("Done");
 }
 
 void loop() {
