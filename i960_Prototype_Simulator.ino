@@ -5,13 +5,15 @@
 
 // Adapt this class to the target microcontroller board
 // Right now I am targeting a grand central m4
-#include <Adafruit_NeoPixel.h>
 #include <SPI.h>
+#include <Wire.h>
 #include <SdFat.h>
+#include <Adafruit_NeoPixel.h>
 #include <Adafruit_SPIFlash.h>
 #include <ArduinoJson.h>
 #include <OPL3Duo.h>
 #include <Adafruit_seesaw.h>
+#include <Adafruit_SI5351.h>
 #include "PinSetup.h"
 #include "Core.h"
 
@@ -32,6 +34,7 @@ OPL3Duo theOPL3Duo(OPL3Duo_A2,
                    OPL3Duo_Latch,
                    OPL3Duo_Reset);
 Adafruit_seesaw theSoilSensor;
+Adafruit_SI5351 clockgen;
 namespace i960 {
     /*
      * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
@@ -153,6 +156,13 @@ void setup() {
     } else {
         Serial.println("Soil Sensor Found!");
         Serial.println(theSoilSensor.getVersion(), HEX);
+    }
+
+    Serial.print("Bringing up Si5351 Clock Chip...");
+    if (clockgen.begin() != ERROR_NONE) {
+        Serial.println("No Clock Chip Detected ... forget to hook it up?");
+    } else {
+        Serial.println("Done");
     }
 }
 
