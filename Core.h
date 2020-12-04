@@ -1458,6 +1458,17 @@ namespace i960
         }
         void callx(Ordinal targ) {
 
+            // the and operation clears out the least significant N bits of this new address
+            // make a new stack frame
+            auto tmp = (getStackPointerAddress() + computeAlignmentBoundaryConstant()) &
+                       (~computeAlignmentBoundaryConstant());
+            setRIP(ip);
+            saveLocals();
+            allocateNewLocalRegisterSet();
+            ip.setOrdinal(targ);
+            setPFP(getFramePointerAddress());
+            setFramePointer(tmp);
+            setStackPointer(tmp + 64);
         }
         void ret() {
             syncf();
