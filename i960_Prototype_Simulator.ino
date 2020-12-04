@@ -7,15 +7,17 @@
 // Right now I am targeting a grand central m4
 #include <Adafruit_NeoPixel.h>
 #include <SPI.h>
-#include <SD.h>
+#include <SdFat.h>
+#include <Adafruit_SPIFlash.h>
 #include "PinSetup.h"
 #include "Core.h"
 
 constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, 88, NEO_GRB + NEO_KHZ800);
-//Adafruit_FlashTransport_QSPI flashTransport;
-//Adafruit_SPIFlash flash(&flashTransport);
-//FatFileSystem fatfs;
+Adafruit_FlashTransport_QSPI flashTransport;
+Adafruit_SPIFlash flash(&flashTransport);
+FatFileSystem fatfs;
+SdFat sdCard; // use SDCARD_SS_PIN for this one
 namespace i960 {
     /*
      * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
@@ -101,7 +103,6 @@ void setup() {
     Serial.print("Starting up SPI...");
     SPI.begin();
     Serial.println("Done");
-#if 0
     Serial.print("Starting up onboard QSPI Flash...");
     flash.begin();
     Serial.println("Done");
@@ -119,11 +120,11 @@ void setup() {
         }
     }
     Serial.println("Done");
-#endif
-    if (!SD.begin(SDCARD_SS_PIN)) {
-        Serial.println("no sd card installed");
+    Serial.print("Starting up SD Card...");
+    if (!sdCard.begin(SDCARD_SS_PIN)) {
+        Serial.println("No card found");
     } else {
-        Serial.println("SD Card found");
+        Serial.println("Card found!");
     }
     onboardNeoPixel.begin();
     onboardNeoPixel.show();
