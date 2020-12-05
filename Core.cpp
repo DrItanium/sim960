@@ -5,6 +5,7 @@
 #include "Core.h"
 
 namespace i960 {
+    constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
     void
     Core::ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
         // a total copy and paste hack job but it will work
@@ -532,5 +533,104 @@ namespace i960 {
     Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
         // overflow detection suppressed
         compareAndDecrementBase<TreatAsInteger>(src1, src2, dest);
+    }
+
+    void
+    Core::setbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto bitpos = extractValue(src1, TreatAsOrdinal{}) ;
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
+    }
+    void
+    Core::clrbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto bitpos = extractValue(src1, TreatAsOrdinal{});
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        auto bitposModified = ~(computeSingleBitShiftMask(bitpos));
+        getRegister(dest).setOrdinal(src & bitposModified);
+    }
+    void
+    Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto bitpos = extractValue(src1, TreatAsOrdinal{});
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        getRegister(dest).setOrdinal(src ^ (1 << (bitpos & 0b11111)));
+    }
+
+    void
+    Core::alterbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto bitpos = extractValue(src1, TreatAsOrdinal{});
+        auto src = extractValue(src2, TreatAsOrdinal{});
+        if ((ac.getConditionCode() & 0b010) == 0) {
+            getRegister(dest).setOrdinal(src & (~(1 << (bitpos & 0b11111))));
+        } else {
+            getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
+        }
+    }
+    void
+    Core::chkbit(RegLit src1, RegLit src2) {
+        ac.setConditionCode(((extractValue(src2, TreatAsOrdinal{})& computeSingleBitShiftMask(extractValue(src1, TreatAsOrdinal{}))) == 0) ? 0b000 : 0b010);
+    }
+    void
+    Core::spanbit(RegLit src1, RegisterIndex dest) {
+        /**
+         * Find the most significant clear bit
+         */
+        auto result = largestOrdinal;
+        ac.clearConditionCode();
+        if (auto src = extractValue(src1, TreatAsOrdinal{}); src != largestOrdinal) {
+            for (Integer i = 31; i >= 0; --i) {
+                if (auto k = (1 << i); (src & k) == 0) {
+                    result = i;
+                    ac.setConditionCode(0b010);
+                    break;
+                }
+            }
+        }
+        getRegister(dest).setOrdinal(result);
+    }
+    void
+    Core::scanbit(RegLit src, RegisterIndex dest) {
+        // find the most significant set bit
+        auto result = largestOrdinal;
+        ac.clearConditionCode();
+        // while the psuedo-code in the programmers manual talks about setting
+        // the destination to all ones if src is equal to zero, there is no short
+        // circuit in the action section for not iterating through the loop when
+        // src is zero. A small optimization
+        if (auto theSrc = extractValue(src, TreatAsOrdinal{}); theSrc != 0) {
+            for (Integer i = 31; i >= 0; --i) {
+                if (auto k = 1 << i; (theSrc & k) != 0) {
+                    ac.setConditionCode(0b010);
+                    result = i;
+                    break;
+                }
+            }
+        }
+        getRegister(dest).setOrdinal(result);
+    }
+    void
+    Core::extract(RegLit src1, RegLit src2, RegisterIndex dest) {
+        // taken from the i960Hx manual
+        getRegister(dest).setOrdinal((extractValue(dest, TreatAsOrdinal{}) >> std::min(extractValue(src1, TreatAsOrdinal{}), static_cast<Ordinal>(32))) &
+                                     (~(0xFFFF'FFFF << extractValue(src2, TreatAsOrdinal{}))));
+    }
+    void
+    Core::modify(RegLit mask, RegLit src, RegisterIndex srcDest) {
+        auto& sd = getRegister(srcDest);
+        auto theMask = extractValue(mask, TreatAsOrdinal{});
+        sd.setOrdinal((extractValue(src, TreatAsOrdinal{}) & theMask)  | (sd.getOrdinal() & (~theMask)));
+    }
+
+    void
+    Core::scanbyte(RegLit src1, RegLit src2) {
+        ac.clearConditionCode();
+        if (auto s1 = extractValue(src1, TreatAsOrdinal{}), s2 = extractValue(src2, TreatAsOrdinal{});
+                ((s1 & 0x0000'00FF) == (s2 & 0x0000'00FF)) ||
+                ((s1 & 0x0000'FF00) == (s2 & 0x0000'FF00)) ||
+                ((s1 & 0x00FF'0000) == (s2 & 0x00FF'0000)) ||
+                ((s1 & 0xFF00'0000) == (s2 & 0xFF00'0000))) {
+            ac.setConditionCode(0b010);
+        } else {
+            ac.setConditionCode(0b000);
+        }
     }
 }
