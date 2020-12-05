@@ -228,17 +228,7 @@ namespace i960
                 MEMFormatInstruction,
                 COBRInstruction,
                 CTRLInstruction>;
-        static DecodedInstruction decode(Ordinal value) noexcept {
-            if (auto opcode = static_cast<ByteOrdinal>(value >> 24); opcode < 0x20) {
-                return CTRLInstruction(value);
-            } else if (opcode >= 0x20 && opcode < 0x58) {
-                return COBRInstruction(value);
-            } else if (opcode >= 0x58 && opcode < 0x80) {
-                return RegFormatInstruction(value);
-            } else {
-                return MEMFormatInstruction(value);
-            }
-        }
+        static DecodedInstruction decode(Ordinal value) noexcept;
     public:
         using RegisterFile = std::array<Register, 16>;
     public:
@@ -255,14 +245,7 @@ namespace i960
          * @param advance
          * @return
          */
-        Ordinal
-        getWordAtIP(bool advance = false) noexcept {
-            auto ipLoc = ip.getOrdinal();
-            if (advance) {
-                ip.setOrdinal(ipLoc + 4);
-            }
-            return loadOrdinal(ipLoc);
-        }
+        Ordinal getWordAtIP(bool advance = false) noexcept;
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
         Ordinal loadOrdinal(Address address) noexcept;
         void storeOrdinal (Address address, Ordinal value) noexcept;
@@ -457,38 +440,13 @@ namespace i960
         void testg(RegisterIndex dest);
         void testge(RegisterIndex dest);
     private:
-        static constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
-        static constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
-        static constexpr RegisterIndex RIP = static_cast<RegisterIndex>(0b00010);
-        static constexpr RegisterIndex FP = static_cast<RegisterIndex>(0b11111);
-        Ordinal
-        getStackPointerAddress() const noexcept {
-            return getRegister(SP).getOrdinal();
-        }
-        void
-        setRIP(const Register& ip) noexcept {
-            getRegister(RIP).setOrdinal(ip.getOrdinal());
-        }
-        Ordinal
-        getFramePointerAddress() const noexcept {
-            return getRegister(FP).getOrdinal();
-        }
-        void
-        setPFP(Ordinal value) noexcept {
-            getRegister(PFP).setOrdinal(value);
-        }
-        void
-        setFramePointer(Ordinal value) noexcept {
-            getRegister(FP).setOrdinal(value);
-        }
-        void
-        setStackPointer(Ordinal value) noexcept {
-            getRegister(SP).setOrdinal(value);
-        }
-        void
-        allocateNewLocalRegisterSet() {
-            /// @todo implement at some point
-        }
+        Ordinal getStackPointerAddress() const noexcept;
+        void setRIP(const Register& ip) noexcept;
+        Ordinal getFramePointerAddress() const noexcept;
+        void setPFP(Ordinal value) noexcept;
+        void setFramePointer(Ordinal value) noexcept;
+        void setStackPointer(Ordinal value) noexcept;
+        void allocateNewLocalRegisterSet();
     private: // call and return
         void call(Displacement22 targ);
         void callx(Ordinal targ);

@@ -6,6 +6,35 @@
 
 namespace i960 {
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
+    constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
+    constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
+    constexpr RegisterIndex RIP = static_cast<RegisterIndex>(0b00010);
+    constexpr RegisterIndex FP = static_cast<RegisterIndex>(0b11111);
+    Core::DecodedInstruction
+    Core::decode(Ordinal value) noexcept {
+        if (auto opcode = static_cast<ByteOrdinal>(value >> 24); opcode < 0x20) {
+            return CTRLInstruction(value);
+        } else if (opcode >= 0x20 && opcode < 0x58) {
+            return COBRInstruction(value);
+        } else if (opcode >= 0x58 && opcode < 0x80) {
+            return RegFormatInstruction(value);
+        } else {
+            return MEMFormatInstruction(value);
+        }
+    }
+    /**
+     * @brief Retrieve the word at the ip address
+     * @param advance
+     * @return
+     */
+    Ordinal
+    Core::getWordAtIP(bool advance) noexcept {
+        auto ipLoc = ip.getOrdinal();
+        if (advance) {
+            ip.setOrdinal(ipLoc + 4);
+        }
+        return loadOrdinal(ipLoc);
+    }
     Ordinal
     Core::extractValue(RegLit value, TreatAsOrdinal) const noexcept {
         return std::visit([this](auto&& value) -> Ordinal {
@@ -1112,5 +1141,33 @@ namespace i960 {
             getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
             getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
         }
+    }
+    Ordinal
+    Core::getStackPointerAddress() const noexcept {
+        return getRegister(SP).getOrdinal();
+    }
+    void
+    Core::setRIP(const Register& ip) noexcept {
+        getRegister(RIP).setOrdinal(ip.getOrdinal());
+    }
+    Ordinal
+    Core::getFramePointerAddress() const noexcept {
+        return getRegister(FP).getOrdinal();
+    }
+    void
+    Core::setPFP(Ordinal value) noexcept {
+        getRegister(PFP).setOrdinal(value);
+    }
+    void
+    Core::setFramePointer(Ordinal value) noexcept {
+        getRegister(FP).setOrdinal(value);
+    }
+    void
+    Core::setStackPointer(Ordinal value) noexcept {
+        getRegister(SP).setOrdinal(value);
+    }
+    void
+    Core::allocateNewLocalRegisterSet() {
+        /// @todo implement at some point
     }
 }
