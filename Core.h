@@ -881,6 +881,28 @@ namespace i960
                 ac.setConditionCode(0b001);
             }
         }
+        template<typename Tag>
+        void
+        conditionalCompareBase(RegLit src1, RegLit src2) {
+            // don't care what the least significant two bits are of the cond code so just mask them out
+            if ((ac.getConditionCode() & 0b100) == 0) {
+                auto s1 = extractValue(src1, Tag{});
+                auto s2 = extractValue(src2, Tag{});
+                ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
+            }
+        }
+        template<typename Tag>
+        void
+        compareAndIncrementBase(RegLit src1, RegLit src2, RegisterIndex dest) {
+            compareBase<Tag>(src1, src2);
+            getRegister(dest).set(extractValue(src2, Tag{}) + 1, Tag{});
+        }
+        template<typename Tag>
+        void
+        compareAndDecrementBase(RegLit src1, RegLit src2, RegisterIndex dest) {
+            compareBase<Tag>(src1, src2);
+            getRegister(dest).set(extractValue(src2, Tag{}) - 1, Tag{});
+        }
         void cmpo(RegLit src1, RegLit src2);
         void cmpi(RegLit src1, RegLit src2);
         void concmpo(RegLit src1, RegLit src2);

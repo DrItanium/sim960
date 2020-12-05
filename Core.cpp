@@ -509,45 +509,28 @@ namespace i960 {
     }
     void
     Core::concmpo(RegLit src1, RegLit src2) {
-        // don't care what the least significant two bits are of the cond code so just mask them out
-        if ((ac.getConditionCode() & 0b100) == 0) {
-            auto s1 = extractValue(src1, TreatAsOrdinal{});
-            auto s2 = extractValue(src2, TreatAsOrdinal{});
-            ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
-        }
+        conditionalCompareBase<TreatAsOrdinal>(src1, src2);
     }
     void
     Core::concmpi(RegLit src1, RegLit src2) {
-        // don't care what the least significant two bits are of the cond code so just mask them out
-        if ((ac.getConditionCode() & 0b100) == 0) {
-            auto s1 = extractValue(src1, TreatAsInteger{});
-            auto s2 = extractValue(src2, TreatAsInteger{});
-            ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
-        }
-
+        conditionalCompareBase<TreatAsInteger>(src1, src2);
     }
     void
     Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
-        cmpo(src1, src2);
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(s2 + 1);
+        compareAndIncrementBase<TreatAsOrdinal>(src1, src2, dest);
     }
     void
     Core::cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
-        cmpi(src1, src2);
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        getRegister(dest).setInteger(s2 + 1); // manual states that this instruction suppresses overflow
+        // overflow detection suppressed
+        compareAndIncrementBase<TreatAsInteger>(src1, src2, dest);
     }
     void
     Core::cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
-        cmpo(src1, src2);
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(s2 - 1);
+        compareAndDecrementBase<TreatAsOrdinal>(src1, src2, dest);
     }
     void
     Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
-        cmpi(src1, src2);
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        getRegister(dest).setInteger(s2 - 1); // manual states that this instruction suppresses overflow
+        // overflow detection suppressed
+        compareAndDecrementBase<TreatAsInteger>(src1, src2, dest);
     }
 }

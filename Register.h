@@ -107,6 +107,8 @@ namespace i960 {
         void setShortInteger(ShortInteger value, bool upper = false) noexcept { shortInts[upper ? 1 : 0] = value; }
         void setByteOrdinal(ByteOrdinal value, int index = 0) noexcept { byteOrds[index & 0b11] = value; }
         void setByteInteger(ByteInteger value, int index = 0) noexcept { byteInts[index & 0b11] = value; }
+        void set(Ordinal value, TreatAsOrdinal) noexcept { setOrdinal(value); }
+        void set(Integer value, TreatAsInteger) noexcept { setInteger(value); }
         void increment() noexcept { ++ordValue; }
         void decrement() noexcept { --ordValue; }
         explicit operator Ordinal() const noexcept { return getOrdinal(); }
