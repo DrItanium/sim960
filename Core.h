@@ -523,56 +523,17 @@ namespace i960
         void rotate(RegLit src1, RegLit src2, RegisterIndex dest);
 
     private: // logical operations
-        void
-        logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(
-                    extractValue(src2, TreatAsOrdinal{}) &
-                    extractValue(src1, TreatAsOrdinal{}));
-        }
-        void
-        andnot(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(
-                    (extractValue(src2, TreatAsOrdinal{})) &
-                    (~extractValue(src1, TreatAsOrdinal{})));
-        }
-        void
-        logicalNand(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | (~extractValue(src1, TreatAsOrdinal{})));
-        }
-
-        void
-        logicalNor(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{})));
-        }
-
-        void
-        logicalNot(RegLit src, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(~extractValue(src, TreatAsOrdinal{}));
-        }
-        void
-        notand(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & extractValue(src1,TreatAsOrdinal{}));
-        }
-        void
-        notor(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | extractValue(src1,TreatAsOrdinal{}));
-        }
-        void
-        logicalOr(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | extractValue(src1,TreatAsOrdinal{}));
-        }
-        void
-        ornot(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | (~extractValue(src1,TreatAsOrdinal{})));
-        }
-        void
-        logicalXor(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{}));
-        }
-        void
-        logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(~(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{})));
-        }
+        void logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest);
+        void andnot(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalNand(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalNor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalNot(RegLit src, RegisterIndex dest);
+        void notand(RegLit src1, RegLit src2, RegisterIndex dest);
+        void notor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalOr(RegLit src1, RegLit src2, RegisterIndex dest);
+        void ornot(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalXor(RegLit src1, RegLit src2, RegisterIndex dest);
+        void logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest);
     private: // bit and bit-field operations
         void setbit(RegLit src1, RegLit src2, RegisterIndex dest);
         void clrbit(RegLit src1, RegLit src2, RegisterIndex dest);

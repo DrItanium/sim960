@@ -864,4 +864,54 @@ namespace i960 {
         auto src = extractValue(src2, TreatAsOrdinal {});
         getRegister(dest).setOrdinal(rotateOperation(src, len));
     }
+    void
+    Core::logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(
+                extractValue(src2, TreatAsOrdinal{}) &
+                extractValue(src1, TreatAsOrdinal{}));
+    }
+    void
+    Core::andnot(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(
+                (extractValue(src2, TreatAsOrdinal{})) &
+                (~extractValue(src1, TreatAsOrdinal{})));
+    }
+    void
+    Core::logicalNand(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | (~extractValue(src1, TreatAsOrdinal{})));
+    }
+
+    void
+    Core::logicalNor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{})));
+    }
+
+    void
+    Core::logicalNot(RegLit src, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(~extractValue(src, TreatAsOrdinal{}));
+    }
+    void
+    Core::notand(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & extractValue(src1,TreatAsOrdinal{}));
+    }
+    void
+    Core::notor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | extractValue(src1,TreatAsOrdinal{}));
+    }
+    void
+    Core::logicalOr(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | extractValue(src1,TreatAsOrdinal{}));
+    }
+    void
+    Core::ornot(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | (~extractValue(src1,TreatAsOrdinal{})));
+    }
+    void
+    Core::logicalXor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{}));
+    }
+    void
+    Core::logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(~(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{})));
+    }
 }
