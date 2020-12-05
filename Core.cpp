@@ -914,4 +914,203 @@ namespace i960 {
     Core::logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest) {
         getRegister(dest).setOrdinal(~(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{})));
     }
+    void
+    Core::lda(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(mem);
+    }
+    void
+    Core::ld(Ordinal address, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(loadOrdinal(address));
+    }
+    void
+    Core::ldob(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setByteOrdinal(loadByteOrdinal(mem));
+    }
+
+    void
+    Core::ldos(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setShortOrdinal(loadShortOrdinal(mem));
+    }
+
+    void
+    Core::ldib(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setByteInteger(loadByteInteger(mem));
+    }
+
+    void
+    Core::ldis(Ordinal mem, RegisterIndex dest) {
+        getRegister(dest).setShortInteger(loadShortInteger(mem));
+    }
+
+    void
+    Core::st(RegisterIndex src, Ordinal dest) {
+        storeOrdinal(dest, getRegister(src).getOrdinal());
+    }
+
+    void
+    Core::stob(RegisterIndex src, Ordinal dest) {
+        storeByteOrdinal(dest, getRegister(src).getByteOrdinal());
+    }
+
+    void
+    Core::stib(RegisterIndex src, Ordinal dest) {
+        storeByteInteger(dest, getRegister(src).getByteInteger());
+    }
+
+    void
+    Core::stis(RegisterIndex src, Ordinal dest) {
+        storeShortInteger(dest, getRegister(src).getShortInteger());
+    }
+
+    void
+    Core::stos(RegisterIndex src, Ordinal dest) {
+        storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
+    }
+
+    void
+    Core::stl(RegisterIndex src, Ordinal address) {
+        if (!divisibleByTwo(src)) {
+            /// @todo raise a operation.invalid_operand fault
+            raiseFault();
+        } else {
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED fault
+                raiseFault();
+            }
+        }
+    }
+    void
+    Core::stt(RegisterIndex src, Ordinal address) {
+        if (!divisibleByFour(src)) {
+            /// @todo raise a operation.invalid_operand fault
+            raiseFault();
+        } else {
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+                raiseFault();
+            }
+        }
+    }
+
+    void
+    Core::stq(RegisterIndex src, Ordinal address) {
+        if (!divisibleByFour(src)) {
+            raiseFault();
+            /// @todo raise a operation.invalid_operand fault
+        } else {
+            storeOrdinal(address, getRegister(src).getOrdinal());
+            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                raiseFault();
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+            }
+        }
+    }
+
+    void
+    Core::ldl(Ordinal mem, RegisterIndex dest) {
+        if(!divisibleByTwo(dest)) {
+            /// @todo raise invalid_operand fault
+            // the Hx docs state that dest is modified
+            getRegister(dest).setOrdinal(-1);
+            raiseFault();
+        } else {
+            getRegister(dest).setOrdinal(loadOrdinal(mem));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+            if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+                raiseFault();
+            }
+        }
+    }
+    void
+    Core::ldt(Ordinal mem, RegisterIndex dest) {
+        if(!divisibleByFour(dest)) {
+            /// @todo raise invalid_operand fault
+            // the Hx docs state that dest is modified
+            getRegister(dest).setOrdinal(-1);
+            raiseFault();
+        } else {
+            getRegister(dest).setOrdinal(loadOrdinal(mem));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
+            if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+                raiseFault();
+            }
+        }
+    }
+    void
+    Core::ldq(Ordinal mem, RegisterIndex dest) {
+        if(!divisibleByFour(dest)) {
+            /// @todo raise invalid_operand fault
+            // the Hx docs state that dest is modified
+            getRegister(dest).setOrdinal(-1);
+            raiseFault();
+        } else {
+            getRegister(dest).setOrdinal(loadOrdinal(mem));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
+            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(loadOrdinal(mem+12));
+            if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
+                /// @todo generate an OPERATION.UNALIGNED_FAULT
+                raiseFault();
+            }
+        }
+    }
+
+    void
+    Core::mov(RegLit src, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+    }
+    void
+    Core::movl(RegLit src, RegisterIndex dest) {
+        // so this is a bit of a hack but according to the i960Hx manual only the least significant register gets the literal
+        if (!divisibleByTwo(dest) || (isRegisterIndex(src) && !divisibleByTwo(std::get<RegisterIndex>(src)))) {
+            getRegister(dest).setInteger(-1);
+            getRegister(nextRegisterIndex(dest)).setInteger(-1);
+            /// @todo generate a fault here!
+            raiseFault();
+        } else {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+        }
+    }
+    void
+    Core::movt(RegLit src, RegisterIndex dest) {
+        if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
+            getRegister(dest).setInteger(-1);
+            getRegister(nextRegisterIndex(dest)).setInteger(-1);
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
+            /// @todo generate a fault here!
+            raiseFault();
+        } else {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
+        }
+    }
+    void
+    Core::movq(RegLit src, RegisterIndex dest) {
+        if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
+            getRegister(dest).setInteger(-1);
+            getRegister(nextRegisterIndex(dest)).setInteger(-1);
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
+            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setInteger(-1);
+            /// @todo generate a fault here!
+            raiseFault();
+        } else {
+            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
+            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
+        }
+    }
 }

@@ -296,205 +296,27 @@ namespace i960
         bool getCarryFlag() const noexcept;
         void setCarryFlag(bool value) noexcept;
     private: // data movement operations
-        void
-        lda(Ordinal mem, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(mem);
-        }
-        void
-        ld(Ordinal address, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(loadOrdinal(address));
-        }
-        void
-        ldob(Ordinal mem, RegisterIndex dest) {
-            getRegister(dest).setByteOrdinal(loadByteOrdinal(mem));
-        }
-
-        void
-        ldos(Ordinal mem, RegisterIndex dest) {
-            getRegister(dest).setShortOrdinal(loadShortOrdinal(mem));
-        }
-
-        void
-        ldib(Ordinal mem, RegisterIndex dest) {
-            getRegister(dest).setByteInteger(loadByteInteger(mem));
-        }
-
-        void
-        ldis(Ordinal mem, RegisterIndex dest) {
-            getRegister(dest).setShortInteger(loadShortInteger(mem));
-        }
-
-        void
-        st(RegisterIndex src, Ordinal dest) {
-            storeOrdinal(dest, getRegister(src).getOrdinal());
-        }
-
-        void
-        stob(RegisterIndex src, Ordinal dest) {
-            storeByteOrdinal(dest, getRegister(src).getByteOrdinal());
-        }
-
-        void
-        stib(RegisterIndex src, Ordinal dest) {
-            storeByteInteger(dest, getRegister(src).getByteInteger());
-        }
-
-        void
-        stis(RegisterIndex src, Ordinal dest) {
-            storeShortInteger(dest, getRegister(src).getShortInteger());
-        }
-
-        void
-        stos(RegisterIndex src, Ordinal dest) {
-            storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
-        }
-
-        void
-        stl(RegisterIndex src, Ordinal address) {
-            if (!divisibleByTwo(src)) {
-                /// @todo raise a operation.invalid_operand fault
-                raiseFault();
-            } else {
-                storeOrdinal(address, getRegister(src).getOrdinal());
-                storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-                if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
-                    /// @todo generate an OPERATION.UNALIGNED fault
-                    raiseFault();
-                }
-            }
-        }
-        void
-        stt(RegisterIndex src, Ordinal address) {
-            if (!divisibleByFour(src)) {
-                /// @todo raise a operation.invalid_operand fault
-                raiseFault();
-            } else {
-                storeOrdinal(address, getRegister(src).getOrdinal());
-                storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-                storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-                if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
-                    /// @todo generate an OPERATION.UNALIGNED_FAULT
-                    raiseFault();
-                }
-            }
-        }
-
-        void
-        stq(RegisterIndex src, Ordinal address) {
-            if (!divisibleByFour(src)) {
-                raiseFault();
-                /// @todo raise a operation.invalid_operand fault
-            } else {
-                storeOrdinal(address, getRegister(src).getOrdinal());
-                storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-                storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-                storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-                if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
-                    raiseFault();
-                    /// @todo generate an OPERATION.UNALIGNED_FAULT
-                }
-            }
-        }
-
-        void
-        ldl(Ordinal mem, RegisterIndex dest) {
-            if(!divisibleByTwo(dest)) {
-                /// @todo raise invalid_operand fault
-                // the Hx docs state that dest is modified
-                getRegister(dest).setOrdinal(-1);
-                raiseFault();
-            } else {
-                getRegister(dest).setOrdinal(loadOrdinal(mem));
-                getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
-                if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
-                    /// @todo generate an OPERATION.UNALIGNED_FAULT
-                    raiseFault();
-                }
-            }
-        }
-        void
-        ldt(Ordinal mem, RegisterIndex dest) {
-            if(!divisibleByFour(dest)) {
-                /// @todo raise invalid_operand fault
-                // the Hx docs state that dest is modified
-                getRegister(dest).setOrdinal(-1);
-                raiseFault();
-            } else {
-                getRegister(dest).setOrdinal(loadOrdinal(mem));
-                getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
-                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
-                if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
-                    /// @todo generate an OPERATION.UNALIGNED_FAULT
-                    raiseFault();
-                }
-            }
-        }
-        void
-        ldq(Ordinal mem, RegisterIndex dest) {
-            if(!divisibleByFour(dest)) {
-                /// @todo raise invalid_operand fault
-                // the Hx docs state that dest is modified
-                getRegister(dest).setOrdinal(-1);
-                raiseFault();
-            } else {
-                getRegister(dest).setOrdinal(loadOrdinal(mem));
-                getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
-                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
-                getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(loadOrdinal(mem+12));
-                if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
-                    /// @todo generate an OPERATION.UNALIGNED_FAULT
-                    raiseFault();
-                }
-            }
-        }
-
-        void
-        mov(RegLit src, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
-        }
-        void
-        movl(RegLit src, RegisterIndex dest) {
-            // so this is a bit of a hack but according to the i960Hx manual only the least significant register gets the literal
-            if (!divisibleByTwo(dest) || (isRegisterIndex(src) && !divisibleByTwo(std::get<RegisterIndex>(src)))) {
-                getRegister(dest).setInteger(-1);
-                getRegister(nextRegisterIndex(dest)).setInteger(-1);
-                /// @todo generate a fault here!
-                raiseFault();
-            } else {
-                getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
-                getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
-            }
-        }
-        void
-        movt(RegLit src, RegisterIndex dest) {
-            if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
-                getRegister(dest).setInteger(-1);
-                getRegister(nextRegisterIndex(dest)).setInteger(-1);
-                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
-                /// @todo generate a fault here!
-                raiseFault();
-            } else {
-                getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
-                getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
-                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
-            }
-        }
-        void
-        movq(RegLit src, RegisterIndex dest) {
-            if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
-                getRegister(dest).setInteger(-1);
-                getRegister(nextRegisterIndex(dest)).setInteger(-1);
-                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
-                getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setInteger(-1);
-                /// @todo generate a fault here!
-                raiseFault();
-            } else {
-                getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
-                getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
-                getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(extractValue(nextValue(nextValue(src)), TreatAsOrdinal{}));
-                getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
-            }
-        }
+        void lda(Ordinal mem, RegisterIndex dest);
+        void ld(Ordinal address, RegisterIndex dest);
+        void ldob(Ordinal mem, RegisterIndex dest);
+        void ldos(Ordinal mem, RegisterIndex dest);
+        void ldib(Ordinal mem, RegisterIndex dest);
+        void ldis(Ordinal mem, RegisterIndex dest);
+        void st(RegisterIndex src, Ordinal dest);
+        void stob(RegisterIndex src, Ordinal dest);
+        void stib(RegisterIndex src, Ordinal dest);
+        void stis(RegisterIndex src, Ordinal dest);
+        void stos(RegisterIndex src, Ordinal dest);
+        void stl(RegisterIndex src, Ordinal address);
+        void stt(RegisterIndex src, Ordinal address);
+        void stq(RegisterIndex src, Ordinal address);
+        void ldl(Ordinal mem, RegisterIndex dest);
+        void ldt(Ordinal mem, RegisterIndex dest);
+        void ldq(Ordinal mem, RegisterIndex dest);
+        void mov(RegLit src, RegisterIndex dest);
+        void movl(RegLit src, RegisterIndex dest);
+        void movt(RegLit src, RegisterIndex dest);
+        void movq(RegLit src, RegisterIndex dest);
     private: // internals
         Ordinal extractValue(RegLit value, TreatAsOrdinal) const noexcept;
         Integer extractValue(RegLit value, TreatAsInteger) const noexcept;
