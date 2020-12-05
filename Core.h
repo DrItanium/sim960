@@ -362,7 +362,7 @@ namespace i960
                     // case 0x5B4: intdis(); break;
                     // case 0x5B5: inten(); break;
                 case 0x5CC: mov(inst.getSrc1(), inst.getDestination()); break;
-                case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x5DC: movl(inst.getSrc1(), inst.getDestination()); break;
                 case 0x5EC: movt(inst.getSrc1(), inst.getDestination()); break;
                 case 0x5FC: movq(inst.getSrc1(), inst.getDestination()); break;
@@ -920,10 +920,6 @@ namespace i960
             getRegister(dest).setOrdinal(s2 / s1) ;
             /// @todo implement fault detection
         }
-        void
-        eshro(RegLit src1, RegLit src2, RegisterIndex dest) {
-            /// @todo implement
-        }
 
         void
         ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -932,7 +928,17 @@ namespace i960
 
         void
         emul(RegLit src1, RegLit src2, RegisterIndex dest) {
-            /// @todo implement
+            auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
+            auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
+            if (!divisibleByTwo(dest)) {
+                getRegister(dest).setOrdinal(-1);
+                getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
+                raiseFault(); // OPERATION.INVALID_OPERAND
+            } else {
+                auto result = s1 * s2;
+                getRegister(dest).setOrdinal(result);
+                getRegister(nextRegisterIndex(dest)).setOrdinal(static_cast<Ordinal>(result >> 32));
+            }
         }
         void
         remi(RegLit src1, RegLit src2, RegisterIndex dest) {
