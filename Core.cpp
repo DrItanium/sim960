@@ -259,7 +259,7 @@ namespace i960 {
             case 0x090: call(inst.getDisplacement()); break;
             case 0x0A0: ret(); break;
             case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
-            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(inst.getDisplacement(){}); break;
+            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{inst.getDisplacement()}); break;
             case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{inst.getDisplacement()}); break;
             case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{inst.getDisplacement()}); break;
             case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{inst.getDisplacement()}); break;

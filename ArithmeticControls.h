@@ -4,6 +4,7 @@
 
 #ifndef I960_PROTOTYPE_SIMULATOR_ARITHMETICCONTROLS_H
 #define I960_PROTOTYPE_SIMULATOR_ARITHMETICCONTROLS_H
+#include <type_traits>
 #include "Register.h"
 #include "CoreTypes.h"
 namespace i960 {
@@ -42,7 +43,7 @@ namespace i960 {
             } else if constexpr (cck == ConditionCodeKind::Ordered) {
                 return static_cast<bool>(getConditionCode());
             } else {
-                return getConditionCode() & static_cast<std::underlying_enum_type_t<ConditionCodeKind>>(cck);
+                return getConditionCode() & static_cast<std::underlying_type_t<ConditionCodeKind>>(cck);
             }
         }
         constexpr bool conditionIsUnordered() const noexcept { return conditionIs<ConditionCodeKind::Unordered>(); }
