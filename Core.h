@@ -9,6 +9,7 @@
 #include "Register.h"
 #include "DependentFalse.h"
 #include "ArithmeticControls.h"
+#include "ProcessControls.h"
 namespace i960
 {
 
@@ -479,6 +480,7 @@ namespace i960
         RegisterFile globals, locals;
         Register ip; // always start at address zero
         ArithmeticControls ac;
+        ProcessControls pc;
         bool _unalignedFaultEnabled = false;
         unsigned int _salign = 1;
     };

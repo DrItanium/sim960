@@ -35,6 +35,8 @@ OPL3Duo theOPL3Duo(OPL3Duo_A2,
                    OPL3Duo_Reset);
 Adafruit_seesaw theSoilSensor;
 Adafruit_SI5351 clockgen;
+// the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
+// directly
 namespace i960 {
     /*
      * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
