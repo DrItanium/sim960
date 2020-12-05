@@ -868,6 +868,19 @@ namespace i960
             }
         }
     private: // compare and increment or decrement
+        template<typename Tag>
+        void
+        compareBase(RegLit src1, RegLit src2) {
+            auto s1 = extractValue(src1, Tag{});
+            auto s2 = extractValue(src2, Tag{});
+            if (s1 < s2) {
+                ac.setConditionCode(0b100);
+            } else if (s1 == s2) {
+                ac.setConditionCode(0b010);
+            } else {
+                ac.setConditionCode(0b001);
+            }
+        }
         void cmpo(RegLit src1, RegLit src2);
         void cmpi(RegLit src1, RegLit src2);
         void concmpo(RegLit src1, RegLit src2);

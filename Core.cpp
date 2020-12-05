@@ -501,27 +501,11 @@ namespace i960 {
     }
     void
     Core::cmpo(RegLit src1, RegLit src2) {
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        if (s1 < s2) {
-            ac.setConditionCode(0b100);
-        } else if (s1 == s2) {
-            ac.setConditionCode(0b010);
-        } else {
-            ac.setConditionCode(0b001);
-        }
+        compareBase<TreatAsOrdinal>(src1, src2);
     }
     void
     Core::cmpi(RegLit src1, RegLit src2) {
-        auto s1 = extractValue(src1, TreatAsInteger{});
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        if (s1 < s2) {
-            ac.setConditionCode(0b100);
-        } else if (s1 == s2) {
-            ac.setConditionCode(0b010);
-        } else {
-            ac.setConditionCode(0b001);
-        }
+        compareBase<TreatAsInteger>(src1, src2);
     }
     void
     Core::concmpo(RegLit src1, RegLit src2) {
