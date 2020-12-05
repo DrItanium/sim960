@@ -358,7 +358,7 @@ namespace i960
                 case 0x5A6: cmpdeco(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x5A7: cmpdeci(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x5AC: scanbyte(inst.getSrc1(), inst.getSrc2()); break;
-                    //case 0x5AD: bswap(inst.getSrc1(), inst.getSrc2()); break;
+                //case 0x5AD: bswap(inst.getSrc1(), inst.getSrc2()); break;
                 case 0x5AE: chkbit(inst.getSrc1(), inst.getSrc2()); break;
                 case 0x5B0: addc(inst.getSrc1(), inst.getSrc2(),inst.getDestination()); break;
                 case 0x5B2: subc(inst.getSrc1(), inst.getSrc2(),inst.getDestination()); break;
@@ -369,30 +369,14 @@ namespace i960
                 case 0x5DC: movl(inst.getSrc1(), inst.getDestination()); break;
                 case 0x5EC: movt(inst.getSrc1(), inst.getDestination()); break;
                 case 0x5FC: movq(inst.getSrc1(), inst.getDestination()); break;
-                    // case 0x610: atmod(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                    // case 0x612: atadd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x610: atmod(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+                //case 0x612: atadd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x640: spanbit(inst.getSrc1(), inst.getDestination()); break;
                 case 0x641: scanbit(inst.getSrc1(), inst.getDestination()); break;
-                case 0x642:
-                    daddc(std::get<RegisterIndex>(inst.getSrc1()),
-                          std::get<RegisterIndex>(inst.getSrc2()),
-                          inst.getDestination());
-                    break;
-                case 0x643:
-                    dsubc(std::get<RegisterIndex>(inst.getSrc1()),
-                          std::get<RegisterIndex>(inst.getSrc2()),
-                          inst.getDestination());
-                    break;
-                case 0x644:
-                    dmovt(std::get<RegisterIndex>(inst.getSrc1()),
-                          inst.getDestination());
-                    break;
-
-                    /// @todo inspect this one, the arguments are backwards
-                case 0x645: // modac
-                    // this one is a little strange and has to be unpacked differently
-                    modac(inst);
-                    break;
+                case 0x642: daddc(std::get<RegisterIndex>(inst.getSrc1()), std::get<RegisterIndex>(inst.getSrc2()), inst.getDestination()); break;
+                case 0x643: dsubc(std::get<RegisterIndex>(inst.getSrc1()), std::get<RegisterIndex>(inst.getSrc2()), inst.getDestination()); break;
+                case 0x644: dmovt(std::get<RegisterIndex>(inst.getSrc1()), inst.getDestination()); break;
+                case 0x645: modac(inst); break;
                 case 0x650: modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x651: extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                     //case 0x654: modtc(inst); break;
@@ -415,7 +399,6 @@ namespace i960
                 case 0x748: remi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x749: modi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x74B: divi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-
                     //case 0x780: addono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                     //case 0x781: addino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                     //case 0x782: subono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -536,19 +519,69 @@ namespace i960
                 case 0x150: bne(Displacement22{inst.getDisplacement()}); break;
                 case 0x160: ble(Displacement22{inst.getDisplacement()}); break;
                 case 0x170: bo(Displacement22{inst.getDisplacement()}); break;
-                    //case 0x180: faultno(); break;
-                    //case 0x190: faultg(); break;
-                    //case 0x1A0: faulte(); break;
-                    //case 0x1B0: faultge(); break;
-                    //case 0x1C0: faultl(); break;
-                    //case 0x1D0: faultne(); break;
-                    //case 0x1E0: faultle(); break;
-                    //case 0x1F0: faulto(); break;
+                case 0x180: faultno(); break;
+                case 0x190: faultg(); break;
+                case 0x1A0: faulte(); break;
+                case 0x1B0: faultge(); break;
+                case 0x1C0: faultl(); break;
+                case 0x1D0: faultne(); break;
+                case 0x1E0: faultle(); break;
+                case 0x1F0: faulto(); break;
                 default:
                     /// @todo raise illegal opcode fault
                     break;
             }
         }
+    private: // fault operations
+        void
+        faultno() {
+            if (ac.getConditionCode() == 0) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faultg() {
+            if (ac.conditionIsGreaterThan()) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faultge() {
+            if (ac.conditionIsGreaterThanOrEqualTo()) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faultl() {
+            if (ac.conditionIsLessThan()) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faultle() {
+            if (ac.conditionIsLessThanOrEqual()) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faulte() {
+            if (ac.conditionIsEqualTo()) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faultne() {
+            if (ac.conditionIsNotEqual()) {
+                /// @todo raise a fault
+            }
+        }
+        void
+        faulto() {
+            if (ac.conditionIsOrdered()) {
+                /// @todo raise a fault
+            }
+        }
+
     private: // common internal functions
         void
         saveLocals() noexcept {
@@ -876,17 +909,17 @@ namespace i960
         }
         void
         eshro(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+            /// @todo implement
         }
 
         void
         ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+            /// @todo implement
         }
 
         void
         emul(RegLit src1, RegLit src2, RegisterIndex dest) {
-
+            /// @todo implement
         }
         void
         remi(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -1470,6 +1503,9 @@ namespace i960
             setFramePointer(tmp);
             setStackPointer(tmp + 64);
         }
+        void calls(RegLit targ) {
+            /// @todo implement
+        }
         void ret() {
             syncf();
             /// @todo continue implementing
@@ -1543,6 +1579,7 @@ namespace i960
             setCarryFlag((outcome & 0xF0) != 0);
             dst.setByteOrdinal((s2.getByteOrdinal() & 0xF0) | (outcome & 0x0F));
         }
+
     private:
         RegisterFile globals, locals;
         Register ip; // always start at address zero
