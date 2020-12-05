@@ -868,73 +868,14 @@ namespace i960
             }
         }
     private: // compare and increment or decrement
-        void
-        cmpo(RegLit src1, RegLit src2) {
-            auto s1 = extractValue(src1, TreatAsOrdinal{});
-            auto s2 = extractValue(src2, TreatAsOrdinal{});
-            if (s1 < s2) {
-                ac.setConditionCode(0b100);
-            } else if (s1 == s2) {
-                ac.setConditionCode(0b010);
-            } else {
-                ac.setConditionCode(0b001);
-            }
-        }
-        void
-        cmpi(RegLit src1, RegLit src2) {
-            auto s1 = extractValue(src1, TreatAsInteger{});
-            auto s2 = extractValue(src2, TreatAsInteger{});
-            if (s1 < s2) {
-                ac.setConditionCode(0b100);
-            } else if (s1 == s2) {
-                ac.setConditionCode(0b010);
-            } else {
-                ac.setConditionCode(0b001);
-            }
-        }
-        void
-        concmpo(RegLit src1, RegLit src2) {
-            // don't care what the least significant two bits are of the cond code so just mask them out
-            if ((ac.getConditionCode() & 0b100) == 0) {
-                auto s1 = extractValue(src1, TreatAsOrdinal{});
-                auto s2 = extractValue(src2, TreatAsOrdinal{});
-                ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
-            }
-        }
-        void
-        concmpi(RegLit src1, RegLit src2) {
-            // don't care what the least significant two bits are of the cond code so just mask them out
-            if ((ac.getConditionCode() & 0b100) == 0) {
-                auto s1 = extractValue(src1, TreatAsInteger{});
-                auto s2 = extractValue(src2, TreatAsInteger{});
-                ac.setConditionCode(s1 <= s2 ? 0b010 : 0b000);
-            }
-
-        }
-        void
-        cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
-            cmpo(src1, src2);
-            auto s2 = extractValue(src2, TreatAsOrdinal{});
-            getRegister(dest).setOrdinal(s2 + 1);
-        }
-        void
-        cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
-            cmpi(src1, src2);
-            auto s2 = extractValue(src2, TreatAsInteger{});
-            getRegister(dest).setInteger(s2 + 1); // manual states that this instruction suppresses overflow
-        }
-        void
-        cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
-            cmpo(src1, src2);
-            auto s2 = extractValue(src2, TreatAsOrdinal{});
-            getRegister(dest).setOrdinal(s2 - 1);
-        }
-        void
-        cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
-            cmpi(src1, src2);
-            auto s2 = extractValue(src2, TreatAsInteger{});
-            getRegister(dest).setInteger(s2 - 1); // manual states that this instruction suppresses overflow
-        }
+        void cmpo(RegLit src1, RegLit src2);
+        void cmpi(RegLit src1, RegLit src2);
+        void concmpo(RegLit src1, RegLit src2);
+        void concmpi(RegLit src1, RegLit src2);
+        void cmpinco(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpinci(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest);
+        void cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest);
     private: // branching
         /// @todo figure out correct signatures
         void
