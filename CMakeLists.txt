@@ -17,5 +17,3 @@ add_library(core960
         Register.h)
 
 
-
-#add_subdirectory(tests)
