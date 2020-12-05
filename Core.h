@@ -386,8 +386,8 @@ namespace i960
             compareBase<Tag>(src1, src2);
             getRegister(dest).set(extractValue(src2, Tag{}) - 1, Tag{});
         }
-        void cmpo(RegLit src1, RegLit src2);
-        void cmpi(RegLit src1, RegLit src2);
+        inline void cmpo(RegLit src1, RegLit src2) { compareBase<TreatAsOrdinal>(src1, src2); }
+        inline void cmpi(RegLit src1, RegLit src2) { compareBase<TreatAsInteger>(src1, src2); }
         void concmpo(RegLit src1, RegLit src2);
         void concmpi(RegLit src1, RegLit src2);
         void cmpinco(RegLit src1, RegLit src2, RegisterIndex dest);

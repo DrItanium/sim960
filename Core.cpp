@@ -541,14 +541,6 @@ namespace i960 {
         }
     }
     void
-    Core::cmpo(RegLit src1, RegLit src2) {
-        compareBase<TreatAsOrdinal>(src1, src2);
-    }
-    void
-    Core::cmpi(RegLit src1, RegLit src2) {
-        compareBase<TreatAsInteger>(src1, src2);
-    }
-    void
     Core::concmpo(RegLit src1, RegLit src2) {
         conditionalCompareBase<TreatAsOrdinal>(src1, src2);
     }
