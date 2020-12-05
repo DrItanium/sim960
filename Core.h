@@ -510,48 +510,11 @@ namespace i960
                 getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
             }
         }
-
+    private: // internals
+        Ordinal extractValue(RegLit value, TreatAsOrdinal) const noexcept;
+        Integer extractValue(RegLit value, TreatAsInteger) const noexcept;
+        RegLit nextValue(RegLit value) const noexcept;
     private: // arithmetic
-        Ordinal extractValue(RegLit value, TreatAsOrdinal) const noexcept {
-            return std::visit([this](auto&& value) -> Ordinal {
-                using K = std::decay_t<decltype(value)>;
-                if constexpr (std::is_same_v<K, Literal>) {
-                    return static_cast<Ordinal>(toInteger(value));
-                } else if constexpr (std::is_same_v<K, RegisterIndex>) {
-                    return getRegister(value).getOrdinal();
-                } else {
-                    static_assert(DependentFalse<K>, "Unimplemented type!");
-                    return 0;
-                }
-            }, value);
-        }
-        Integer extractValue(RegLit value, TreatAsInteger) const noexcept {
-            return std::visit([this](auto&& value) -> Integer{
-                using K = std::decay_t<decltype(value)>;
-                if constexpr (std::is_same_v<K, Literal>) {
-                    return static_cast<Integer>(toInteger(value));
-                } else if constexpr (std::is_same_v<K, RegisterIndex>) {
-                    return getRegister(value).getInteger();
-                } else {
-                    static_assert(DependentFalse<K>, "Unimplemented type!");
-                    return 0;
-                }
-            }, value);
-        }
-        RegLit nextValue(RegLit value) const noexcept {
-            return std::visit([this](auto&& value) -> RegLit {
-                using K = std::decay_t<decltype(value)>;
-                if constexpr (std::is_same_v<K, Literal>) {
-                    // in this case it should always be zero
-                    return toLiteral(0);
-                } else if constexpr (std::is_same_v<K, RegisterIndex>) {
-                    return nextRegisterIndex(value);
-                } else {
-                    static_assert(DependentFalse<K>, "Unimplemented type!");
-                }
-            }, value);
-        }
-        /// @todo figure out the different code forms
         void
         addc(RegLit src1, RegLit src2, RegisterIndex dest) {
             auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
