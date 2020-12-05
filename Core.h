@@ -238,7 +238,7 @@ namespace i960
          * @param ibrBase The address of the initialization boot record
          * @param salign The stack alignment value (defaults to 1)
          */
-        explicit Core(Ordinal ibrBase, unsigned int salign = 1) : _salign(salign), _ibr(ibrBase) { }
+        explicit Core(Ordinal ibrBase, unsigned int salign = 1) : _salign(salign), _ibrBase(ibrBase) { }
         constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
             return (_salign * 16) - 1;
         }

@@ -14,7 +14,6 @@
 #include <OPL3Duo.h>
 #include <Adafruit_seesaw.h>
 #include <Adafruit_SI5351.h>
-#include "PinSetup.h"
 #include "Core.h"
 
 constexpr auto OPL3Duo_A2 = 22;
