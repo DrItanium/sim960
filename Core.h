@@ -308,6 +308,11 @@ namespace i960
         fetchInstruction() {
             return getWordAtIP(true);
         }
+    private: // fault related
+        void
+        raiseFault() {
+           /// @todo flesh this out
+        }
     private: // execution routines
         void
         execute(const RegFormatInstruction& inst) noexcept {
@@ -432,6 +437,7 @@ namespace i960
                     //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                     //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 default:
+                    raiseFault();
                     /// @todo raise an error at this point
                     break;
             }
@@ -460,7 +466,7 @@ namespace i960
                 case 0xC80: ldis(address, inst.getSrcDest()); break;
                 case 0xCA0: stis(inst.getSrcDest(), address); break;
                 default:
-                    /// @todo raise an error at this point
+                    raiseFault();
                     break;
             }
         }
@@ -492,7 +498,7 @@ namespace i960
                 case 0x270: testo(inst.getSrc1()); break;
                 case 0x200: testno(inst.getSrc1()); break;
                 default:
-                    /// @todo raise an error at this point
+                    raiseFault();
                     break;
             }
         }
@@ -520,7 +526,7 @@ namespace i960
                 case 0x1E0: faultle(); break;
                 case 0x1F0: faulto(); break;
                 default:
-                    /// @todo raise illegal opcode fault
+                    raiseFault();
                     break;
             }
         }
@@ -528,49 +534,49 @@ namespace i960
         void
         faultno() {
             if (ac.getConditionCode() == 0) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faultg() {
             if (ac.conditionIsGreaterThan()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faultge() {
             if (ac.conditionIsGreaterThanOrEqualTo()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faultl() {
             if (ac.conditionIsLessThan()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faultle() {
             if (ac.conditionIsLessThanOrEqual()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faulte() {
             if (ac.conditionIsEqualTo()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faultne() {
             if (ac.conditionIsNotEqual()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
         void
         faulto() {
             if (ac.conditionIsOrdered()) {
-                /// @todo raise a fault
+                raiseFault();
             }
         }
 
@@ -651,11 +657,13 @@ namespace i960
         stl(RegisterIndex src, Ordinal address) {
             if (!divisibleByTwo(src)) {
                 /// @todo raise a operation.invalid_operand fault
+                raiseFault();
             } else {
                 storeOrdinal(address, getRegister(src).getOrdinal());
                 storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
                 if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
                     /// @todo generate an OPERATION.UNALIGNED fault
+                    raiseFault();
                 }
             }
         }
@@ -663,12 +671,14 @@ namespace i960
         stt(RegisterIndex src, Ordinal address) {
             if (!divisibleByFour(src)) {
                 /// @todo raise a operation.invalid_operand fault
+                raiseFault();
             } else {
                 storeOrdinal(address, getRegister(src).getOrdinal());
                 storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
                 storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
                 if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
                     /// @todo generate an OPERATION.UNALIGNED_FAULT
+                    raiseFault();
                 }
             }
         }
@@ -676,6 +686,7 @@ namespace i960
         void
         stq(RegisterIndex src, Ordinal address) {
             if (!divisibleByFour(src)) {
+                raiseFault();
                 /// @todo raise a operation.invalid_operand fault
             } else {
                 storeOrdinal(address, getRegister(src).getOrdinal());
@@ -683,6 +694,7 @@ namespace i960
                 storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
                 storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
                 if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
+                    raiseFault();
                     /// @todo generate an OPERATION.UNALIGNED_FAULT
                 }
             }
@@ -694,11 +706,13 @@ namespace i960
                 /// @todo raise invalid_operand fault
                 // the Hx docs state that dest is modified
                 getRegister(dest).setOrdinal(-1);
+                raiseFault();
             } else {
                 getRegister(dest).setOrdinal(loadOrdinal(mem));
                 getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
                 if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
                     /// @todo generate an OPERATION.UNALIGNED_FAULT
+                    raiseFault();
                 }
             }
         }
@@ -708,12 +722,14 @@ namespace i960
                 /// @todo raise invalid_operand fault
                 // the Hx docs state that dest is modified
                 getRegister(dest).setOrdinal(-1);
+                raiseFault();
             } else {
                 getRegister(dest).setOrdinal(loadOrdinal(mem));
                 getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
                 getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem+8));
                 if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                     /// @todo generate an OPERATION.UNALIGNED_FAULT
+                    raiseFault();
                 }
             }
         }
@@ -723,6 +739,7 @@ namespace i960
                 /// @todo raise invalid_operand fault
                 // the Hx docs state that dest is modified
                 getRegister(dest).setOrdinal(-1);
+                raiseFault();
             } else {
                 getRegister(dest).setOrdinal(loadOrdinal(mem));
                 getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem+4));
@@ -730,6 +747,7 @@ namespace i960
                 getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(loadOrdinal(mem+12));
                 if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                     /// @todo generate an OPERATION.UNALIGNED_FAULT
+                    raiseFault();
                 }
             }
         }
@@ -745,6 +763,7 @@ namespace i960
                 getRegister(dest).setInteger(-1);
                 getRegister(nextRegisterIndex(dest)).setInteger(-1);
                 /// @todo generate a fault here!
+                raiseFault();
             } else {
                 getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
                 getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
@@ -757,6 +776,7 @@ namespace i960
                 getRegister(nextRegisterIndex(dest)).setInteger(-1);
                 getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
                 /// @todo generate a fault here!
+                raiseFault();
             } else {
                 getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
                 getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
@@ -771,6 +791,7 @@ namespace i960
                 getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setInteger(-1);
                 getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setInteger(-1);
                 /// @todo generate a fault here!
+                raiseFault();
             } else {
                 getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
                 getRegister(nextRegisterIndex(dest)).setOrdinal(extractValue(nextValue(src), TreatAsOrdinal{}));
@@ -932,6 +953,7 @@ namespace i960
             auto numerator = extractValue(src2, TreatAsInteger{});
             if (denominator == 0) {
                 // @todo raise Arithmetic Zero Divide fault
+                raiseFault();
                 return;
             }
             auto theDestValue = numerator - ((numerator / denominator) * denominator);
