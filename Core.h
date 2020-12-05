@@ -1184,46 +1184,11 @@ namespace i960
         allocateNewLocalRegisterSet() {
             /// @todo implement at some point
         }
-    private: // call and return (note, no supervisor mode right now)
-        /// @todo figure out correct signatures
-        void
-        call(Displacement22 targ) {
-            auto newAddress = targ.getValue();
-            // the and operation clears out the least significant N bits of this new address
-            // make a new stack frame
-            auto tmp = (getStackPointerAddress() + computeAlignmentBoundaryConstant()) &
-                    (~computeAlignmentBoundaryConstant());
-            setRIP(ip);
-            saveLocals();
-            allocateNewLocalRegisterSet();
-            auto addr = ip.getInteger();
-            ip.setInteger(addr + newAddress);
-            setPFP(getFramePointerAddress());
-            setFramePointer(tmp);
-            setStackPointer(tmp + 64);
-        }
-        void callx(Ordinal targ) {
-
-            // the and operation clears out the least significant N bits of this new address
-            // make a new stack frame
-            auto tmp = (getStackPointerAddress() + computeAlignmentBoundaryConstant()) &
-                       (~computeAlignmentBoundaryConstant());
-            setRIP(ip);
-            saveLocals();
-            allocateNewLocalRegisterSet();
-            ip.setOrdinal(targ);
-            setPFP(getFramePointerAddress());
-            setFramePointer(tmp);
-            setStackPointer(tmp + 64);
-        }
-        void calls(RegLit targ) {
-            /// @todo implement
-        }
-        void ret() {
-            syncf();
-            /// @todo continue implementing
-        }
-        /// @todo implement faults as exceptions
+    private: // call and return
+        void call(Displacement22 targ);
+        void callx(Ordinal targ);
+        void calls(RegLit targ);
+        void ret();
     private: // processor management
         void flushreg();
         void modtc(const RegFormatInstruction& inst);
