@@ -520,4 +520,112 @@ namespace i960 {
     Core::testge(RegisterIndex dest) {
         getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
     }
+    void
+    Core::cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bg(Displacement22{targ});
+    }
+
+    void
+    Core::cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        ble(Displacement22{targ});
+
+    }
+
+    void
+    Core::cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        be(Displacement22{targ});
+
+    }
+
+    void
+    Core::cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bne(Displacement22{targ});
+    }
+
+    void
+    Core::cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bl(Displacement22{targ});
+    }
+    void
+    Core::cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bge(Displacement22{targ});
+    }
+    void
+    Core::cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpo(src1, src2);
+        bg(Displacement22{targ});
+    }
+
+    void
+    Core::cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpo(src1, src2);
+        ble(Displacement22{targ});
+    }
+
+    void
+    Core::cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpo(src1, src2);
+        be(Displacement22{targ});
+    }
+
+    void
+    Core::cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpo(src1, src2);
+        bne(Displacement22{targ});
+    }
+
+    void
+    Core::cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpo(src1, src2);
+        bl(Displacement22{targ});
+    }
+    void
+    Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
+        cmpo(src1, src2);
+        bge(Displacement22{targ});
+    }
+    void
+    Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
+        auto bpos = extractValue(bitpos, TreatAsOrdinal{});
+        auto theSrc = getRegister(src).getOrdinal();
+        auto theMask = computeSingleBitShiftMask(bpos);
+        constexpr Ordinal startingConditionCode = 0b010;
+        constexpr Ordinal onConditionMet = 0b000;
+        constexpr Ordinal compareAgainst = 0;
+        ac.setConditionCode(startingConditionCode);
+        if ((theSrc & theMask) == compareAgainst) {
+            ac.setConditionCode(onConditionMet);
+            ip.setInteger(ip.getInteger() + targ);
+        }
+    }
+    void
+    Core::bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
+        auto bpos = extractValue(bitpos, TreatAsOrdinal{});
+        auto theSrc = getRegister(src).getOrdinal();
+        auto theMask = computeSingleBitShiftMask(bpos);
+        constexpr Ordinal startingConditionCode = 0b000;
+        constexpr Ordinal onConditionMet = 0b010;
+        constexpr Ordinal compareAgainst = 1;
+        ac.setConditionCode(startingConditionCode);
+        if ((theSrc & theMask) == compareAgainst) {
+            ac.setConditionCode(onConditionMet);
+            ip.setInteger(ip.getInteger() + targ);
+        }
+    }
+    void
+    Core::cmpibo(RegLit src1, RegLit src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bo(Displacement22{targ});
+    }
+    void
+    Core::cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
+        cmpi(src1, src2);
+        bno(Displacement22{targ});
+    }
 }

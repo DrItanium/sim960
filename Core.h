@@ -1008,115 +1008,22 @@ namespace i960
             }
         }
     private: // compare and branch
-        /// @todo figure out correct signatures
-        void
-        cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            bg(Displacement22{targ});
-        }
-
-        void
-        cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            ble(Displacement22{targ});
-
-        }
-
-        void
-        cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            be(Displacement22{targ});
-
-        }
-
-        void
-        cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            bne(Displacement22{targ});
-        }
-
-        void
-        cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            bl(Displacement22{targ});
-        }
-        void
-        cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            bge(Displacement22{targ});
-        }
-        void
-        cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpo(src1, src2);
-            bg(Displacement22{targ});
-        }
-
-        void
-        cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpo(src1, src2);
-            ble(Displacement22{targ});
-        }
-
-        void
-        cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpo(src1, src2);
-            be(Displacement22{targ});
-        }
-
-        void
-        cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpo(src1, src2);
-            bne(Displacement22{targ});
-        }
-
-        void
-        cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpo(src1, src2);
-            bl(Displacement22{targ});
-        }
-        void
-        cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-            cmpo(src1, src2);
-            bge(Displacement22{targ});
-        }
-        void
-        bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
-            auto bpos = extractValue(bitpos, TreatAsOrdinal{});
-            auto theSrc = getRegister(src).getOrdinal();
-            auto theMask = computeSingleBitShiftMask(bpos);
-            constexpr Ordinal startingConditionCode = 0b010;
-            constexpr Ordinal onConditionMet = 0b000;
-            constexpr Ordinal compareAgainst = 0;
-            ac.setConditionCode(startingConditionCode);
-            if ((theSrc & theMask) == compareAgainst) {
-                ac.setConditionCode(onConditionMet);
-                ip.setInteger(ip.getInteger() + targ);
-            }
-        }
-        void
-        bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
-            auto bpos = extractValue(bitpos, TreatAsOrdinal{});
-            auto theSrc = getRegister(src).getOrdinal();
-            auto theMask = computeSingleBitShiftMask(bpos);
-            constexpr Ordinal startingConditionCode = 0b000;
-            constexpr Ordinal onConditionMet = 0b010;
-            constexpr Ordinal compareAgainst = 1;
-            ac.setConditionCode(startingConditionCode);
-            if ((theSrc & theMask) == compareAgainst) {
-                ac.setConditionCode(onConditionMet);
-                ip.setInteger(ip.getInteger() + targ);
-            }
-        }
-        void
-        cmpibo(RegLit src1, RegLit src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            bo(Displacement22{targ});
-        }
-        void
-        cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
-            cmpi(src1, src2);
-            bno(Displacement22{targ});
-        }
+        void cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ);
+        void bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ);
+        void cmpibo(RegLit src1, RegLit src2, ShortInteger targ);
+        void cmpibno(RegLit src1, RegLit src2, ShortInteger targ);
     private: // test condition codes
         void testo(RegisterIndex dest);
         void testno(RegisterIndex dest);
