@@ -289,27 +289,12 @@ namespace i960
         void execute(const MEMFormatInstruction &inst) noexcept;
         void execute(const COBRInstruction &inst) noexcept;
         void execute(const CTRLInstruction &inst) noexcept;
-    private: // fault operations
-        void faultno();
-        void faultg();
-        void faultge();
-        void faultl();
-        void faultle();
-        void faulte();
-        void faultne();
-        void faulto();
 
     private: // common internal functions
         void saveLocals() noexcept;
         void restoreLocals() noexcept;
-        bool
-        getCarryFlag() const noexcept {
-            return ac.carryFlagSet();
-        }
-        void
-        setCarryFlag(bool value) noexcept {
-            ac.setCarryFlag(value);
-        }
+        bool getCarryFlag() const noexcept;
+        void setCarryFlag(bool value) noexcept;
     private: // data movement operations
         void
         lda(Ordinal mem, RegisterIndex dest) {
@@ -786,27 +771,11 @@ namespace i960
         void cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest);
         void cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest);
     private: // branching
-        /// @todo figure out correct signatures
-        void
-        b(Displacement22 targ) {
-            ip.setInteger(ip.getInteger() + targ.getValue());
-        }
-        void
-        bal(Displacement22 targ) {
-            globals[14].setOrdinal(ip.getOrdinal() + 4);
-            // make sure that the code is consistent
-            b(targ);
-        }
-        void
-        bx(Ordinal targ) {
-            ip.setOrdinal(targ);
-        }
-        void
-        balx(Ordinal targ, RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ip.getOrdinal());
-            ip.setOrdinal(targ);
-        }
-
+        void b(Displacement22 targ);
+        void bal(Displacement22 targ);
+        void bx(Ordinal targ);
+        void balx(Ordinal targ, RegisterIndex dest);
+    private: // condensed logic forms
         /// @todo condense this operation set down to a single function since the mask is embedded in the opcode itself :)
         template<ConditionCodeKind cck>
         void

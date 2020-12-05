@@ -675,4 +675,32 @@ namespace i960 {
             ac.setConditionCode(0b000);
         }
     }
+    bool
+    Core::getCarryFlag() const noexcept {
+        return ac.carryFlagSet();
+    }
+    void
+    Core::setCarryFlag(bool value) noexcept {
+        ac.setCarryFlag(value);
+    }
+    /// @todo figure out correct signatures
+    void
+    Core::b(Displacement22 targ) {
+        ip.setInteger(ip.getInteger() + targ.getValue());
+    }
+    void
+    Core::bal(Displacement22 targ) {
+        globals[14].setOrdinal(ip.getOrdinal() + 4);
+        // make sure that the code is consistent
+        b(targ);
+    }
+    void
+    Core::bx(Ordinal targ) {
+        ip.setOrdinal(targ);
+    }
+    void
+    Core::balx(Ordinal targ, RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ip.getOrdinal());
+        ip.setOrdinal(targ);
+    }
 }
