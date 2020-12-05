@@ -54,6 +54,8 @@ namespace i960 {
      * - 2 MB Onboard SPI Flash directly mapped into IO Device Space
      * - OPL3 Device
      * - Neopixels
+     * - EEPROM
+     * - FLASH memory
      * - etc
      */
     Ordinal

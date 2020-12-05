@@ -233,10 +233,19 @@ namespace i960
     public:
         using RegisterFile = std::array<Register, 16>;
     public:
-        explicit Core(unsigned int salign = 1) : _salign(salign) { }
+        /**
+         * @brief Construct a core object
+         * @param ibrBase The address of the initialization boot record
+         * @param salign The stack alignment value (defaults to 1)
+         */
+        explicit Core(Ordinal ibrBase, unsigned int salign = 1) : _salign(salign), _ibr(ibrBase) { }
         constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
             return (_salign * 16) - 1;
         }
+        /**
+         * @brief Perform the power on self test, get the image information, and then return
+         */
+        void post();
         void cycle();
         Register& getRegister(RegisterIndex index) noexcept;
         const Register& getRegister(RegisterIndex index) const noexcept;
@@ -483,6 +492,7 @@ namespace i960
         ProcessControls pc;
         bool _unalignedFaultEnabled = false;
         unsigned int _salign = 1;
+        Ordinal _ibrBase = 0;
     };
 
 }

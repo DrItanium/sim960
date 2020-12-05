@@ -1131,4 +1131,9 @@ namespace i960 {
     Core::allocateNewLocalRegisterSet() {
         /// @todo implement at some point
     }
+
+    void
+    Core::post() {
+
+    }
 }
