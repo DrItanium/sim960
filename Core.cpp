@@ -318,5 +318,54 @@ namespace i960 {
             return globals[offset];
         }
     }
+    void
+    Core::faultno() {
+        if (ac.getConditionCode() == 0) {
+            raiseFault();
+        }
+    }
+    void
+    Core::faultg() {
+        if (ac.conditionIsGreaterThan()) {
+            raiseFault();
+        }
+    }
+    void
+    Core::faultge() {
+        if (ac.conditionIsGreaterThanOrEqualTo()) {
+            raiseFault();
+        }
+    }
+    void
+    Core::faultl() {
+        if (ac.conditionIsLessThan()) {
+            raiseFault();
+        }
+    }
+    void
+    Core::faultle() {
+        if (ac.conditionIsLessThanOrEqual()) {
+            raiseFault();
+        }
+    }
+    void
+    Core::faulte() {
+        if (ac.conditionIsEqualTo()) {
+            raiseFault();
+        }
+    }
+    void
+    Core::faultne() {
+        if (ac.conditionIsNotEqual()) {
+            raiseFault();
+        }
+    }
+
+    void
+    Core::faulto() {
+        if (ac.conditionIsOrdered()) {
+            raiseFault();
+        }
+    }
 
 }

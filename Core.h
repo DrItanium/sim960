@@ -290,54 +290,14 @@ namespace i960
         void execute(const COBRInstruction &inst) noexcept;
         void execute(const CTRLInstruction &inst) noexcept;
     private: // fault operations
-        void
-        faultno() {
-            if (ac.getConditionCode() == 0) {
-                raiseFault();
-            }
-        }
-        void
-        faultg() {
-            if (ac.conditionIsGreaterThan()) {
-                raiseFault();
-            }
-        }
-        void
-        faultge() {
-            if (ac.conditionIsGreaterThanOrEqualTo()) {
-                raiseFault();
-            }
-        }
-        void
-        faultl() {
-            if (ac.conditionIsLessThan()) {
-                raiseFault();
-            }
-        }
-        void
-        faultle() {
-            if (ac.conditionIsLessThanOrEqual()) {
-                raiseFault();
-            }
-        }
-        void
-        faulte() {
-            if (ac.conditionIsEqualTo()) {
-                raiseFault();
-            }
-        }
-        void
-        faultne() {
-            if (ac.conditionIsNotEqual()) {
-                raiseFault();
-            }
-        }
-        void
-        faulto() {
-            if (ac.conditionIsOrdered()) {
-                raiseFault();
-            }
-        }
+        void faultno();
+        void faultg();
+        void faultge();
+        void faultl();
+        void faultle();
+        void faulte();
+        void faultne();
+        void faulto();
 
     private: // common internal functions
         void
