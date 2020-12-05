@@ -431,14 +431,11 @@ namespace i960
         void bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ);
         void bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ);
     private: // test condition codes
-        void testo(RegisterIndex dest);
-        void testno(RegisterIndex dest);
-        void teste(RegisterIndex dest);
-        void testne(RegisterIndex dest);
-        void testl(RegisterIndex dest);
-        void testle(RegisterIndex dest);
-        void testg(RegisterIndex dest);
-        void testge(RegisterIndex dest);
+        template<ConditionCodeKind cck>
+        void
+        testBase(RegisterIndex dest) {
+            getRegister(dest).setOrdinal(ac.conditionIs<cck>() ? 1 : 0);
+        }
     private:
         Ordinal getStackPointerAddress() const noexcept;
         void setRIP(const Register& ip) noexcept;

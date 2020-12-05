@@ -295,14 +295,14 @@ namespace i960 {
     void
     Core::execute(const COBRInstruction &inst) noexcept {
         switch (inst.getOpcode()) {
-            case 0x200: testno(inst.getSrc1()); break;
-            case 0x210: testg(inst.getSrc1()); break;
-            case 0x220: teste(inst.getSrc1()); break;
-            case 0x230: testge(inst.getSrc1()); break;
-            case 0x240: testl(inst.getSrc1()); break;
-            case 0x250: testne(inst.getSrc1()); break;
-            case 0x260: testle(inst.getSrc1()); break;
-            case 0x270: testo(inst.getSrc1()); break;
+            case 0x200: testBase<ConditionCodeKind::Unordered>(inst.getSrc1()); break;
+            case 0x210: testBase<ConditionCodeKind::GreaterThan>(inst.getSrc1()); break;
+            case 0x220: testBase<ConditionCodeKind::EqualTo>(inst.getSrc1()); break;
+            case 0x230: testBase<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1()); break;
+            case 0x240: testBase<ConditionCodeKind::LessThan>(inst.getSrc1()); break;
+            case 0x250: testBase<ConditionCodeKind::NotEqual>(inst.getSrc1()); break;
+            case 0x260: testBase<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1()); break;
+            case 0x270: testBase<ConditionCodeKind::Ordered>(inst.getSrc1()); break;
             case 0x300: bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
             case 0x310: compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
             case 0x320: compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
@@ -511,38 +511,7 @@ namespace i960 {
         setFramePointer(tmp);
         setStackPointer(tmp + 64);
     }
-    void
-    Core::testo(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsOrdered() ? 1 : 0);
-    }
-    void
-    Core::testno(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.getConditionCode() == 0 ? 1 : 0);
-    }
-    void
-    Core::teste(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsEqualTo() ? 1 : 0);
-    }
-    void
-    Core::testne(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsNotEqual() ? 1 : 0);
-    }
-    void
-    Core::testl(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsLessThan() ? 1 : 0);
-    }
-    void
-    Core::testle(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsLessThanOrEqual() ? 1 : 0);
-    }
-    void
-    Core::testg(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsGreaterThan() ? 1 : 0);
-    }
-    void
-    Core::testge(RegisterIndex dest) {
-        getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
-    }
+
     void
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
