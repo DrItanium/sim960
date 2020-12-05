@@ -367,5 +367,38 @@ namespace i960 {
             raiseFault();
         }
     }
+    void
+    Core::saveLocals() noexcept {
+        // okay, we have to save all of the registers to the stack or the on board
+        // register cache (however, I'm not implementing that yet)
+    }
+    void
+    Core::restoreLocals() noexcept {
+        // restore the local register frame, generally done when you return from a
+        // previous function
+    }
+
+    void
+    Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+        /// @todo implement... such a baffling design...BCD...
+    }
+    void
+    Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
+        auto srcValue = extractValue(src1, TreatAsOrdinal { });
+        getRegister(dest).setOrdinal(srcValue);
+        auto lowest8 = static_cast<ByteOrdinal>(srcValue);
+        ac.setConditionCode(((lowest8 >= 0b0011'0000) && (lowest8 <= 0b0011'1001)) ? 0b000 : 0b010);
+    }
+    void
+    Core::daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+        const auto& s1 = getRegister(src1);
+        const auto& s2 = getRegister(src2);
+        auto& dst = getRegister(dest);
+        // transfer bits over
+        dst.setOrdinal(s2.getOrdinal());
+        auto outcome = (s2.getByteOrdinal() & 0xF) + (s1.getByteOrdinal() & 0xF) + (getCarryFlag() ? 1 : 0);
+        setCarryFlag((outcome & 0xF0) != 0);
+        dst.setByteOrdinal((s2.getByteOrdinal() & 0xF0) | (outcome & 0x0F));
+    }
 
 }

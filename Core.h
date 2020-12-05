@@ -300,16 +300,8 @@ namespace i960
         void faulto();
 
     private: // common internal functions
-        void
-        saveLocals() noexcept {
-            // okay, we have to save all of the registers to the stack or the on board
-            // register cache (however, I'm not implementing that yet)
-        }
-        void
-        restoreLocals() noexcept {
-            // restore the local register frame, generally done when you return from a
-            // previous function
-        }
+        void saveLocals() noexcept;
+        void restoreLocals() noexcept;
         bool
         getCarryFlag() const noexcept {
             return ac.carryFlagSet();
@@ -1283,17 +1275,8 @@ namespace i960
             /// @todo implement
         }
     private: // Numerics Architecture addons
-        void
-        dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
-            /// @todo implement... such a baffling design...BCD...
-        }
-        void
-        dmovt(RegisterIndex src1, RegisterIndex dest) {
-            auto srcValue = extractValue(src1, TreatAsOrdinal { });
-            getRegister(dest).setOrdinal(srcValue);
-            auto lowest8 = static_cast<ByteOrdinal>(srcValue);
-            ac.setConditionCode(((lowest8 >= 0b0011'0000) && (lowest8 <= 0b0011'1001)) ? 0b000 : 0b010);
-        }
+        void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+        void dmovt(RegisterIndex src1, RegisterIndex dest);
         /**
          * @brief Decimal Add with Carry. Adds bits 0 through 3 of src2 and src1 and bit 1 of the condition code (used here as a carry bit).
          * The result is stored in bits 0 through 3 of dest. If the addition results in a carry, bit 1 of the condition code is set. Bits 4
@@ -1306,17 +1289,7 @@ namespace i960
          * @param src2 The second bcd number
          * @param dest The destination register to store the result in
          */
-        void
-        daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
-            const auto& s1 = getRegister(src1);
-            const auto& s2 = getRegister(src2);
-            auto& dst = getRegister(dest);
-            // transfer bits over
-            dst.setOrdinal(s2.getOrdinal());
-            auto outcome = (s2.getByteOrdinal() & 0xF) + (s1.getByteOrdinal() & 0xF) + (getCarryFlag() ? 1 : 0);
-            setCarryFlag((outcome & 0xF0) != 0);
-            dst.setByteOrdinal((s2.getByteOrdinal() & 0xF0) | (outcome & 0x0F));
-        }
+        void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
 
     private:
         RegisterFile globals, locals;
