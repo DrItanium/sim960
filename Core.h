@@ -1225,55 +1225,14 @@ namespace i960
         }
         /// @todo implement faults as exceptions
     private: // processor management
-        void
-        flushreg() {
-            // noop right now
-        }
-        void
-        modtc(const RegFormatInstruction& inst) {
-            /// @todo implement
-        }
-        void
-        modpc(const RegFormatInstruction& inst) {
-            /// @todo implement
-        }
-        void
-        modac(const RegFormatInstruction &inst) {
-            // in this case, mask is src/dst
-            // src is src2
-            // dest is src1
-            auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
-            auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
-            auto dest = std::visit([](auto&& value) -> RegisterIndex {
-                using K = std::decay_t<decltype(value)>;
-                if constexpr (std::is_same_v<K, RegisterIndex>) {
-                    return value;
-                } else if constexpr (std::is_same_v<K, Literal>) {
-                    return toRegisterIndex(toInteger(value));
-                } else {
-                    static_assert(DependentFalse<K>, "Unresolved type!");
-                }
-            }, inst.getSrc1());
-            auto tmp = ac.getRawValue();
-            ac.setRawValue((src & mask) | (tmp & (~mask)));
-            getRegister(dest).setOrdinal(tmp);
-        }
-        void
-        syncf() {
-            if (ac.getNoImpreciseFaults()) {
-                return;
-            }
-            // do a noop
-        }
+        void flushreg();
+        void modtc(const RegFormatInstruction& inst);
+        void modpc(const RegFormatInstruction& inst);
+        void modac(const RegFormatInstruction& inst);
+        void syncf();
     private: // marking
-        void
-        fmark() {
-            /// @todo implement
-        }
-        void
-        mark() {
-            /// @todo implement
-        }
+        void fmark();
+        void mark();
     private: // Numerics Architecture addons
         void dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
         void dmovt(RegisterIndex src1, RegisterIndex dest);

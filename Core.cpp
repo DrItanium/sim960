@@ -400,5 +400,53 @@ namespace i960 {
         setCarryFlag((outcome & 0xF0) != 0);
         dst.setByteOrdinal((s2.getByteOrdinal() & 0xF0) | (outcome & 0x0F));
     }
+    void
+    Core::fmark() {
+        /// @todo implement
+    }
+    void
+    Core::mark() {
+        /// @todo implement
+    }
+    void
+    Core::syncf() {
+        if (ac.getNoImpreciseFaults()) {
+            return;
+        }
+        // do a noop
+    }
+    void
+    Core::flushreg() {
+        // noop right now
+    }
+    void
+    Core::modtc(const RegFormatInstruction& inst) {
+        /// @todo implement
+    }
+    void
+    Core::modpc(const RegFormatInstruction& inst) {
+        /// @todo implement
+    }
+    void
+    Core::modac(const RegFormatInstruction &inst) {
+        // in this case, mask is src/dst
+        // src is src2
+        // dest is src1
+        auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
+        auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
+        auto dest = std::visit([](auto&& value) -> RegisterIndex {
+            using K = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<K, RegisterIndex>) {
+                return value;
+            } else if constexpr (std::is_same_v<K, Literal>) {
+                return toRegisterIndex(toInteger(value));
+            } else {
+                static_assert(DependentFalse<K>, "Unresolved type!");
+            }
+        }, inst.getSrc1());
+        auto tmp = ac.getRawValue();
+        ac.setRawValue((src & mask) | (tmp & (~mask)));
+        getRegister(dest).setOrdinal(tmp);
+    }
 
 }
