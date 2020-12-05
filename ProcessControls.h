@@ -9,6 +9,7 @@
 namespace i960 {
     class ProcessControls {
     public:
+        constexpr ProcessControls() noexcept : _raw(0) { }
         constexpr auto getPriority() const noexcept { return p; }
         constexpr auto getRawValue() const noexcept { return _raw; }
         constexpr auto traceFaultsEnabledGlobally() const noexcept { return static_cast<bool>(te); }
@@ -23,6 +24,7 @@ namespace i960 {
         void setExecutionMode(bool value) noexcept { em = value; }
         void setTraceFaultPending(bool value) noexcept { tfp = value; }
         void setStateFlag(bool value) noexcept { s = value; }
+        void setRawValue(Ordinal value) noexcept { _raw = value; }
     private:
         union {
             Ordinal _raw;
