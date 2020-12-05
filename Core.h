@@ -964,11 +964,6 @@ namespace i960
                     getRegister(dest).setOrdinal(remainder);
                 }
             }
-            /// @todo implement
-        }
-        void
-        ediv_internal(RegLit src1, RegisterIndex src2, RegisterIndex dest) {
-
         }
 
         void
