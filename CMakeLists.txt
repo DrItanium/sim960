@@ -18,4 +18,4 @@ add_library(core960
 
 
 
-add_subdirectory(tests)
+#add_subdirectory(tests)
