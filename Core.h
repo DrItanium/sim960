@@ -248,8 +248,6 @@ namespace i960
         }
         void cycle() {
             executeInstruction(decodeInstruction(fetchInstruction()));
-            memoryAccess();
-            writeback();
         }
         Register& getRegister(int index) noexcept {
             if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
@@ -309,12 +307,6 @@ namespace i960
         Ordinal
         fetchInstruction() {
             return getWordAtIP(true);
-        }
-        void memoryAccess() {
-
-        }
-        void writeback() {
-
         }
     private: // execution routines
         void
@@ -379,15 +371,15 @@ namespace i960
                 case 0x645: modac(inst); break;
                 case 0x650: modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 case 0x651: extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                    //case 0x654: modtc(inst); break;
-                    //case 0x655: modpc(inst); break;
+                case 0x654: modtc(inst); break;
+                case 0x655: modpc(inst); break;
                     //case 0x658: intctl(inst.getSrc1(), inst.getDestination()); break;
                     //case 0x659: sysctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                     //case 0x65B: icctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                     //case 0x65C: dcctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-                    //case 0x660: calls(inst.getSrc1()); break;
-                    //case 0x66B: mark(); break;
-                    //case 0x66C: fmark(); break;
+                case 0x660: calls(inst.getSrc1()); break;
+                case 0x66B: mark(); break;
+                case 0x66C: fmark(); break;
                 case 0x66D: flushreg(); break;
                 case 0x66F: syncf(); break;
                 case 0x670: emul(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -1517,6 +1509,14 @@ namespace i960
             // noop right now
         }
         void
+        modtc(const RegFormatInstruction& inst) {
+            /// @todo implement
+        }
+        void
+        modpc(const RegFormatInstruction& inst) {
+            /// @todo implement
+        }
+        void
         modac(const RegFormatInstruction &inst) {
             // in this case, mask is src/dst
             // src is src2
@@ -1543,6 +1543,15 @@ namespace i960
                 return;
             }
             // do a noop
+        }
+    private: // marking
+        void
+        fmark() {
+            /// @todo implement
+        }
+        void
+        mark() {
+            /// @todo implement
         }
     private: // Numerics Architecture addons
         void
