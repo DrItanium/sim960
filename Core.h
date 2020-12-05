@@ -958,72 +958,35 @@ namespace i960
         }
 
         /// @todo condense this operation set down to a single function since the mask is embedded in the opcode itself :)
+        template<ConditionCodeKind cck>
         void
-        bno(Displacement22 dest) {
-            if (ac.conditionIsUnordered()) {
+        conditionalBranch(Displacement22 dest) {
+            if (ac.conditionIs<cck>()) {
                 ip.setInteger(ip.getInteger() + dest.getValue());
             }
         }
+        template<ConditionCodeKind cck>
         void
-        bo(Displacement22 dest) {
-            if (ac.conditionIsOrdered()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
+        conditionalFault() {
+            if (ac.conditionIs<cck>()) {
+                raiseFault();
             }
         }
+        template<ConditionCodeKind cck>
         void
-        bg(Displacement22 dest) {
-            if (ac.conditionIsGreaterThan()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
-            }
+        compareAndBranch(RegLit src1, RegisterIndex src2, ShortInteger targ, TreatAsInteger) {
+            cmpi(src1, src2);
+            conditionalBranch<cck>(Displacement22{targ});
         }
+        template<ConditionCodeKind cck>
         void
-        be(Displacement22 dest) {
-            if (ac.conditionIsEqualTo()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
-            }
-        }
-
-        void
-        bge(Displacement22 dest) {
-            if (ac.conditionIsGreaterThanOrEqualTo()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
-            }
-        }
-        void
-        bl(Displacement22 dest) {
-            if (ac.conditionIsLessThan()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
-            }
-        }
-        void
-        bne(Displacement22 dest) {
-            if (ac.conditionIsNotEqual()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
-            }
-        }
-        void
-        ble(Displacement22 dest) {
-            if (ac.conditionIsLessThanOrEqual()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
-            }
+        compareAndBranch(RegLit src1, RegisterIndex src2, ShortInteger targ, TreatAsOrdinal) {
+            cmpo(src1, src2);
+            conditionalBranch<cck>(Displacement22{targ});
         }
     private: // compare and branch
-        void cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ);
-        void cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ);
         void bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ);
         void bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ);
-        void cmpibo(RegLit src1, RegLit src2, ShortInteger targ);
-        void cmpibno(RegLit src1, RegLit src2, ShortInteger targ);
     private: // test condition codes
         void testo(RegisterIndex dest);
         void testno(RegisterIndex dest);

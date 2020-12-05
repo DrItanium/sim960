@@ -1,7 +1,7 @@
 //
 // Created by jwscoggins on 12/5/20.
 //
-
+#include "ArithmeticControls.h"
 #include "Core.h"
 
 namespace i960 {
@@ -223,30 +223,30 @@ namespace i960 {
     void
     Core::execute(const COBRInstruction &inst) noexcept {
         switch (inst.getOpcode()) {
-            case 0x300: bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x370: bbs(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x3A0: cmpibe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x3D0: cmpibne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x3C0: cmpibl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x3E0: cmpible(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x390: cmpibg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x3B0: cmpibge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x3F0: cmpibo(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x380: cmpibno(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x320: cmpobe(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x350: cmpobne(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x340: cmpobl(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x360: cmpoble(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x310: cmpobg(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x330: cmpobge(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
-            case 0x220: teste(inst.getSrc1()); break;
-            case 0x250: testne(inst.getSrc1()); break;
-            case 0x240: testl(inst.getSrc1()); break;
-            case 0x260: testle(inst.getSrc1()); break;
-            case 0x210: testg(inst.getSrc1()); break;
-            case 0x230: testge(inst.getSrc1()); break;
-            case 0x270: testo(inst.getSrc1()); break;
             case 0x200: testno(inst.getSrc1()); break;
+            case 0x210: testg(inst.getSrc1()); break;
+            case 0x220: teste(inst.getSrc1()); break;
+            case 0x230: testge(inst.getSrc1()); break;
+            case 0x240: testl(inst.getSrc1()); break;
+            case 0x250: testne(inst.getSrc1()); break;
+            case 0x260: testle(inst.getSrc1()); break;
+            case 0x270: testo(inst.getSrc1()); break;
+            case 0x300: bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x310: compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
+            case 0x320: compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
+            case 0x330: compareAndBranch<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x340: compareAndBranch<ConditionCodeKind::LessThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
+            case 0x350: compareAndBranch<ConditionCodeKind::NotEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
+            case 0x360: compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal { }); break;
+            case 0x370: bbs(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x380: compareAndBranch<ConditionCodeKind::Unordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x390: compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3A0: compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3B0: compareAndBranch<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3C0: compareAndBranch<ConditionCodeKind::LessThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3D0: compareAndBranch<ConditionCodeKind::NotEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3E0: compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3F0: compareAndBranch<ConditionCodeKind::Ordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
             default:
                 raiseFault();
                 break;
@@ -259,22 +259,22 @@ namespace i960 {
             case 0x090: call(inst.getDisplacement()); break;
             case 0x0A0: ret(); break;
             case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
-            case 0x100: bno(Displacement22{inst.getDisplacement()}); break;
-            case 0x110: bg(Displacement22{inst.getDisplacement()}); break;
-            case 0x120: be(Displacement22{inst.getDisplacement()}); break;
-            case 0x130: bge(Displacement22{inst.getDisplacement()}); break;
-            case 0x140: bl(Displacement22{inst.getDisplacement()}); break;
-            case 0x150: bne(Displacement22{inst.getDisplacement()}); break;
-            case 0x160: ble(Displacement22{inst.getDisplacement()}); break;
-            case 0x170: bo(Displacement22{inst.getDisplacement()}); break;
-            case 0x180: faultno(); break;
-            case 0x190: faultg(); break;
-            case 0x1A0: faulte(); break;
-            case 0x1B0: faultge(); break;
-            case 0x1C0: faultl(); break;
-            case 0x1D0: faultne(); break;
-            case 0x1E0: faultle(); break;
-            case 0x1F0: faulto(); break;
+            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(inst.getDisplacement(){}); break;
+            case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{inst.getDisplacement()}); break;
+            case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{inst.getDisplacement()}); break;
+            case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{inst.getDisplacement()}); break;
+            case 0x140: conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{inst.getDisplacement()}); break;
+            case 0x150: conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{inst.getDisplacement()}); break;
+            case 0x160: conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{inst.getDisplacement()}); break;
+            case 0x170: conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{inst.getDisplacement()}); break;
+            case 0x180: conditionalFault<ConditionCodeKind::Unordered>(); break;
+            case 0x190: conditionalFault<ConditionCodeKind::GreaterThan>(); break;
+            case 0x1A0: conditionalFault<ConditionCodeKind::EqualTo>(); break;
+            case 0x1B0: conditionalFault<ConditionCodeKind::GreaterThanOrEqualTo>(); break;
+            case 0x1C0: conditionalFault<ConditionCodeKind::LessThan>(); break;
+            case 0x1D0: conditionalFault<ConditionCodeKind::NotEqual>(); break;
+            case 0x1E0: conditionalFault<ConditionCodeKind::LessThanOrEqual>(); break;
+            case 0x1F0: conditionalFault<ConditionCodeKind::Ordered>(); break;
             default:
                 raiseFault();
                 break;
@@ -316,55 +316,6 @@ namespace i960 {
             return locals[offset];
         } else {
             return globals[offset];
-        }
-    }
-    void
-    Core::faultno() {
-        if (ac.getConditionCode() == 0) {
-            raiseFault();
-        }
-    }
-    void
-    Core::faultg() {
-        if (ac.conditionIsGreaterThan()) {
-            raiseFault();
-        }
-    }
-    void
-    Core::faultge() {
-        if (ac.conditionIsGreaterThanOrEqualTo()) {
-            raiseFault();
-        }
-    }
-    void
-    Core::faultl() {
-        if (ac.conditionIsLessThan()) {
-            raiseFault();
-        }
-    }
-    void
-    Core::faultle() {
-        if (ac.conditionIsLessThanOrEqual()) {
-            raiseFault();
-        }
-    }
-    void
-    Core::faulte() {
-        if (ac.conditionIsEqualTo()) {
-            raiseFault();
-        }
-    }
-    void
-    Core::faultne() {
-        if (ac.conditionIsNotEqual()) {
-            raiseFault();
-        }
-    }
-
-    void
-    Core::faulto() {
-        if (ac.conditionIsOrdered()) {
-            raiseFault();
         }
     }
     void
@@ -521,76 +472,6 @@ namespace i960 {
         getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
     }
     void
-    Core::cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        bg(Displacement22{targ});
-    }
-
-    void
-    Core::cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        ble(Displacement22{targ});
-
-    }
-
-    void
-    Core::cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        be(Displacement22{targ});
-
-    }
-
-    void
-    Core::cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        bne(Displacement22{targ});
-    }
-
-    void
-    Core::cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        bl(Displacement22{targ});
-    }
-    void
-    Core::cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        bge(Displacement22{targ});
-    }
-    void
-    Core::cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpo(src1, src2);
-        bg(Displacement22{targ});
-    }
-
-    void
-    Core::cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpo(src1, src2);
-        ble(Displacement22{targ});
-    }
-
-    void
-    Core::cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpo(src1, src2);
-        be(Displacement22{targ});
-    }
-
-    void
-    Core::cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpo(src1, src2);
-        bne(Displacement22{targ});
-    }
-
-    void
-    Core::cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpo(src1, src2);
-        bl(Displacement22{targ});
-    }
-    void
-    Core::cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ) {
-        cmpo(src1, src2);
-        bge(Displacement22{targ});
-    }
-    void
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
         auto theSrc = getRegister(src).getOrdinal();
@@ -617,15 +498,5 @@ namespace i960 {
             ac.setConditionCode(onConditionMet);
             ip.setInteger(ip.getInteger() + targ);
         }
-    }
-    void
-    Core::cmpibo(RegLit src1, RegLit src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        bo(Displacement22{targ});
-    }
-    void
-    Core::cmpibno(RegLit src1, RegLit src2, ShortInteger targ) {
-        cmpi(src1, src2);
-        bno(Displacement22{targ});
     }
 }
