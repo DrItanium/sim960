@@ -703,4 +703,165 @@ namespace i960 {
         getRegister(dest).setOrdinal(ip.getOrdinal());
         ip.setOrdinal(targ);
     }
+    void
+    Core::addc(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
+        auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
+        auto c = getCarryFlag() ? 1 : 0;
+        auto result = s2 + s1 + c;
+        auto upperHalf = static_cast<Ordinal>(result >> 32);
+        setCarryFlag(upperHalf != 0) ;
+        getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
+        /// @todo check for integer overflow condition
+    }
+    void
+    Core::addi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsInteger{}) ;
+        auto s2 = extractValue(src2, TreatAsInteger{}) ;
+        getRegister(dest).setInteger(s2 + s1) ;
+        /// @todo implement fault detection
+    }
+
+    void
+    Core::addo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+        auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+        getRegister(dest).setOrdinal(s2 + s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::subi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsInteger{}) ;
+        auto s2 = extractValue(src2, TreatAsInteger{}) ;
+        getRegister(dest).setInteger(s2 - s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::subo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+        auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+        getRegister(dest).setOrdinal(s2 - s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::subc(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
+        auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
+        auto c = getCarryFlag() ? 1 : 0;
+        auto result = s2 - s1 + c;
+        auto upperHalf = static_cast<Ordinal>(result >> 32);
+        setCarryFlag(upperHalf != 0);
+        /// @todo do integer overflow subtraction check
+        getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
+    }
+    void
+    Core::muli(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsInteger{}) ;
+        auto s2 = extractValue(src2, TreatAsInteger{}) ;
+        getRegister(dest).setInteger(s2 * s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::mulo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+        auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+        getRegister(dest).setOrdinal(s2 * s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::divi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsInteger{}) ;
+        auto s2 = extractValue(src2, TreatAsInteger{}) ;
+        getRegister(dest).setInteger(s2 / s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::divo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
+        auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
+        getRegister(dest).setOrdinal(s2 / s1) ;
+        /// @todo implement fault detection
+    }
+    void
+    Core::remi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s2 = extractValue(src2, TreatAsInteger{});
+        auto s1 = extractValue(src1, TreatAsInteger{});
+        getRegister(dest).setInteger(((s2 / s1) * s1));
+    }
+    void
+    Core::remo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto s2 = extractValue(src2, TreatAsOrdinal{});
+        auto s1 = extractValue(src1, TreatAsOrdinal{});
+        getRegister(dest).setOrdinal(((s2 / s1) * s1));
+    }
+    void
+    Core::modi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        // taken from the manual
+        auto denominator = extractValue(src1, TreatAsInteger{});
+        auto numerator = extractValue(src2, TreatAsInteger{});
+        if (denominator == 0) {
+            // @todo raise Arithmetic Zero Divide fault
+            raiseFault();
+            return;
+        }
+        auto theDestValue = numerator - ((numerator / denominator) * denominator);
+        auto& dReg = getRegister(dest);
+        dReg.setInteger(theDestValue);
+        if (((numerator * denominator) < 0) && (theDestValue != 0)) {
+            dReg.setInteger(theDestValue + denominator);
+        }
+    }
+    void
+    Core::shlo(RegLit len, RegLit src, RegisterIndex dest) {
+        auto theLength = extractValue(len, TreatAsOrdinal{});
+        auto theSrc = extractValue(src, TreatAsOrdinal{});
+        if (theLength < 32) {
+            getRegister(dest).setOrdinal(theSrc << theLength);
+        } else {
+            getRegister(dest).setOrdinal(0);
+        }
+    }
+    void
+    Core::shro(RegLit len, RegLit src, RegisterIndex dest) {
+        auto theLength = extractValue(len, TreatAsOrdinal{});
+        auto theSrc = extractValue(src, TreatAsOrdinal{});
+        if (theLength < 32) {
+            getRegister(dest).setOrdinal(theSrc >> theLength);
+        } else {
+            getRegister(dest).setOrdinal(0);
+        }
+    }
+    void
+    Core::shli(RegLit len, RegLit src, RegisterIndex dest) {
+        auto theLength = extractValue(len, TreatAsInteger{});
+        auto theSrc = extractValue(src, TreatAsInteger{});
+        getRegister(dest).setInteger(theSrc << theLength);
+    }
+    /// @todo correctly implement shri and shrdi
+    void
+    Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto src = extractValue(src2, TreatAsInteger{});
+        auto len = abs(extractValue(src1, TreatAsInteger{}));
+        if (len > 32)  {
+            len = 32;
+        }
+        getRegister(dest).setInteger(src >> len);
+    }
+
+    void
+    Core::shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto src = extractValue(src2, TreatAsInteger{});
+        auto len = abs(extractValue(src1, TreatAsInteger{}));
+        auto result = src >> len;
+        if (src < 0 && result < 0) {
+            ++result;
+        }
+        getRegister(dest).setInteger(result);
+    }
+    void
+    Core::rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
+        auto len = extractValue(src1, TreatAsOrdinal {});
+        auto src = extractValue(src2, TreatAsOrdinal {});
+        getRegister(dest).setOrdinal(rotateOperation(src, len));
+    }
 }

@@ -500,169 +500,27 @@ namespace i960
         Integer extractValue(RegLit value, TreatAsInteger) const noexcept;
         RegLit nextValue(RegLit value) const noexcept;
     private: // arithmetic
-        void
-        addc(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
-            auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
-            auto c = getCarryFlag() ? 1 : 0;
-            auto result = s2 + s1 + c;
-            auto upperHalf = static_cast<Ordinal>(result >> 32);
-            setCarryFlag(upperHalf != 0) ;
-            getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
-            /// @todo check for integer overflow condition
-        }
-        void
-        addi(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsInteger{}) ;
-            auto s2 = extractValue(src2, TreatAsInteger{}) ;
-            getRegister(dest).setInteger(s2 + s1) ;
-            /// @todo implement fault detection
-        }
-
-        void
-        addo(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
-            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
-            getRegister(dest).setOrdinal(s2 + s1) ;
-            /// @todo implement fault detection
-        }
-        void
-        subi(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsInteger{}) ;
-            auto s2 = extractValue(src2, TreatAsInteger{}) ;
-            getRegister(dest).setInteger(s2 - s1) ;
-            /// @todo implement fault detection
-        }
-        void
-        subo(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
-            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
-            getRegister(dest).setOrdinal(s2 - s1) ;
-            /// @todo implement fault detection
-        }
-        void
-        subc(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
-            auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
-            auto c = getCarryFlag() ? 1 : 0;
-            auto result = s2 - s1 + c;
-            auto upperHalf = static_cast<Ordinal>(result >> 32);
-            setCarryFlag(upperHalf != 0);
-            /// @todo do integer overflow subtraction check
-            getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
-        }
-        void
-        muli(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsInteger{}) ;
-            auto s2 = extractValue(src2, TreatAsInteger{}) ;
-            getRegister(dest).setInteger(s2 * s1) ;
-            /// @todo implement fault detection
-        }
-        void
-        mulo(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
-            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
-            getRegister(dest).setOrdinal(s2 * s1) ;
-            /// @todo implement fault detection
-        }
-        void
-        divi(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsInteger{}) ;
-            auto s2 = extractValue(src2, TreatAsInteger{}) ;
-            getRegister(dest).setInteger(s2 / s1) ;
-            /// @todo implement fault detection
-        }
-        void
-        divo(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s1 = extractValue(src1, TreatAsOrdinal{}) ;
-            auto s2 = extractValue(src2, TreatAsOrdinal{}) ;
-            getRegister(dest).setOrdinal(s2 / s1) ;
-            /// @todo implement fault detection
-        }
+        void addc(RegLit src1, RegLit src2, RegisterIndex dest);
+        void addi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void addo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void subc(RegLit src1, RegLit src2, RegisterIndex dest);
+        void muli(RegLit src1, RegLit src2, RegisterIndex dest);
+        void mulo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void divi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void divo(RegLit src1, RegLit src2, RegisterIndex dest);
         void ediv(RegLit src1, RegLit src2, RegisterIndex dest);
         void emul(RegLit src1, RegLit src2, RegisterIndex dest);
-        void
-        remi(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s2 = extractValue(src2, TreatAsInteger{});
-            auto s1 = extractValue(src1, TreatAsInteger{});
-            getRegister(dest).setInteger(((s2 / s1) * s1));
-        }
-        void
-        remo(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto s2 = extractValue(src2, TreatAsOrdinal{});
-            auto s1 = extractValue(src1, TreatAsOrdinal{});
-            getRegister(dest).setOrdinal(((s2 / s1) * s1));
-        }
-        void
-        modi(RegLit src1, RegLit src2, RegisterIndex dest) {
-            // taken from the manual
-            auto denominator = extractValue(src1, TreatAsInteger{});
-            auto numerator = extractValue(src2, TreatAsInteger{});
-            if (denominator == 0) {
-                // @todo raise Arithmetic Zero Divide fault
-                raiseFault();
-                return;
-            }
-            auto theDestValue = numerator - ((numerator / denominator) * denominator);
-            auto& dReg = getRegister(dest);
-            dReg.setInteger(theDestValue);
-            if (((numerator * denominator) < 0) && (theDestValue != 0)) {
-                dReg.setInteger(theDestValue + denominator);
-            }
-        }
-        void
-        shlo(RegLit len, RegLit src, RegisterIndex dest) {
-            auto theLength = extractValue(len, TreatAsOrdinal{});
-            auto theSrc = extractValue(src, TreatAsOrdinal{});
-            if (theLength < 32) {
-                getRegister(dest).setOrdinal(theSrc << theLength);
-            } else {
-                getRegister(dest).setOrdinal(0);
-            }
-        }
-        void
-        shro(RegLit len, RegLit src, RegisterIndex dest) {
-            auto theLength = extractValue(len, TreatAsOrdinal{});
-            auto theSrc = extractValue(src, TreatAsOrdinal{});
-            if (theLength < 32) {
-                getRegister(dest).setOrdinal(theSrc >> theLength);
-            } else {
-                getRegister(dest).setOrdinal(0);
-            }
-        }
-        void
-        shli(RegLit len, RegLit src, RegisterIndex dest) {
-            auto theLength = extractValue(len, TreatAsInteger{});
-            auto theSrc = extractValue(src, TreatAsInteger{});
-            getRegister(dest).setInteger(theSrc << theLength);
-        }
-        /// @todo correctly implement shri and shrdi
-        void
-        shri(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto src = extractValue(src2, TreatAsInteger{});
-            auto len = abs(extractValue(src1, TreatAsInteger{}));
-            if (len > 32)  {
-                len = 32;
-            }
-            getRegister(dest).setInteger(src >> len);
-        }
-
-        void
-        shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto src = extractValue(src2, TreatAsInteger{});
-            auto len = abs(extractValue(src1, TreatAsInteger{}));
-            auto result = src >> len;
-            if (src < 0 && result < 0) {
-                ++result;
-            }
-            getRegister(dest).setInteger(result);
-        }
-        void
-        rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
-            auto len = extractValue(src1, TreatAsOrdinal {});
-            auto src = extractValue(src2, TreatAsOrdinal {});
-            getRegister(dest).setOrdinal(rotateOperation(src, len));
-        }
+        void remi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void remo(RegLit src1, RegLit src2, RegisterIndex dest);
+        void modi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shlo(RegLit len, RegLit src, RegisterIndex dest);
+        void shro(RegLit len, RegLit src, RegisterIndex dest);
+        void shli(RegLit len, RegLit src, RegisterIndex dest);
+        void shri(RegLit src1, RegLit src2, RegisterIndex dest);
+        void shrdi(RegLit src1, RegLit src2, RegisterIndex dest);
+        void rotate(RegLit src1, RegLit src2, RegisterIndex dest);
 
     private: // logical operations
         void
