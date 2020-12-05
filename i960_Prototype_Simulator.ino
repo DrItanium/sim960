@@ -112,7 +112,7 @@ namespace i960 {
     Core::storeInteger(Address address, Integer value) noexcept {
     }
 }
-i960::Core cpuCore(i960Zx_SALIGN);
+i960::Core cpuCore(0, i960Zx_SALIGN);
 /// @todo implement the register frames "in hardware"
 void setup() {
     Serial.begin(9600);
