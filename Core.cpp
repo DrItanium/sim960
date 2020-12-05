@@ -488,4 +488,36 @@ namespace i960 {
         setFramePointer(tmp);
         setStackPointer(tmp + 64);
     }
+    void
+    Core::testo(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsOrdered() ? 1 : 0);
+    }
+    void
+    Core::testno(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.getConditionCode() == 0 ? 1 : 0);
+    }
+    void
+    Core::teste(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsEqualTo() ? 1 : 0);
+    }
+    void
+    Core::testne(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsNotEqual() ? 1 : 0);
+    }
+    void
+    Core::testl(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsLessThan() ? 1 : 0);
+    }
+    void
+    Core::testle(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsLessThanOrEqual() ? 1 : 0);
+    }
+    void
+    Core::testg(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsGreaterThan() ? 1 : 0);
+    }
+    void
+    Core::testge(RegisterIndex dest) {
+        getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
+    }
 }

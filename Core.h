@@ -1118,39 +1118,14 @@ namespace i960
             bno(Displacement22{targ});
         }
     private: // test condition codes
-        void
-        testo(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsOrdered() ? 1 : 0);
-        }
-        void
-        testno(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.getConditionCode() == 0 ? 1 : 0);
-        }
-        void
-        teste(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsEqualTo() ? 1 : 0);
-        }
-        void
-        testne(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsNotEqual() ? 1 : 0);
-        }
-        void
-        testl(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsLessThan() ? 1 : 0);
-        }
-        void
-        testle(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsLessThanOrEqual() ? 1 : 0);
-        }
-        void
-        testg(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsGreaterThan() ? 1 : 0);
-        }
-
-        void
-        testge(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIsGreaterThanOrEqualTo() ? 1 : 0);
-        }
+        void testo(RegisterIndex dest);
+        void testno(RegisterIndex dest);
+        void teste(RegisterIndex dest);
+        void testne(RegisterIndex dest);
+        void testl(RegisterIndex dest);
+        void testle(RegisterIndex dest);
+        void testg(RegisterIndex dest);
+        void testge(RegisterIndex dest);
     private:
         static constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
         static constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
