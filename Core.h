@@ -246,25 +246,9 @@ namespace i960
         constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
             return (_salign * 16) - 1;
         }
-        void cycle() {
-            executeInstruction(decodeInstruction(fetchInstruction()));
-        }
-        Register& getRegister(int index) noexcept {
-            if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
-                return locals[offset];
-            } else {
-                return globals[offset];
-            }
-        }
-        inline Register& getRegister(RegisterIndex index) noexcept { return getRegister(toInteger(index)); }
-        const Register& getRegister(int index) const noexcept {
-            if (auto offset = index & 0b1111, maskedValue = index & 0b10000; maskedValue != 0) {
-                return locals[offset];
-            } else {
-                return globals[offset];
-            }
-        }
-        inline const Register& getRegister(RegisterIndex index) const noexcept { return getRegister(toInteger(index)); }
+        void cycle();
+        Register& getRegister(RegisterIndex index) noexcept;
+        const Register& getRegister(RegisterIndex index) const noexcept;
         const Register& getIP() const noexcept { return ip; }
         /**
          * @brief Retrieve the word at the ip address
@@ -295,24 +279,11 @@ namespace i960
         ShortInteger loadShortInteger(Address address) noexcept;
         void storeShortInteger (Address address, ShortInteger value) noexcept;
     private:
-        // classic risc pipeline stages
-        DecodedInstruction
-        decodeInstruction(Ordinal currentInstruction) {
-            return decode(currentInstruction);
-        }
-        void
-        executeInstruction(const DecodedInstruction& inst) {
-            std::visit([this](auto&& theInst) { execute(theInst); }, inst);
-        }
-        Ordinal
-        fetchInstruction() {
-            return getWordAtIP(true);
-        }
+        DecodedInstruction decodeInstruction(Ordinal currentInstruction);
+        void executeInstruction(const DecodedInstruction& inst);
+        Ordinal fetchInstruction();
     private: // fault related
-        void
-        raiseFault() {
-           /// @todo flesh this out
-        }
+        void raiseFault();
     private: // execution routines
         void execute(const RegFormatInstruction& inst) noexcept;
         void execute(const MEMFormatInstruction &inst) noexcept;

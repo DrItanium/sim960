@@ -280,5 +280,43 @@ namespace i960 {
                 break;
         }
     }
+    void
+    Core::cycle() {
+        executeInstruction(decodeInstruction(fetchInstruction()));
+    }
+    Core::DecodedInstruction
+    Core::decodeInstruction(Ordinal currentInstruction) {
+        return decode(currentInstruction);
+    }
+    void
+    Core::executeInstruction(const DecodedInstruction& inst) {
+        std::visit([this](auto&& theInst) { execute(theInst); }, inst);
+    }
+    Ordinal
+    Core::fetchInstruction() {
+        return getWordAtIP(true);
+    }
+    void
+    Core::raiseFault() {
+        /// @todo implement
+    }
+    Register&
+    Core::getRegister(RegisterIndex index) noexcept {
+        auto ival = toInteger(index);
+        if (auto offset = ival & 0b1111, maskedValue = ival & 0b10000; maskedValue != 0) {
+            return locals[offset];
+        } else {
+            return globals[offset];
+        }
+    }
+    const Register&
+    Core::getRegister(RegisterIndex index) const noexcept {
+        auto ival = toInteger(index);
+        if (auto offset = ival & 0b1111, maskedValue = ival & 0b10000; maskedValue != 0) {
+            return locals[offset];
+        } else {
+            return globals[offset];
+        }
+    }
 
 }
