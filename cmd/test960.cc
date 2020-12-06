@@ -255,7 +255,7 @@ namespace i960 {
         std::cout << std::endl;
     }
     void
-    test3() {
+    testB() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         i960::Core testCore(0,4);
@@ -274,6 +274,57 @@ namespace i960 {
         }
         std::cout << std::endl;
     }
+    void
+    testCall() {
+        // test call
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
+        // make sure that each instruction operates as expected
+        i960::Core testCore(0,4);
+        testCore.post();
+        // double check that registers are clear at this point
+        if (testCore.getIP().getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r4!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        // okay now here is the test itself
+        // run a simple program:
+        // call 0x9000 <destination>
+        testCore.cycle(0x09'00'90'00); // b
+        std::cout << "call 0x9000" << std::endl;
+        if (testCore.getIP().getOrdinal() != 0x9000) {
+            std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    void
+    testBal() {
+        // test bal
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
+        // make sure that each instruction operates as expected
+        i960::Core testCore(0,4);
+        testCore.post();
+        // double check that registers are clear at this point
+        if (testCore.getIP().getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r4!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        // okay now here is the test itself
+        // run a simple program:
+        // call 0x9000 <destination>
+        testCore.cycle(0x0b'00'a0'00); // bal
+        std::cout << "bal 0xa000" << std::endl;
+        if (testCore.getIP().getOrdinal() != 0xa000) {
+            std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        /// @todo check the frame pointers and such at some point in the future
+        // offset testing
+        testCore.nextInstruction();
+        testCore.cycle(0x0b'00'9f'fc); // bal
+        std::cout << "bal 0xa000 // offset style" << std::endl;
+        if (testCore.getIP().getOrdinal() != 0xa000) {
+            std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        std::cout << std::endl;
+        /// @todo check the frame pointers and such at some point in the future
+    }
 }
 
 
@@ -281,6 +332,8 @@ int main() {
     i960::test0();
     i960::test1();
     i960::test2();
-    i960::test3();
+    i960::testB();
+    i960::testCall();
+    i960::testBal();
     return 0;
 }
