@@ -31,7 +31,7 @@ namespace i960 {
     Core::getWordAtIP(bool advance) noexcept {
         auto ipLoc = ip.getOrdinal();
         if (advance) {
-            ip.setOrdinal(ipLoc + 4);
+            nextInstruction();
         }
         return loadOrdinal(ipLoc);
     }
@@ -266,6 +266,7 @@ namespace i960 {
     }
     void
     Core::nextInstruction() {
+        ip.setOrdinal(ip.getOrdinal() + 4);
     }
 
     void
