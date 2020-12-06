@@ -10,6 +10,7 @@
 #include "DependentFalse.h"
 #include "ArithmeticControls.h"
 #include "ProcessControls.h"
+#include "InstructionNames.h"
 namespace i960
 {
 
@@ -46,6 +47,7 @@ namespace i960
         constexpr ShortOrdinal getOpcode() const noexcept {
             return ((static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0) | (static_cast<ShortOrdinal>(opcodeExt) & 0x000F);
         }
+        std::string decodeName() const noexcept;
     private:
         union {
             Ordinal _value;
@@ -71,6 +73,7 @@ namespace i960
         constexpr RegisterIndex getSrc1() const noexcept { return toRegisterIndex(src1); }
         constexpr bool getTBit() const noexcept { return t; }
         constexpr ShortInteger getDisplacement() const noexcept { return displacement; }
+        std::string decodeName() const noexcept;
     private:
         union {
             Ordinal _value;
@@ -91,6 +94,7 @@ namespace i960
         constexpr ShortOrdinal getOpcode() const noexcept { return (static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0; }
         constexpr bool getTBit() const noexcept { return t; }
         constexpr Integer getDisplacement() const noexcept { return displacement; }
+        std::string decodeName() const noexcept;
     private:
         union {
             Ordinal _value;
@@ -103,7 +107,6 @@ namespace i960
         };
     };
     class MEMFormatInstruction {
-    private:
     public:
         constexpr explicit MEMFormatInstruction(Ordinal lowerHalf, Ordinal upperHalf) noexcept : lower(lowerHalf), next(upperHalf) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
@@ -116,6 +119,7 @@ namespace i960
             }
         }
         constexpr RegisterIndex getSrcDest() const noexcept { return static_cast<RegisterIndex>(srcDest); }
+        std::string decodeName() const noexcept;
     private:
         constexpr bool isMEMAFormat() const noexcept { return modeMajor & 1 == 0; }
         constexpr bool isMEMBFormat() const noexcept { return modeMajor & 1 != 0; }

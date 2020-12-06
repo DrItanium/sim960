@@ -1141,4 +1141,37 @@ namespace i960 {
     Core::post() {
 
     }
+
+    std::string
+    RegFormatInstruction::decodeName() const noexcept {
+        if (auto result = getNameFromOpcode(getOpcode()); result) {
+            return *result;
+        } else {
+            return "";
+        }
+    }
+    std::string
+    COBRInstruction::decodeName() const noexcept {
+        if (auto result = getNameFromOpcode(getOpcode()); result) {
+            return *result;
+        } else {
+            return "";
+        }
+    }
+    std::string
+    CTRLInstruction::decodeName() const noexcept {
+        if (auto result = getNameFromOpcode(getOpcode()); result) {
+            return *result;
+        } else {
+            return "";
+        }
+    }
+    std::string
+    MEMFormatInstruction::decodeName() const noexcept {
+        if (auto result = getNameFromOpcode(getOpcode()); result) {
+            return *result;
+        } else {
+            return "";
+        }
+    }
 }
