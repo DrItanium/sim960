@@ -117,7 +117,7 @@ namespace i960 {
             std::cout << "\tfailed!, got " << std::hex << r5.getOrdinal() << " instead!" << std::endl;
         }
 
-        testCore.cycle(0x59314004); // addo r4,r5,r6
+        testCore.cycle(0x59'31'40'04); // addo r4,r5,r6
         std::cout << "addo r4, r5, r6" << std::endl;
         if (r6.getOrdinal() != (0xfded + 2)) {
             std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;

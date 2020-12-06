@@ -50,16 +50,16 @@ namespace i960
         union {
             Ordinal _value;
             struct {
-                int src1 : 5;
-                int s1 : 1;
-                int s2 : 1;
-                int opcodeExt : 4;
-                int m1 : 1;
-                int m2 : 1;
-                int m3 : 1;
-                int src2 : 5;
-                int srcDest : 5;
-                int opcode : 8;
+                unsigned int src1 : 5;
+                unsigned int s1 : 1;
+                unsigned int s2 : 1;
+                unsigned int opcodeExt : 4;
+                unsigned int m1 : 1;
+                unsigned int m2 : 1;
+                unsigned int m3 : 1;
+                unsigned int src2 : 5;
+                unsigned int srcDest : 5;
+                unsigned int opcode : 8;
             };
         };
     };
@@ -75,13 +75,13 @@ namespace i960
         union {
             Ordinal _value;
             struct {
-                int s2 : 1;
-                int t : 1;
+                unsigned int s2 : 1;
+                unsigned int t : 1;
                 int displacement : 11;
-                int m1 : 1;
-                int src2 : 5;
-                int src1 : 5;
-                int opcode : 8;
+                unsigned int m1 : 1;
+                unsigned int src2 : 5;
+                unsigned int src1 : 5;
+                unsigned int opcode : 8;
             };
         };
     };
@@ -95,10 +95,10 @@ namespace i960
         union {
             Ordinal _value;
             struct {
-                int unused : 1;
-                int t : 1;
+                unsigned int unused : 1;
+                unsigned int t : 1;
                 int displacement : 22;
-                int opcode : 8;
+                unsigned int opcode : 8;
             };
         };
     };

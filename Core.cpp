@@ -138,7 +138,8 @@ namespace i960 {
     }
     void
     Core::execute(const RegFormatInstruction& inst) noexcept {
-        switch(inst.getOpcode()) {
+        auto theOpcode = inst.getOpcode();
+        switch(theOpcode) {
             case 0x580: notbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x581: logicalAnd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             case 0x582: andnot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
