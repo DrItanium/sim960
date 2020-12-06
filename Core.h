@@ -44,7 +44,7 @@ namespace i960
             }
         }
         constexpr ShortOrdinal getOpcode() const noexcept {
-            return ((static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0) | (static_cast<ShortOrdinal>(opcode) & 0x000F);
+            return ((static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0) | (static_cast<ShortOrdinal>(opcodeExt) & 0x000F);
         }
     private:
         union {
