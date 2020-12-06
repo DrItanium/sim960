@@ -16,7 +16,6 @@ add_library(core960
         ProcessControls.h
         Register.h
         TraceControls.h
-        InstructionNames.cpp
         InstructionNames.h
         OpcodesRaw.h)
 
