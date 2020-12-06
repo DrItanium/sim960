@@ -15,6 +15,9 @@ add_library(core960
         PreviousFramePointer.h
         ProcessControls.h
         Register.h
-        TraceControls.h)
+        TraceControls.h
+        InstructionNames.cpp
+        InstructionNames.h
+        Opcodes.def)
 
 add_subdirectory(cmd)
