@@ -94,17 +94,15 @@ namespace i960
     public:
         constexpr CTRLInstruction(Ordinal value) noexcept : _value(value) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return (static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0; }
-        constexpr bool getTBit() const noexcept { return t; }
-        constexpr Integer getDisplacement() const noexcept { return displacement; }
+        constexpr bool getTBit() const noexcept { return _value & 0b10; }
+        constexpr Integer getDisplacement() const noexcept { return displacement & 0x00FF'FFFC; }
         std::string decodeName() const noexcept;
         constexpr auto lowerHalf() const noexcept { return _value; }
     private:
         union {
             Ordinal _value;
             struct {
-                unsigned int unused : 1;
-                unsigned int t : 1;
-                int displacement : 22;
+                int displacement : 24;
                 unsigned int opcode : 8;
             };
         };

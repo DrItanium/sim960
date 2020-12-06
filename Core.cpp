@@ -273,7 +273,8 @@ namespace i960 {
     void
     Core::execute(const MEMFormatInstruction &inst) noexcept {
         auto address = inst.computeAddress(*this);
-        switch (inst.getOpcode()) {
+        auto opcode = inst.getOpcode();
+        switch (opcode) {
             case 0x800: ldob(address, inst.getSrcDest()); break;
             case 0x820: stob(inst.getSrcDest(), address); break;
             case 0x840: bx(address); break;
@@ -332,19 +333,21 @@ namespace i960 {
     }
     void
     Core::execute(const CTRLInstruction &inst) noexcept {
-        switch (inst.getOpcode()) {
-            case 0x080: b(inst.getDisplacement()); break;
-            case 0x090: call(inst.getDisplacement()); break;
+        auto opcode = inst.getOpcode();
+        auto displacement = inst.getDisplacement();
+        switch (opcode) {
+            case 0x080: b(displacement); break;
+            case 0x090: call(displacement); break;
             case 0x0A0: ret(); break;
-            case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
-            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{inst.getDisplacement()}); break;
-            case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{inst.getDisplacement()}); break;
-            case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{inst.getDisplacement()}); break;
-            case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{inst.getDisplacement()}); break;
-            case 0x140: conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{inst.getDisplacement()}); break;
-            case 0x150: conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{inst.getDisplacement()}); break;
-            case 0x160: conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{inst.getDisplacement()}); break;
-            case 0x170: conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{inst.getDisplacement()}); break;
+            case 0x0B0: bal(Displacement22{displacement}); break;
+            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{displacement}); break;
+            case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{displacement}); break;
+            case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{displacement}); break;
+            case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{displacement}); break;
+            case 0x140: conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{displacement}); break;
+            case 0x150: conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{displacement}); break;
+            case 0x160: conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{displacement}); break;
+            case 0x170: conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{displacement}); break;
             case 0x180: conditionalFault<ConditionCodeKind::Unordered>(); break;
             case 0x190: conditionalFault<ConditionCodeKind::GreaterThan>(); break;
             case 0x1A0: conditionalFault<ConditionCodeKind::EqualTo>(); break;

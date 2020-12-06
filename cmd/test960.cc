@@ -266,10 +266,10 @@ namespace i960 {
         }
         // okay now here is the test itself
         // run a simple program:
-        // b 0xfded <destination>
-        testCore.cycle(0x0800fded); // subi r5,r4,r6
-        std::cout << "b destination" << std::endl;
-        if (testCore.getIP().getOrdinal() != 0xFDED) {
+        // b 0x8000 <destination>
+        testCore.cycle(0x08'00'80'00); // b
+        std::cout << "b 0x8000" << std::endl;
+        if (testCore.getIP().getOrdinal() != 0x8000) {
             std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
         }
         std::cout << std::endl;
