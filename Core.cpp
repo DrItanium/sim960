@@ -11,15 +11,15 @@ namespace i960 {
     constexpr RegisterIndex RIP = static_cast<RegisterIndex>(0b00010);
     constexpr RegisterIndex FP = static_cast<RegisterIndex>(0b11111);
     Core::DecodedInstruction
-    Core::decode(Ordinal value) noexcept {
-        if (auto opcode = static_cast<ByteOrdinal>(value >> 24); opcode < 0x20) {
-            return CTRLInstruction(value);
+    Core::decode(Ordinal lower, Ordinal upper) noexcept {
+        if (auto opcode = static_cast<ByteOrdinal>(lower >> 24); opcode < 0x20) {
+            return CTRLInstruction(lower);
         } else if (opcode >= 0x20 && opcode < 0x58) {
-            return COBRInstruction(value);
+            return COBRInstruction(lower);
         } else if (opcode >= 0x58 && opcode < 0x80) {
-            return RegFormatInstruction(value);
+            return RegFormatInstruction(lower);
         } else {
-            return MEMFormatInstruction(value);
+            return MEMFormatInstruction(lower, upper);
         }
     }
     /**
@@ -265,6 +265,10 @@ namespace i960 {
         }
     }
     void
+    Core::nextInstruction() {
+    }
+
+    void
     Core::execute(const MEMFormatInstruction &inst) noexcept {
         auto address = inst.computeAddress(*this);
         switch (inst.getOpcode()) {
@@ -354,19 +358,18 @@ namespace i960 {
     }
     void
     Core::cycle() {
-        executeInstruction(decodeInstruction(fetchInstruction()));
+        // always load two words
+        auto lower = getWordAtIP(true);
+        auto upper = getWordAtIP(false); // do not automatically advance this time
+        cycle(lower, upper);
     }
-    Core::DecodedInstruction
-    Core::decodeInstruction(Ordinal currentInstruction) {
-        return decode(currentInstruction);
+    void
+    Core::cycle(Ordinal lower, Ordinal upper) {
+        executeInstruction(decode(lower, upper));
     }
     void
     Core::executeInstruction(const DecodedInstruction& inst) {
         std::visit([this](auto&& theInst) { execute(theInst); }, inst);
-    }
-    Ordinal
-    Core::fetchInstruction() {
-        return getWordAtIP(true);
     }
     void
     Core::raiseFault() {

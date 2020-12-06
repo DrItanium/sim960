@@ -103,8 +103,9 @@ namespace i960
         };
     };
     class MEMFormatInstruction {
+    private:
     public:
-        constexpr explicit MEMFormatInstruction(Ordinal lowerHalf) noexcept : lower(lowerHalf) { }
+        constexpr explicit MEMFormatInstruction(Ordinal lowerHalf, Ordinal upperHalf) noexcept : lower(lowerHalf), next(upperHalf) { }
         constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
         template<typename Core>
         Ordinal computeAddress(Core& referenceCore) const noexcept {
@@ -133,17 +134,12 @@ namespace i960
         template<typename Core>
         Ordinal computeAddress_MEMB(Core& referenceCore) const noexcept {
             // bit 12 of the instruction has to be 1 to get into this code, eight possible combos
-            union {
-                Ordinal next;
-                Integer optionalDisplacement;
-            } disp;
-            disp.next = 0;
             switch (memb.mode) {
                 case 0b0100: // register indirect
                     return referenceCore.getRegister(toRegisterIndex(memb.abase)).getOrdinal();
                 case 0b0101: // ip with displacement
-                    disp.next = referenceCore.getWordAtIP(true);
-                    return static_cast<Ordinal>(referenceCore.getIP().getInteger() + disp.optionalDisplacement + 8);
+                    referenceCore.nextInstruction();
+                    return static_cast<Ordinal>(referenceCore.getIP().getInteger() + optionalDisplacement + 8);
                 case 0b0110: // reserved
                     return -1;
                 case 0b0111: // register indirect with index
@@ -151,23 +147,20 @@ namespace i960
                            referenceCore.getRegister(toRegisterIndex(memb.index)).getOrdinal() *
                            computeScale(referenceCore);
                 case 0b1100: // absolute displacement
-                    disp.next = referenceCore.getWordAtIP(true);
-                    return static_cast<Ordinal>(disp.optionalDisplacement);
+                    referenceCore.nextInstruction();
+                    return static_cast<Ordinal>(optionalDisplacement);
                 case 0b1101: // register indirect with displacement
-                    disp.next = referenceCore.getWordAtIP(true);
-                    return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() +
-                                                disp.optionalDisplacement);
+                    referenceCore.nextInstruction();
+                    return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() + optionalDisplacement);
                 case 0b1110: // index with displacement
-                    disp.next = referenceCore.getWordAtIP(true);
+                    referenceCore.nextInstruction();
                     return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.index)).getInteger() *
-                                                computeScale(referenceCore) +
-                                                disp.optionalDisplacement);
+                                                computeScale(referenceCore) + optionalDisplacement);
                 case 0b1111: // register indirect with index and displacement
-                    disp.next = referenceCore.getWordAtIP(true);
+                    referenceCore.nextInstruction();
                     return static_cast<Ordinal>(referenceCore.getRegister(toRegisterIndex(memb.abase)).getInteger() +
                                                 referenceCore.getRegister(toRegisterIndex(memb.index)).getInteger() *
-                                                computeScale(referenceCore) +
-                                                disp.optionalDisplacement);
+                                                computeScale(referenceCore) + optionalDisplacement);
                 default:
                     return -1;
             }
@@ -182,7 +175,7 @@ namespace i960
                 case 0b011: return 8;
                 case 0b100: return 16;
                 default:
-                    /// @todo raise an invalid opcode fault here using referenceCore
+                    referenceCore.raiseFault(); // invalid opcode
                     return 1;
             }
         }
@@ -214,6 +207,10 @@ namespace i960
                 unsigned int opcode : 8;
             } memb;
         };
+        union {
+            Ordinal next;
+            Integer optionalDisplacement;
+        };
     };
     class Core {
     private:
@@ -229,7 +226,7 @@ namespace i960
                 MEMFormatInstruction,
                 COBRInstruction,
                 CTRLInstruction>;
-        static DecodedInstruction decode(Ordinal value) noexcept;
+        static DecodedInstruction decode(Ordinal lower, Ordinal upper) noexcept;
     public:
         using RegisterFile = std::array<Register, 16>;
     public:
@@ -247,6 +244,7 @@ namespace i960
          */
         void post();
         void cycle();
+        void cycle(Ordinal lower, Ordinal upper = 0);
         Register& getRegister(RegisterIndex index) noexcept;
         const Register& getRegister(RegisterIndex index) const noexcept;
         const Register& getIP() const noexcept { return ip; }
@@ -272,10 +270,8 @@ namespace i960
         ShortInteger loadShortInteger(Address address) noexcept;
         void storeShortInteger (Address address, ShortInteger value) noexcept;
     private:
-        DecodedInstruction decodeInstruction(Ordinal currentInstruction);
         void executeInstruction(const DecodedInstruction& inst);
-        Ordinal fetchInstruction();
-    private: // fault related
+    public: // fault related
         void raiseFault();
     private: // execution routines
         void execute(const RegFormatInstruction& inst) noexcept;
@@ -484,7 +480,8 @@ namespace i960
          * @param dest The destination register to store the result in
          */
         void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
-
+    public:
+        void nextInstruction();
     private:
         RegisterFile globals, locals;
         Register ip; // always start at address zero
