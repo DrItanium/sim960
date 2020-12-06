@@ -82,6 +82,7 @@ namespace i960 {
 
     void
     test0() {
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         i960::Core testCore(0,4);
         testCore.post();
@@ -122,10 +123,11 @@ namespace i960 {
         if (r6.getOrdinal() != (0xfded + 2)) {
             std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
         }
-
+        std::cout << std::endl;
     }
     void
     test1() {
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         i960::Core testCore(0,4);
         testCore.post();
@@ -173,6 +175,65 @@ namespace i960 {
         if (r6.getInteger() != (2 - 0xFDED)) {
             std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
         }
+        std::cout << std::endl;
+    }
+    void
+    test2() {
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
+        // make sure that each instruction operates as expected
+        i960::Core testCore(0,4);
+        testCore.post();
+        // double check that registers are clear at this point
+        auto l4 = static_cast<i960::RegisterIndex>(4);
+        auto l5 = static_cast<i960::RegisterIndex>(5);
+        auto l6 = static_cast<i960::RegisterIndex>(6);
+        auto& r4 = testCore.getRegister(l4);
+        if (r4.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r4!, got " << std::hex << r4.getOrdinal() << " instead!" << std::endl;
+        }
+        auto& r5 = testCore.getRegister(l5);
+        if (r5.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r5!, got " << std::hex << r5.getOrdinal() << " instead!" << std::endl;
+        }
+        auto& r6 = testCore.getRegister(l6);
+        if (r6.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r6!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+        // okay now here is the test itself
+        // run a simple program:
+        // lda 0xfded, r4
+        // mov 2, r5
+        // addo r4, r5, r6
+        // subi r4, r5, r6
+        // subi r5, r4, r6
+        testCore.cycle(0x8c203000, 0x0000fded); // LDA 0xfded, r4
+        std::cout << "lda 0xfded, r4" << std::endl;
+        if (r4.getOrdinal() != 0xfded) {
+            std::cout << "\tfailed!, got " << std::hex << r4.getOrdinal() << " instead!" << std::endl;
+        }
+        testCore.cycle(0x5c281e02); // mov 2, r5
+        std::cout << "mov 2, r5" << std::endl;
+        if (r5.getOrdinal() != 2) {
+            std::cout << "\tfailed!, got " << std::hex << r5.getOrdinal() << " instead!" << std::endl;
+        }
+
+        testCore.cycle(0x59'31'40'04); // addo r4,r5,r6
+        std::cout << "addo r4, r5, r6" << std::endl;
+        if (r6.getOrdinal() != (0xfded + 2)) {
+            std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+
+        testCore.cycle(0x59'31'41'84); // subi r4,r5,r6
+        std::cout << "subi r4, r5, r6" << std::endl;
+        if (r6.getInteger() != (2 - 0xFDED)) {
+            std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+        testCore.cycle(0x59'31'01'85); // subi r5,r4,r6
+        std::cout << "subi r5, r4, r6" << std::endl;
+        if (r6.getInteger() != (0xFDED - 2)) {
+            std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+        std::cout << std::endl;
     }
 }
 
@@ -180,5 +241,6 @@ namespace i960 {
 int main() {
     i960::test0();
     i960::test1();
+    i960::test2();
     return 0;
 }
