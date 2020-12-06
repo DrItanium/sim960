@@ -85,7 +85,8 @@ all:	 $(O)/linuxxdoom
 clean:
 	rm -f *.o *~ *.flc
 	rm -f linux/*
-	rm -f i960/*
+	rm -f i960/*.o
+	rm -f i960/linuxxdoom
 
 $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
