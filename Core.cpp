@@ -260,7 +260,7 @@ namespace i960 {
                 //case 0x7F3: subio(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x7F4: selo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
             default:
-                raiseFault();
+                badInstruction(inst);
                 /// @todo raise an error at this point
                 break;
         }
@@ -294,7 +294,7 @@ namespace i960 {
             case 0xC80: ldis(address, inst.getSrcDest()); break;
             case 0xCA0: stis(inst.getSrcDest(), address); break;
             default:
-                raiseFault();
+                badInstruction(inst);
                 break;
         }
     }
@@ -326,7 +326,7 @@ namespace i960 {
             case 0x3E0: compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
             case 0x3F0: compareAndBranch<ConditionCodeKind::Ordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
             default:
-                raiseFault();
+                badInstruction(inst);
                 break;
         }
     }
@@ -354,7 +354,7 @@ namespace i960 {
             case 0x1E0: conditionalFault<ConditionCodeKind::LessThanOrEqual>(); break;
             case 0x1F0: conditionalFault<ConditionCodeKind::Ordered>(); break;
             default:
-                raiseFault();
+                badInstruction(inst);
                 break;
         }
     }

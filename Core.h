@@ -48,6 +48,7 @@ namespace i960
             return ((static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0) | (static_cast<ShortOrdinal>(opcodeExt) & 0x000F);
         }
         std::string decodeName() const noexcept;
+        constexpr auto lowerHalf() const noexcept { return _value; }
     private:
         union {
             Ordinal _value;
@@ -74,6 +75,7 @@ namespace i960
         constexpr bool getTBit() const noexcept { return t; }
         constexpr ShortInteger getDisplacement() const noexcept { return displacement; }
         std::string decodeName() const noexcept;
+        constexpr auto lowerHalf() const noexcept { return _value; }
     private:
         union {
             Ordinal _value;
@@ -95,6 +97,7 @@ namespace i960
         constexpr bool getTBit() const noexcept { return t; }
         constexpr Integer getDisplacement() const noexcept { return displacement; }
         std::string decodeName() const noexcept;
+        constexpr auto lowerHalf() const noexcept { return _value; }
     private:
         union {
             Ordinal _value;
@@ -120,6 +123,8 @@ namespace i960
         }
         constexpr RegisterIndex getSrcDest() const noexcept { return static_cast<RegisterIndex>(srcDest); }
         std::string decodeName() const noexcept;
+        constexpr auto upperHalf() const noexcept { return next; }
+        constexpr auto lowerHalf() const noexcept { return lower; }
     private:
         constexpr bool isMEMAFormat() const noexcept { return modeMajor & 1 == 0; }
         constexpr bool isMEMBFormat() const noexcept { return modeMajor & 1 != 0; }
@@ -486,6 +491,8 @@ namespace i960
         void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
     public:
         void nextInstruction();
+    private:
+        void badInstruction(DecodedInstruction inst);
     private:
         RegisterFile globals, locals;
         Register ip; // always start at address zero

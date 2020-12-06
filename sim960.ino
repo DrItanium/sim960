@@ -110,6 +110,24 @@ namespace i960 {
     void
     Core::storeInteger(Address address, Integer value) noexcept {
     }
+    void
+    Core::badInstruction(DecodedInstruction inst) {
+        Serial.println("BAD INSTRUCTION!");
+        std::visit([](auto&& value) {
+            using K = std::decay_t<decltype(value)>;
+            Serial.print("Instruction opcode: 0x");
+            if constexpr (std::is_same_v<K, i960::MEMFormatInstruction>) {
+                Serial.print(value.upperHalf(), HEX);
+            }
+            Serial.println(value.lowerHalf(), HEX);
+            auto name = value.decodeName();
+            if (!name.empty()) {
+                Serial.print("Name: ");
+                Serial.println(name.c_str());
+            }
+        }, inst);
+        raiseFault();
+    }
 }
 i960::Core cpuCore(0, i960Zx_SALIGN);
 /// @todo implement the register frames "in hardware"
