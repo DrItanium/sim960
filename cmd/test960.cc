@@ -314,6 +314,11 @@ namespace i960 {
         if (testCore.getIP().getOrdinal() != 0xa000) {
             std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
         }
+        testCore.cycle(0x0b'ff'60'00); // bal
+        std::cout << "bal start" << std::endl;
+        if (testCore.getIP().getOrdinal() != 0) {
+            std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
         /// @todo check the frame pointers and such at some point in the future
         // offset testing
         testCore.nextInstruction();
