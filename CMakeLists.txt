@@ -16,7 +16,7 @@ add_library(core960
         ProcessControls.h
         Register.h
         TraceControls.h
-        InstructionNames.h
+        Disassembly.h
         OpcodesRaw.h)
 
 add_subdirectory(cmd)

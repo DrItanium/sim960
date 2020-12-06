@@ -2,8 +2,8 @@
 // Created by jwscoggins on 12/5/20.
 //
 
-#ifndef SIM960_INSTRUCTIONNAMES_H
-#define SIM960_INSTRUCTIONNAMES_H
+#ifndef SIM960_DISASSEMBLY_H
+#define SIM960_DISASSEMBLY_H
 #include <map>
 #include <string>
 #include <optional>
@@ -35,4 +35,4 @@ namespace i960 {
         }
     }
 }
-#endif //SIM960_INSTRUCTIONNAMES_H
+#endif //SIM960_DISASSEMBLY_H

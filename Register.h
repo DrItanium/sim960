@@ -5,6 +5,7 @@
 #ifndef I960_PROTOTYPE_SIMULATOR_REGISTER_H
 #define I960_PROTOTYPE_SIMULATOR_REGISTER_H
 #include <variant>
+#include <string>
 #include "CoreTypes.h"
 namespace i960 {
     /**

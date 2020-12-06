@@ -10,7 +10,7 @@
 #include "DependentFalse.h"
 #include "ArithmeticControls.h"
 #include "ProcessControls.h"
-#include "InstructionNames.h"
+#include "Disassembly.h"
 namespace i960
 {
 
