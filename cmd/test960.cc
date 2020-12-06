@@ -254,6 +254,26 @@ namespace i960 {
         }
         std::cout << std::endl;
     }
+    void
+    test3() {
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
+        // make sure that each instruction operates as expected
+        i960::Core testCore(0,4);
+        testCore.post();
+        // double check that registers are clear at this point
+        if (testCore.getIP().getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r4!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        // okay now here is the test itself
+        // run a simple program:
+        // b 0xfded <destination>
+        testCore.cycle(0x0800fded); // subi r5,r4,r6
+        std::cout << "b destination" << std::endl;
+        if (testCore.getIP().getOrdinal() != 0xFDED) {
+            std::cout << "\tfailed!, got " << std::hex << testCore.getIP().getOrdinal() << " instead!" << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
 
 
@@ -261,5 +281,6 @@ int main() {
     i960::test0();
     i960::test1();
     i960::test2();
+    i960::test3();
     return 0;
 }
