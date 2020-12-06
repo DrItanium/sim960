@@ -17,3 +17,4 @@ add_library(core960
         Register.h
         TraceControls.h)
 
+add_subdirectory(cmd)
