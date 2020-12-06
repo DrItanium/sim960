@@ -18,6 +18,6 @@ add_library(core960
         TraceControls.h
         InstructionNames.cpp
         InstructionNames.h
-        Opcodes.def)
+        OpcodesRaw.h)
 
 add_subdirectory(cmd)
