@@ -81,6 +81,25 @@ namespace i960 {
     }
 
     void
+    Core::badInstruction(DecodedInstruction inst) {
+        std::cerr << "BAD INSTRUCTION!" << std::endl;
+        std::visit([](auto &&value) {
+            using K = std::decay_t<decltype(value)>;
+            std::cerr << "Instruction opcode: 0x";
+            if constexpr (std::is_same_v<K, i960::MEMFormatInstruction>) {
+                std::cerr << std::hex << value.upperHalf();
+            }
+            std::cerr << std::hex << value.lowerHalf() << std::endl;
+            if (auto name = value.decodeName(); !name.empty()) {
+                std::cerr << "Name: " << name << std::endl;
+            }
+        }, inst);
+        raiseFault();
+    }
+
+
+
+    void
     test0() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
