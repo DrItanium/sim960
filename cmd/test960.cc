@@ -4,28 +4,51 @@
 
 #include "Core.h"
 #include <iostream>
+#include <memory>
+#include <tuple>
 // custom implementation (this is on purpose)
 namespace i960 {
-    /*
-     * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
-     * available memory. On board devices are mapped into the implicit onboard device area of [0xFF00'0000,0xFFFF'FFFF]. The IO device bus
-     * exists here as extra "modules" such as:
-     * - Clock Generator
-     * - RTC
-     * - ESP32 Wifi Coprocessor
-     * - Display
-     * - Sharp Memory Display
-     * - GPIOs from the Grand Central
-     * - SPI IO Expanders
-     * - Speaker
-     * - Control Registers
-     * - 2 MB Onboard SPI Flash directly mapped into IO Device Space
-     * - OPL3 Device
-     * - Neopixels
-     * - EEPROM
-     * - FLASH memory
-     * - etc
+    // allocate memory in 16 megabyte sections, 256 of them!
+    union Cell {
+        constexpr explicit Cell(Ordinal value = 0) noexcept : ord(value) { }
+        Ordinal ord;
+        Integer ival;
+        ShortInteger si[2];
+        ShortOrdinal so[2];
+        ByteInteger bi[4];
+        ByteOrdinal bo[4];
+    };
+    static_assert(sizeof(Cell) == sizeof(Ordinal));
+    using Section = std::shared_ptr<Cell[]>;
+    constexpr size_t SectionSize = (0xFF'FFFF + 1) / sizeof(Cell);
+    Section
+    makeSection() noexcept {
+        return std::make_shared<Cell[]>(SectionSize);
+    }
+    std::array<Section, 256> theMemorySpace;
+
+    constexpr bool addressCellUnaligned(Address address) noexcept {
+        return (address & 0b11) != 0;
+    }
+    constexpr bool addressCellAligned(Address address) noexcept {
+        return !addressCellUnaligned(address);
+    }
+    using CellTarget = std::tuple<ByteOrdinal,  // section id
+    Address,  // offset in section
+    ByteOrdinal // cell offset
+    >;
+
+    /**
+     * @brief Convert the target address into a cell target, Cells are 32-bits wide so we have to do some decomposition
+     * @param address The address to convert
+     * @return The cell target information
      */
+    constexpr CellTarget targetCell(Address address) noexcept {
+        // this can be unaligned
+        return CellTarget(static_cast<ByteOrdinal>((address & 0xFF00'0000) >> 24),
+                          (address & 0x00FF'FFFF) >> 2,
+                          static_cast<ByteOrdinal>(address & 0b11));
+    }
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
         return 0;
@@ -38,12 +61,14 @@ namespace i960 {
 
     ByteOrdinal
     Core::loadByteOrdinal(Address address) noexcept {
-        return 0;
+        auto [section, cell, byteOffset] = targetCell(address);
+        return theMemorySpace[section][cell].bo[byteOffset];
     }
 
     ByteInteger
     Core::loadByteInteger(Address address) noexcept {
-        return 0;
+        auto [section, cell, byteOffset] = targetCell(address);
+        return theMemorySpace[section][cell].bi[byteOffset];
     }
 
     ShortOrdinal
@@ -62,10 +87,14 @@ namespace i960 {
 
     void
     Core::storeByteInteger(Address address, ByteInteger value) {
+        auto [section, cell, byteOffset] = targetCell(address);
+        theMemorySpace[section][cell].bi[byteOffset] = value;
     }
 
     void
     Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
+        auto [section, cell, byteOffset] = targetCell(address);
+        theMemorySpace[section][cell].bo[byteOffset] = value;
     }
 
     void
@@ -78,6 +107,7 @@ namespace i960 {
 
     void
     Core::storeInteger(Address address, Integer value) noexcept {
+
     }
 
     void
@@ -334,6 +364,9 @@ namespace i960 {
 
 
 int main() {
+    for (int i = 0; i < i960::theMemorySpace.size(); ++i) {
+        i960::theMemorySpace[i] = i960::makeSection();
+    }
     i960::test0();
     i960::test1();
     i960::test2();
