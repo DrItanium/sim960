@@ -23,7 +23,7 @@ namespace i960 {
     constexpr size_t SectionSize = (0xFF'FFFF + 1) / sizeof(Cell);
     Section
     makeSection() noexcept {
-        return std::make_shared<Cell[]>(SectionSize);
+        return Section(new Cell[SectionSize]());
     }
     std::array<Section, 256> theMemorySpace;
 
@@ -33,81 +33,93 @@ namespace i960 {
     constexpr bool addressCellAligned(Address address) noexcept {
         return !addressCellUnaligned(address);
     }
-    using CellTarget = std::tuple<ByteOrdinal,  // section id
-    Address,  // offset in section
-    ByteOrdinal // cell offset
-    >;
-
-    /**
-     * @brief Convert the target address into a cell target, Cells are 32-bits wide so we have to do some decomposition
-     * @param address The address to convert
-     * @return The cell target information
-     */
-    constexpr CellTarget targetCell(Address address) noexcept {
-        // this can be unaligned
-        return CellTarget(static_cast<ByteOrdinal>((address & 0xFF00'0000) >> 24),
-                          (address & 0x00FF'FFFF) >> 2,
-                          static_cast<ByteOrdinal>(address & 0b11));
-    }
+    class CellTarget {
+    public:
+        constexpr explicit CellTarget(Address address) :
+        sectionId((address & 0xFF00'0000) >> 24),
+        cellId((address & 0x00FF'FFFF) >> 2),
+        cellByteOffset(address & 0b11),
+        cellShortOffset((address & 0b10) ? 1 : 0) { }
+        constexpr auto getSectionId() const noexcept { return sectionId; }
+        constexpr auto getCellId() const noexcept { return cellId; }
+        constexpr auto getByteOffset() const noexcept { return cellByteOffset; }
+        constexpr auto getCellShortOffset() const noexcept { return cellShortOffset; }
+    private:
+        ByteOrdinal sectionId;
+        Address cellId;
+        ByteOrdinal cellByteOffset;
+        ByteOrdinal cellShortOffset;
+    };
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
-        return 0;
+        CellTarget cell(address);
+        return theMemorySpace[cell.getSectionId()][cell.getCellId()].ord;
     }
 
     Integer
     Core::loadInteger(Address address) noexcept {
-        return 0;
+        CellTarget cell(address);
+        return theMemorySpace[cell.getSectionId()][cell.getCellId()].ival;
     }
 
     ByteOrdinal
     Core::loadByteOrdinal(Address address) noexcept {
-        auto [section, cell, byteOffset] = targetCell(address);
-        return theMemorySpace[section][cell].bo[byteOffset];
+        CellTarget cell(address);
+        return theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()];
     }
 
     ByteInteger
     Core::loadByteInteger(Address address) noexcept {
-        auto [section, cell, byteOffset] = targetCell(address);
-        return theMemorySpace[section][cell].bi[byteOffset];
+        CellTarget cell(address);
+        return theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()];
     }
 
     ShortOrdinal
     Core::loadShortOrdinal(Address address) noexcept {
-        return 0;
+        CellTarget cell(address);
+        return theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()];
     }
 
     ShortInteger
     Core::loadShortInteger(Address address) noexcept {
-        return 0;
+        CellTarget cell(address);
+        return theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()];
     }
 
     void
     Core::storeOrdinal(Address address, Ordinal value) noexcept {
+        CellTarget cell(address);
+        theMemorySpace[cell.getSectionId()][cell.getCellId()].ord = value;
     }
 
     void
     Core::storeByteInteger(Address address, ByteInteger value) {
-        auto [section, cell, byteOffset] = targetCell(address);
-        theMemorySpace[section][cell].bi[byteOffset] = value;
+        CellTarget cell(address);
+        theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()]= value;
     }
 
     void
     Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
-        auto [section, cell, byteOffset] = targetCell(address);
-        theMemorySpace[section][cell].bo[byteOffset] = value;
+        CellTarget cell(address);
+        theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()]= value;
     }
 
     void
     Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
+        CellTarget cell(address);
+        theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()]= value;
     }
 
     void
     Core::storeShortInteger(Address address, ShortInteger value) noexcept {
+        CellTarget cell(address);
+        theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()]= value;
     }
 
     void
     Core::storeInteger(Address address, Integer value) noexcept {
-
+        CellTarget cell(address);
+        theMemorySpace[cell.getSectionId()][cell.getCellId()].ival = value;
     }
 
     void
@@ -360,6 +372,55 @@ namespace i960 {
         std::cout << std::endl;
         /// @todo check the frame pointers and such at some point in the future
     }
+    void
+    testProperCycle() {
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
+        // make sure that each instruction operates as expected
+        i960::Core testCore(0,4);
+        testCore.post();
+        // setup instructions
+        theMemorySpace[0][0].ord = 0x8c20'3000;
+        theMemorySpace[0][1].ord = 0x0000'fded;
+        theMemorySpace[0][2].ord = 0x5c28'1e02;
+        theMemorySpace[0][3].ord = 0x5931'4004; // addo r4,r5,r6
+        // double check that registers are clear at this point
+        auto l4 = static_cast<i960::RegisterIndex>(4);
+        auto l5 = static_cast<i960::RegisterIndex>(5);
+        auto l6 = static_cast<i960::RegisterIndex>(6);
+        auto& r4 = testCore.getRegister(l4);
+        if (r4.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r4!, got " << std::hex << r4.getOrdinal() << " instead!" << std::endl;
+        }
+        auto& r5 = testCore.getRegister(l5);
+        if (r5.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r5!, got " << std::hex << r5.getOrdinal() << " instead!" << std::endl;
+        }
+        auto& r6 = testCore.getRegister(l6);
+        if (r6.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r6!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+        // okay now here is the test itself
+        // run a simple program:
+        // lda 0xfded, r4
+        // mov 2, r5
+        // addo r4, r5, r6
+        testCore.cycle(); // LDA 0xfded, r4
+        std::cout << "lda 0xfded, r4" << std::endl;
+        if (r4.getOrdinal() != 0xfded) {
+            std::cout << "\tfailed!, got " << std::hex << r4.getOrdinal() << " instead!" << std::endl;
+        }
+        testCore.cycle(); // mov 2, r5
+        std::cout << "mov 2, r5" << std::endl;
+        if (r5.getOrdinal() != 2) {
+            std::cout << "\tfailed!, got " << std::hex << r5.getOrdinal() << " instead!" << std::endl;
+        }
+        testCore.cycle();
+        std::cout << "addo r4, r5, r6" << std::endl;
+        if (r6.getOrdinal() != (0xfded + 2)) {
+            std::cout << "\tfailed!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
 
 
@@ -373,5 +434,6 @@ int main() {
     i960::testB();
     i960::testCall();
     i960::testBal();
+    i960::testProperCycle();
     return 0;
 }
