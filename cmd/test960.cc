@@ -37,6 +37,7 @@ namespace i960 {
     class CellTarget {
     public:
         constexpr explicit CellTarget(Address address) :
+        raw(address),
         sectionId((address & 0xFF00'0000) >> 24),
         cellId((address & 0x00FF'FFFF) >> 2),
         cellByteOffset(address & 0b11),
@@ -45,12 +46,16 @@ namespace i960 {
         constexpr auto getCellId() const noexcept { return cellId; }
         constexpr auto getByteOffset() const noexcept { return cellByteOffset; }
         constexpr auto getCellShortOffset() const noexcept { return cellShortOffset; }
+        constexpr auto isWordAligned() const noexcept { return cellByteOffset == 0; }
+        constexpr CellTarget nextTarget() const noexcept { return CellTarget{raw + 4}; }
     private:
+        Address raw;
         ByteOrdinal sectionId;
         Address cellId;
         ByteOrdinal cellByteOffset;
         ByteOrdinal cellShortOffset;
     };
+    /// @todo handle unaligned load/store and loads/store which span multiple sections
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
         CellTarget cell(address);
