@@ -261,7 +261,7 @@ namespace i960
          * @return
          */
         Ordinal getWordAtIP(bool advance = false) noexcept;
-    protected: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
+    private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
         Ordinal loadOrdinal(Address address) noexcept;
         void storeOrdinal (Address address, Ordinal value) noexcept;
         Integer loadInteger(Address address) noexcept;
@@ -274,6 +274,7 @@ namespace i960
         void storeShortOrdinal (Address address, ShortOrdinal value) noexcept;
         ShortInteger loadShortInteger(Address address) noexcept;
         void storeShortInteger (Address address, ShortInteger value) noexcept;
+    private:
     private:
         void executeInstruction(const DecodedInstruction& inst);
     public: // fault related

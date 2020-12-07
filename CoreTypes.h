@@ -10,6 +10,12 @@ using LongInteger = std::int64_t;
 using ByteOrdinal = std::uint8_t;
 using ByteInteger = std::int8_t;
 using Address = Ordinal;
-class TreatAsOrdinal final { };
-class TreatAsInteger final { };
+struct TreatAsOrdinal final { using ReturnType = Ordinal; };
+struct TreatAsInteger final { using ReturnType = Integer; };
+struct TreatAsByteOrdinal final { using ReturnType = ByteOrdinal; };
+struct TreatAsByteInteger final { using ReturnType = ByteInteger; };
+struct TreatAsShortOrdinal final { using ReturnType = ShortOrdinal; };
+struct TreatAsShortInteger final { using ReturnType = ShortInteger; };
+struct TreatAsLongOrdinal final { using ReturnType = LongOrdinal; };
+struct TreatAsLongInteger final { using ReturnType = LongInteger; };
 #endif // end I960_CORE_TYPES_H__

@@ -9,6 +9,7 @@
 // custom implementation (this is on purpose)
 namespace i960 {
     // allocate memory in 16 megabyte sections, 256 of them!
+    // since this is the testing area it means the entire memory space is ram
     union Cell {
         constexpr explicit Cell(Ordinal value = 0) noexcept : ord(value) { }
         Ordinal ord;
@@ -425,9 +426,12 @@ namespace i960 {
 
 
 int main() {
+    std::cout << "Starting up test960..." << std::endl;
     for (int i = 0; i < i960::theMemorySpace.size(); ++i) {
+        std::cout << "\tSetting up Memory Space " << i << std::endl;
         i960::theMemorySpace[i] = i960::makeSection();
     }
+    std::cout << "Running tests..." << std::endl;
     i960::test0();
     i960::test1();
     i960::test2();
