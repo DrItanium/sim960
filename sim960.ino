@@ -38,6 +38,11 @@ Adafruit_SI5351 clockgen;
 // directly
 namespace i960 {
     /*
+     * Memory Map So far (broken up into 16 megabyte blocks)
+     * 0x0000'0000 - 0xFEFF'FFFF: FRAM / SD Card memory / memory buffer /etc
+     * 0xFF00'0000 - 0xFFFF'FFFF: Internal IO Space (Where I expose the SAMD51 peripherals)
+     */
+    /*
      * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
      * available memory. On board devices are mapped into the implicit onboard device area of [0xFF00'0000,0xFFFF'FFFF]. The IO device bus
      * exists here as extra "modules" such as:
