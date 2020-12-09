@@ -457,6 +457,21 @@ namespace i960 {
     void
     Core::modpc(const RegFormatInstruction& inst) {
         /// @todo implement
+        auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
+        auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
+        auto dest = std::visit([](auto&& value) -> RegisterIndex {
+            using K = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<K, RegisterIndex>) {
+                return value;
+            } else if constexpr (std::is_same_v<K, Literal>) {
+                return toRegisterIndex(toInteger(value));
+            } else {
+                static_assert(DependentFalse<K>, "Unresolved type!");
+            }
+        }, inst.getSrc1());
+        auto tmp = pc.getRawValue();
+        pc.setRawValue((src & mask) | (tmp & (~mask)));
+        getRegister(dest).setOrdinal(tmp);
     }
     void
     Core::modac(const RegFormatInstruction &inst) {
