@@ -33,7 +33,7 @@ namespace i960 {
     struct MappingConfiguration {
     public:
         MappingConfiguration() = default;
-        void setName(const std::string& name) noexcept;
+        void setName(const std::string& value) noexcept { name = value; }
         [[nodiscard]] decltype(auto) begin() const { return blocks.begin(); }
         [[nodiscard]] decltype(auto) begin() { return blocks.begin(); }
         [[nodiscard]] decltype(auto) end() const { return blocks.end(); }

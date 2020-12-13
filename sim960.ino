@@ -17,6 +17,7 @@
 #include <array>
 #include "CoreTypes.h"
 #include "Core.h"
+#include "ProcessorMappingConfiguration.h"
 
 constexpr auto OPL3Duo_A2 = 22;
 constexpr auto OPL3Duo_A1 = 23;
@@ -47,9 +48,39 @@ union MemoryCell {
 
 };
 const std::string filename = "/config.txt";
+i960::MappingConfiguration mapping;
+bool
+loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMapping) {
+  // Open file for reading
+  File file = sdCard.open(filename.c_str());
 
-static_assert(sizeof(Ordinal) == sizeof(MemoryCell));
-std::array<MemoryCell, 2048 / sizeof(MemoryCell)> dataRam;
+  // Allocate a temporary JsonDocument
+  // Don't forget to change the capacity to match your requirements.
+  // Use arduinojson.org/v6/assistant to compute the capacity.
+  StaticJsonDocument<16384> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+    Serial.println(F("Failed to read file, using default configuration"));
+
+  // Copy values from the JsonDocument to the Config
+  theMapping.setName(doc["name"] | "An i960 Processor");
+  JsonArray blocks = doc["blocks"];
+  for (JsonVariant block : blocks) {
+    JsonObject theObject = block.as<JsonObject>();
+    auto index = theObject["index"].as<byte>();
+    auto& targetBlock = theMapping.get(index);
+    targetBlock.setType(theObject["type"].as<std::string>());
+    targetBlock.setFilename(theObject["filename"].as<std::string>());
+    targetBlock.setDescription(theObject["description"].as<std::string>());
+    targetBlock.setPermissions(theObject["perms"].as<std::string>());
+  }
+
+  // Close the file (Curiously, File's destructor doesn't close the file)
+  file.close();
+  return true;
+}
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
 // directly
 namespace i960 {
@@ -210,6 +241,17 @@ void setup() {
         Serial.println("No Clock Chip Detected ... forget to hook it up?");
     } else {
         Serial.println("Done");
+    }
+
+    Serial.println(F("Loading mapping configuration..."));
+    if (!loadConfiguration(filename, mapping)) {
+        Serial.println("Unable to find mapping configuration, stopping!");
+        while(true) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            delay(1000);
+            digitalWrite(LED_BUILTIN, LOW);
+            delay(1000);
+        }
     }
 }
 
