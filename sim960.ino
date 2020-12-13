@@ -46,6 +46,8 @@ union MemoryCell {
     ShortInteger si[2];
 
 };
+const std::string filename = "/config.txt";
+
 static_assert(sizeof(Ordinal) == sizeof(MemoryCell));
 std::array<MemoryCell, 2048 / sizeof(MemoryCell)> dataRam;
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
