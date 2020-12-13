@@ -109,13 +109,8 @@ namespace i960 {
      * - FLASH memory
      * - etc
      */
-    MemoryCell&
-    loadCell(Address address) noexcept {
-
-    }
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
-        auto cell = loadCell(address);
         return 0;
     }
 
