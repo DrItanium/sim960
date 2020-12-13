@@ -14,6 +14,8 @@
 #include <OPL3Duo.h>
 #include <Adafruit_seesaw.h>
 #include <Adafruit_SI5351.h>
+#include <array>
+#include "CoreTypes.h"
 #include "Core.h"
 
 constexpr auto OPL3Duo_A2 = 22;
@@ -34,6 +36,18 @@ OPL3Duo theOPL3Duo(OPL3Duo_A2,
                    OPL3Duo_Reset);
 Adafruit_seesaw theSoilSensor;
 Adafruit_SI5351 clockgen;
+union MemoryCell {
+    constexpr explicit MemoryCell(Ordinal value = 0) : oval(value) { }
+    Ordinal oval = 0;
+    Integer ival;
+    ByteOrdinal bo[4];
+    ByteInteger bi[4];
+    ShortOrdinal so[2];
+    ShortInteger si[2];
+
+};
+static_assert(sizeof(Ordinal) == sizeof(MemoryCell));
+std::array<MemoryCell, 2048 / sizeof(MemoryCell)> dataRam;
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
 // directly
 namespace i960 {
@@ -62,8 +76,13 @@ namespace i960 {
      * - FLASH memory
      * - etc
      */
+    MemoryCell&
+    loadCell(Address address) noexcept {
+
+    }
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
+        auto cell = loadCell(address);
         return 0;
     }
 

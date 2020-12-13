@@ -17,6 +17,7 @@ add_library(core960
         Register.h
         TraceControls.h
         Disassembly.h
-        OpcodesRaw.h)
+        OpcodesRaw.h
+        GenericNumber.h)
 
 add_subdirectory(cmd)
