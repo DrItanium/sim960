@@ -51,6 +51,7 @@ const std::string filename = "/config.txt";
 i960::MappingConfiguration mapping;
 bool
 loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMapping) {
+    /// @todo fix this
   // Open file for reading
   File file = sdCard.open(filename.c_str());
 
