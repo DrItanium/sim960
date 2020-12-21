@@ -9,9 +9,9 @@
 namespace i960 {
     class ProcessControls {
     public:
-        constexpr ProcessControls() noexcept : _raw(0) { }
+        constexpr ProcessControls() noexcept : raw_(0) { }
         constexpr auto getPriority() const noexcept { return p; }
-        constexpr auto getRawValue() const noexcept { return _raw; }
+        constexpr auto getRawValue() const noexcept { return raw_; }
         constexpr auto traceFaultsEnabledGlobally() const noexcept { return static_cast<bool>(te); }
         constexpr auto inSupervisorMode() const noexcept { return em == 1; }
         constexpr auto inUserMode() const noexcept { return em == 0; }
@@ -24,23 +24,23 @@ namespace i960 {
         void setExecutionMode(bool value) noexcept { em = value; }
         void setTraceFaultPending(bool value) noexcept { tfp = value; }
         void setStateFlag(bool value) noexcept { s = value; }
-        void setRawValue(Ordinal value) noexcept { _raw = value; }
+        void setRawValue(Ordinal value) noexcept { raw_ = value; }
     private:
         union {
-            Ordinal _raw;
+            Ordinal raw_;
             struct {
                 unsigned te : 1;
                 unsigned em : 1;
-                unsigned unused0 : 8;
+                unsigned u0_ : 8;
                 unsigned tfp : 1;
-                unsigned unused1 : 2;
+                unsigned u1_ : 2;
                 unsigned s : 1;
-                unsigned unused2 : 2;
+                unsigned u2_ : 2;
                 unsigned p : 5;
-                unsigned unused3 : 11;
+                unsigned u3_ : 11;
             };
         };
-        Ordinal _value = 0;
+        Ordinal value_ = 0;
     };
 }
 

@@ -7,10 +7,10 @@
 #include <string>
 #include <array>
 namespace i960 {
-    struct BlockConfiguration {
+    struct SectionConfiguration {
     public:
-        BlockConfiguration() = default;
-        BlockConfiguration(const std::string& kind, const std::string& desc, const std::string& path, const std::string& permissions);
+        SectionConfiguration() = default;
+        SectionConfiguration(const std::string& kind, const std::string& desc, const std::string& path, const std::string& permissions);
         [[nodiscard]] const std::string& getPermissions() const noexcept { return perms; }
         [[nodiscard]] const std::string& getFilename() const noexcept { return filename; }
         [[nodiscard]] const std::string& getDescription() const noexcept { return description; }
@@ -34,16 +34,16 @@ namespace i960 {
     public:
         MappingConfiguration() = default;
         void setName(const std::string& value) noexcept { name = value; }
-        [[nodiscard]] decltype(auto) begin() const { return blocks.begin(); }
-        [[nodiscard]] decltype(auto) begin() { return blocks.begin(); }
-        [[nodiscard]] decltype(auto) end() const { return blocks.end(); }
-        [[nodiscard]] decltype(auto) end() { return blocks.end(); }
-        [[nodiscard]] BlockConfiguration& get(size_t index);
-        [[nodiscard]] const BlockConfiguration& get(size_t index) const;
+        [[nodiscard]] decltype(auto) begin() const { return sections_.begin(); }
+        [[nodiscard]] decltype(auto) begin() { return sections_.begin(); }
+        [[nodiscard]] decltype(auto) end() const { return sections_.end(); }
+        [[nodiscard]] decltype(auto) end() { return sections_.end(); }
+        [[nodiscard]] SectionConfiguration& get(size_t index);
+        [[nodiscard]] const SectionConfiguration& get(size_t index) const;
         [[nodiscard]] const std::string& getName() const noexcept { return name; }
     private:
         std::string name;
-        std::array<BlockConfiguration, 256> blocks;
+        std::array<SectionConfiguration, 256> sections_;
     };
 
 }

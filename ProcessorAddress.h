@@ -12,7 +12,7 @@ namespace i960 {
      * Each address is made up of four components (in order from MSB to LSB): Section, Subsection, Block
      * There are 256 Sections.
      * Each section contains 256 subsections.
-     * Each subsection contains 256 blocks.
+     * Each subsection contains 256 sections_.
      * Each Block contains 256 Sectors.
      *
      * In terms of bytes:

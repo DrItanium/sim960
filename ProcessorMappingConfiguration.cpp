@@ -5,26 +5,26 @@
 #include "ProcessorMappingConfiguration.h"
 
 namespace i960 {
-    bool BlockConfiguration::isUnmapped() const noexcept { return type == "unmapped"; }
-    bool BlockConfiguration::isSd() const noexcept { return type == "sd"; }
-    bool BlockConfiguration::isOnChip() const noexcept { return type == "onchip"; }
-    bool BlockConfiguration::isExternalIO() const noexcept { return type == "external-io"; }
+    bool SectionConfiguration::isUnmapped() const noexcept { return type == "unmapped"; }
+    bool SectionConfiguration::isSd() const noexcept { return type == "sd"; }
+    bool SectionConfiguration::isOnChip() const noexcept { return type == "onchip"; }
+    bool SectionConfiguration::isExternalIO() const noexcept { return type == "external-io"; }
 
-    BlockConfiguration::BlockConfiguration(const std::string &kind,
-                                           const std::string &desc,
-                                           const std::string &path,
-                                           const std::string &permissions)
+    SectionConfiguration::SectionConfiguration(const std::string &kind,
+                                               const std::string &desc,
+                                               const std::string &path,
+                                               const std::string &permissions)
             : type(kind), description(desc), filename(path), perms(permissions) { }
 
 
 
-    BlockConfiguration&
+    SectionConfiguration&
     MappingConfiguration::get(size_t index) {
-        return blocks[index&0xFF];
+        return sections_[index & 0xFF];
     }
-    const BlockConfiguration&
+    const SectionConfiguration&
     MappingConfiguration::get(size_t index) const {
-        return blocks[index&0xFF];
+        return sections_[index & 0xFF];
     }
 
 }

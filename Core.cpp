@@ -411,7 +411,12 @@ namespace i960 {
 
     void
     Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
-        /// @todo implement... such a baffling design...BCD...
+        const auto& s1 = getRegister(src1);
+        const auto& s2 = getRegister(src2);
+        // transfer bits over
+        auto outcome = (s2.getOrdinal() - s1.getOrdinal() - 1 + (getCarryFlag() ? 1 : 0)) & 0xF;
+        setCarryFlag(outcome != 0);
+        getRegister(dest).setOrdinal((s2.getOrdinal() & (~0xF)) | (outcome & 0xF));
     }
     void
     Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
