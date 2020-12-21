@@ -487,6 +487,24 @@ namespace i960
          * @param dest The destination register to store the result in
          */
         void daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest);
+    private: // i960 Hx,Jx extended instructions (partial set)
+        template<ConditionCodeKind cck>
+        void selectGeneral(RegLit src1, RegLit src2, RegisterIndex dest) noexcept {
+            if ((ac.conditionIs<cck>()) || (static_cast<ByteOrdinal>(cck) == ac.getConditionCode())) {
+                getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}));
+            } else {
+                getRegister(dest).setOrdinal(extractValue(src1, TreatAsOrdinal{}));
+            }
+        }
+        inline void selno(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::Unordered>(src1, src2, dest); }
+        inline void selg(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::GreaterThan>(src1, src2, dest); }
+        inline void sele(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::EqualTo>(src1, src2, dest); }
+        inline void selge(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::GreaterThanOrEqualTo>(src1, src2, dest); }
+        inline void sell(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::LessThan>(src1, src2, dest); }
+        inline void selne(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::NotEqual>(src1, src2, dest); }
+        inline void selle(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::LessThanOrEqual>(src1, src2, dest); }
+        inline void selo(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::Ordered>(src1, src2, dest); }
+
     public:
         void nextInstruction();
     private:
