@@ -140,215 +140,85 @@ namespace i960 {
     Core::execute(const RegFormatInstruction &inst) noexcept {
         auto theOpcode = inst.getOpcode();
         switch (theOpcode) {
-            case 0x580:
-                notbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x581:
-                logicalAnd(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x582:
-                andnot(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x583:
-                setbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x584:
-                notand(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x586:
-                logicalXor(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x587:
-                logicalOr(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x588:
-                logicalNor(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x589:
-                logicalXnor(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x58A:
-                logicalNot(inst.getSrc1(), inst.getDestination());
-                break;
-            case 0x58B:
-                ornot(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x58C:
-                clrbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x58D:
-                notor(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x58E:
-                logicalNand(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x58F:
-                alterbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x590:
-                addo(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x591:
-                addi(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x592:
-                subo(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x593:
-                subi(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
+            case 0x580: notbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x581: logicalAnd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x582: andnot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x583: setbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x584: notand(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x586: logicalXor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x587: logicalOr(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x588: logicalNor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x589: logicalXnor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x58A: logicalNot(inst.getSrc1(), inst.getDestination()); break;
+            case 0x58B: ornot(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x58C: clrbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x58D: notor(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x58E: logicalNand(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x58F: alterbit(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x590: addo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x591: addi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x592: subo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x593: subi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x594: cmpob(inst.getSrc1(), inst.getSrc2()); break;
                 //case 0x595: cmpib(inst.getSrc1(), inst.getSrc2()); break;
                 //case 0x596: cmpos(inst.getSrc1(), inst.getSrc2()); break;
                 //case 0x597: cmpis(inst.getSrc1(), inst.getSrc2()); break;
-            case 0x598:
-                shro(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x59A:
-                shrdi(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x59B:
-                shri(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x59C:
-                shlo(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x59D:
-                rotate(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x59E:
-                shli(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x5A0:
-                cmpo(inst.getSrc1(), inst.getSrc2());
-                break;
-            case 0x5A1:
-                cmpi(inst.getSrc1(), inst.getSrc2());
-                break;
-            case 0x5A2:
-                concmpo(inst.getSrc1(), inst.getSrc2());
-                break;
-            case 0x5A3:
-                concmpi(inst.getSrc1(), inst.getSrc2());
-                break;
-            case 0x5A4:
-                cmpinco(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x5A5:
-                cmpinci(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x5A6:
-                cmpdeco(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x5A7:
-                cmpdeci(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x5AC:
-                scanbyte(inst.getSrc1(), inst.getSrc2());
-                break;
+            case 0x598: shro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x59A: shrdi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x59B: shri(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x59C: shlo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x59D: rotate(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x59E: shli(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5A0: cmpo(inst.getSrc1(), inst.getSrc2()); break;
+            case 0x5A1: cmpi(inst.getSrc1(), inst.getSrc2()); break;
+            case 0x5A2: concmpo(inst.getSrc1(), inst.getSrc2()); break;
+            case 0x5A3: concmpi(inst.getSrc1(), inst.getSrc2()); break;
+            case 0x5A4: cmpinco(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5A5: cmpinci(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5A6: cmpdeco(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5A7: cmpdeci(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5AC: scanbyte(inst.getSrc1(), inst.getSrc2()); break;
                 //case 0x5AD: bswap(inst.getSrc1(), inst.getSrc2()); break;
-            case 0x5AE:
-                chkbit(inst.getSrc1(), inst.getSrc2());
-                break;
-            case 0x5B0:
-                addc(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x5B2:
-                subc(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
+            case 0x5AE: chkbit(inst.getSrc1(), inst.getSrc2()); break;
+            case 0x5B0: addc(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x5B2: subc(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 // case 0x5B4: intdis(); break;
                 // case 0x5B5: inten(); break;
-            case 0x5CC:
-                mov(inst.getSrc1(), inst.getDestination());
-                break;
+            case 0x5CC: mov(inst.getSrc1(), inst.getDestination()); break;
                 //case 0x5D8: eshro(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            case 0x5DC:
-                movl(inst.getSrc1(), inst.getDestination());
-                break;
-            case 0x5EC:
-                movt(inst.getSrc1(), inst.getDestination());
-                break;
-            case 0x5FC:
-                movq(inst.getSrc1(), inst.getDestination());
-                break;
+            case 0x5DC: movl(inst.getSrc1(), inst.getDestination()); break;
+            case 0x5EC: movt(inst.getSrc1(), inst.getDestination()); break;
+            case 0x5FC: movq(inst.getSrc1(), inst.getDestination()); break;
                 //case 0x610: atmod(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x612: atadd(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            case 0x640:
-                spanbit(inst.getSrc1(), inst.getDestination());
-                break;
-            case 0x641:
-                scanbit(inst.getSrc1(), inst.getDestination());
-                break;
-            case 0x642:
-                daddc(std::get<RegisterIndex>(inst.getSrc1()), std::get<RegisterIndex>(inst.getSrc2()), inst.getDestination());
-                break;
-            case 0x643:
-                dsubc(std::get<RegisterIndex>(inst.getSrc1()), std::get<RegisterIndex>(inst.getSrc2()), inst.getDestination());
-                break;
-            case 0x644:
-                dmovt(std::get<RegisterIndex>(inst.getSrc1()), inst.getDestination());
-                break;
-            case 0x645:
-                modac(inst);
-                break;
-            case 0x650:
-                modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x651:
-                extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x654:
-                modtc(inst);
-                break;
-            case 0x655:
-                modpc(inst);
-                break;
+            case 0x640: spanbit(inst.getSrc1(), inst.getDestination()); break;
+            case 0x641: scanbit(inst.getSrc1(), inst.getDestination()); break;
+            case 0x642: daddc(std::get<RegisterIndex>(inst.getSrc1()), std::get<RegisterIndex>(inst.getSrc2()), inst.getDestination()); break;
+            case 0x643: dsubc(std::get<RegisterIndex>(inst.getSrc1()), std::get<RegisterIndex>(inst.getSrc2()), inst.getDestination()); break;
+            case 0x644: dmovt(std::get<RegisterIndex>(inst.getSrc1()), inst.getDestination()); break;
+            case 0x645: modac(inst); break;
+            case 0x650: modify(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x651: extract(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x654: modtc(inst); break;
+            case 0x655: modpc(inst); break;
                 //case 0x658: intctl(inst.getSrc1(), inst.getDestination()); break;
                 //case 0x659: sysctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x65B: icctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x65C: dcctl(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
-            case 0x660:
-                calls(inst.getSrc1());
-                break;
-            case 0x66B:
-                mark();
-                break;
-            case 0x66C:
-                fmark();
-                break;
-            case 0x66D:
-                flushreg();
-                break;
-            case 0x66F:
-                syncf();
-                break;
-            case 0x670:
-                emul(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x671:
-                ediv(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x701:
-                mulo(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x708:
-                remo(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x70B:
-                divo(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x741:
-                muli(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x748:
-                remi(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x749:
-                modi(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
-            case 0x74B:
-                divi(inst.getSrc1(), inst.getSrc2(), inst.getDestination());
-                break;
+            case 0x660: calls(inst.getSrc1()); break;
+            case 0x66B: mark(); break;
+            case 0x66C: fmark(); break;
+            case 0x66D: flushreg(); break;
+            case 0x66F: syncf(); break;
+            case 0x670: emul(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x671: ediv(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x701: mulo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x708: remo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x70B: divo(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x741: muli(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x748: remi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x749: modi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
+            case 0x74B: divi(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x780: addono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x781: addino(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
                 //case 0x782: subono(inst.getSrc1(), inst.getSrc2(), inst.getDestination()); break;
@@ -405,169 +275,73 @@ namespace i960 {
         auto address = inst.computeAddress(*this);
         auto opcode = inst.getOpcode();
         switch (opcode) {
-            case 0x800:
-                ldob(address, inst.getSrcDest());
-                break;
-            case 0x820:
-                stob(inst.getSrcDest(), address);
-                break;
-            case 0x840:
-                bx(address);
-                break;
-            case 0x850:
-                balx(address, inst.getSrcDest());
-                break;
-            case 0x860:
-                callx(address);
-                break;
-            case 0x880:
-                ldos(address, inst.getSrcDest());
-                break;
-            case 0x8A0:
-                stos(inst.getSrcDest(), address);
-                break;
-            case 0x8C0:
-                lda(address, inst.getSrcDest());
-                break;
-            case 0x900:
-                ld(address, inst.getSrcDest());
-                break;
-            case 0x920:
-                st(inst.getSrcDest(), address);
-                break;
-            case 0x980:
-                ldl(address, inst.getSrcDest());
-                break;
-            case 0xA00:
-                ldt(address, inst.getSrcDest());
-                break;
-            case 0xA20:
-                stt(inst.getSrcDest(), address);
-                break;
-            case 0xB00:
-                ldq(address, inst.getSrcDest());
-                break;
-            case 0xB20:
-                stq(inst.getSrcDest(), address);
-                break;
-            case 0xC00:
-                ldib(address, inst.getSrcDest());
-                break;
-            case 0xC20:
-                stib(inst.getSrcDest(), address);
-                break;
-            case 0xC80:
-                ldis(address, inst.getSrcDest());
-                break;
-            case 0xCA0:
-                stis(inst.getSrcDest(), address);
-                break;
-            default:
-                badInstruction(inst);
-                break;
+            case 0x800: ldob(address, inst.getSrcDest()); break;
+            case 0x820: stob(inst.getSrcDest(), address); break;
+            case 0x840: bx(address); break;
+            case 0x850: balx(address, inst.getSrcDest()); break;
+            case 0x860: callx(address); break;
+            case 0x880: ldos(address, inst.getSrcDest()); break;
+            case 0x8A0: stos(inst.getSrcDest(), address); break;
+            case 0x8C0: lda(address, inst.getSrcDest()); break;
+            case 0x900: ld(address, inst.getSrcDest()); break;
+            case 0x920: st(inst.getSrcDest(), address); break;
+            case 0x980: ldl(address, inst.getSrcDest()); break;
+            case 0xA00: ldt(address, inst.getSrcDest()); break;
+            case 0xA20: stt(inst.getSrcDest(), address); break;
+            case 0xB00: ldq(address, inst.getSrcDest()); break;
+            case 0xB20: stq(inst.getSrcDest(), address); break;
+            case 0xC00: ldib(address, inst.getSrcDest()); break;
+            case 0xC20: stib(inst.getSrcDest(), address); break;
+            case 0xC80: ldis(address, inst.getSrcDest()); break;
+            case 0xCA0: stis(inst.getSrcDest(), address); break;
+            default: badInstruction(inst); break;
         }
     }
     void
     Core::execute(const COBRInstruction &inst) noexcept {
         switch (inst.getOpcode()) {
-            case 0x200:
-                testBase<ConditionCodeKind::Unordered>(inst.getSrc1());
-                break;
-            case 0x210:
-                testBase<ConditionCodeKind::GreaterThan>(inst.getSrc1());
-                break;
-            case 0x220:
-                testBase<ConditionCodeKind::EqualTo>(inst.getSrc1());
-                break;
-            case 0x230:
-                testBase<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1());
-                break;
-            case 0x240:
-                testBase<ConditionCodeKind::LessThan>(inst.getSrc1());
-                break;
-            case 0x250:
-                testBase<ConditionCodeKind::NotEqual>(inst.getSrc1());
-                break;
-            case 0x260:
-                testBase<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1());
-                break;
-            case 0x270:
-                testBase<ConditionCodeKind::Ordered>(inst.getSrc1());
-                break;
-            case 0x300:
-                bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement());
-                break;
-            case 0x310:
-                compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{});
-                break;
-            case 0x320:
-                compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{});
-                break;
-            case 0x330:
-                compareAndBranch<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(),
-                                                                          TreatAsOrdinal{});
-                break;
-            case 0x340:
-                compareAndBranch<ConditionCodeKind::LessThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{});
-                break;
-            case 0x350:
-                compareAndBranch<ConditionCodeKind::NotEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{});
-                break;
-            case 0x360:
-                compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(),
-                                                                     TreatAsOrdinal{});
-                break;
-            case 0x370:
-                bbs(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement());
-                break;
-            case 0x380:
-                compareAndBranch<ConditionCodeKind::Unordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{});
-                break;
-            case 0x390:
-                compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{});
-                break;
-            case 0x3A0:
-                compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{});
-                break;
-            case 0x3B0:
-                compareAndBranch<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(),
-                                                                          TreatAsInteger{});
-                break;
-            case 0x3C0:
-                compareAndBranch<ConditionCodeKind::LessThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{});
-                break;
-            case 0x3D0:
-                compareAndBranch<ConditionCodeKind::NotEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{});
-                break;
-            case 0x3E0:
-                compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(),
-                                                                     TreatAsInteger{});
-                break;
-            case 0x3F0:
-                compareAndBranch<ConditionCodeKind::Ordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{});
-                break;
-            default:
-                badInstruction(inst);
-                break;
+            case 0x200: testBase<ConditionCodeKind::Unordered>(inst.getSrc1()); break;
+            case 0x210: testBase<ConditionCodeKind::GreaterThan>(inst.getSrc1()); break;
+            case 0x220: testBase<ConditionCodeKind::EqualTo>(inst.getSrc1()); break;
+            case 0x230: testBase<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1()); break;
+            case 0x240: testBase<ConditionCodeKind::LessThan>(inst.getSrc1()); break;
+            case 0x250: testBase<ConditionCodeKind::NotEqual>(inst.getSrc1()); break;
+            case 0x260: testBase<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1()); break;
+            case 0x270: testBase<ConditionCodeKind::Ordered>(inst.getSrc1()); break;
+            case 0x300: bbc(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x310: compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x320: compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x330: compareAndBranch<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x340: compareAndBranch<ConditionCodeKind::LessThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x350: compareAndBranch<ConditionCodeKind::NotEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x360: compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsOrdinal{}); break;
+            case 0x370: bbs(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement()); break;
+            case 0x380: compareAndBranch<ConditionCodeKind::Unordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x390: compareAndBranch<ConditionCodeKind::GreaterThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3A0: compareAndBranch<ConditionCodeKind::EqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3B0: compareAndBranch<ConditionCodeKind::GreaterThanOrEqualTo>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3C0: compareAndBranch<ConditionCodeKind::LessThan>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3D0: compareAndBranch<ConditionCodeKind::NotEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3E0: compareAndBranch<ConditionCodeKind::LessThanOrEqual>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            case 0x3F0: compareAndBranch<ConditionCodeKind::Ordered>(inst.getSrc1(), inst.getSrc2(), inst.getDisplacement(), TreatAsInteger{}); break;
+            default: badInstruction(inst); break;
         }
     }
     void
     Core::execute(const CTRLInstruction &inst) noexcept {
-        auto opcode = inst.getOpcode();
-        auto displacement = inst.getDisplacement();
-        switch (opcode) {
-            case 0x080: b(displacement); break;
-            case 0x090: call(displacement); break;
+        switch (inst.getOpcode()) {
+            case 0x080: b(inst.getDisplacement()); break;
+            case 0x090: call(inst.getDisplacement()); break;
             case 0x0A0: ret(); break;
-            case 0x0B0: bal(Displacement22{displacement}); break;
-            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{displacement}); break;
-            case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{displacement}); break;
-            case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{displacement}); break;
-            case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{displacement}); break;
-            case 0x140: conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{displacement}); break;
-            case 0x150: conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{displacement}); break;
-            case 0x160: conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{displacement}); break;
-            case 0x170: conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{displacement}); break;
+            case 0x0B0: bal(Displacement22{inst.getDisplacement()}); break;
+            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{inst.getDisplacement()}); break;
+            case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{inst.getDisplacement()}); break;
+            case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{inst.getDisplacement()}); break;
+            case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{inst.getDisplacement()}); break;
+            case 0x140: conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{inst.getDisplacement()}); break;
+            case 0x150: conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{inst.getDisplacement()}); break;
+            case 0x160: conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{inst.getDisplacement()}); break;
+            case 0x170: conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{inst.getDisplacement()}); break;
             case 0x180: conditionalFault<ConditionCodeKind::Unordered>(); break;
             case 0x190: conditionalFault<ConditionCodeKind::GreaterThan>(); break;
             case 0x1A0: conditionalFault<ConditionCodeKind::EqualTo>(); break;
