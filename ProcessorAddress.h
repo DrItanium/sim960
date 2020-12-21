@@ -5,7 +5,7 @@
 #ifndef SIM960_PROCESSORADDRESS_H
 #define SIM960_PROCESSORADDRESS_H
 #include "CoreTypes.h"
-
+#include <tuple>
 namespace i960 {
     /**
      * @brief Wraps a normal 32-bit Ordinal/Address and allows access to the different components.
@@ -39,6 +39,16 @@ namespace i960 {
          * @return the offset into the current section (chop off the upper most 8 bits) and get a 24 bit address back
          */
         [[nodiscard]] constexpr auto getSectionOffset() const noexcept { return full_ & 0x00FFFFFF; }
+
+        [[nodiscard]] constexpr auto rangeSpansSections(Address width) const noexcept {
+            return ProcessorAddress(full_ + width).getSectionId() != getSectionId();
+        }
+        template<typename T>
+        [[nodiscard]] constexpr auto dataSpansSections() const noexcept {
+            return rangeSpansSections(sizeof(T));
+        }
+
+        [[nodiscard]] constexpr auto decompose() const noexcept { return std::make_tuple(getSectionId(), getSubsectionId(), getBlockId(), getBlockOffset()); }
     private:
         Address full_;
     };
@@ -50,6 +60,9 @@ namespace i960 {
     static_assert(!ProcessorAddress(0x01020304).isInIOSpace());
     static_assert(ProcessorAddress(0xFF020304).isInIOSpace());
     static_assert(ProcessorAddress(0xFF020304).getSectionOffset() == 0x020304);
+    static_assert(!ProcessorAddress(0xFF020304).rangeSpansSections(1));
+    static_assert(ProcessorAddress(0xFEFF'FFFF).rangeSpansSections(1));
+    static_assert(ProcessorAddress(0xFEFF'FFFE).rangeSpansSections(2));
 
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getBlockOffset() == 0x04);
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getBlockId() == 0x03);
