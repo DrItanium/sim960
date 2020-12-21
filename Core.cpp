@@ -393,11 +393,13 @@ namespace i960 {
     }
     void
     Core::saveRegisterSet() noexcept {
+        auto address = getFramePointer().getOrdinal();
         // okay, we have to save all of the registers to the stack or the on board
         // register cache (however, I'm not implementing that yet)
     }
     void
     Core::restoreRegisterSet() noexcept {
+        auto address = getFramePointer().getOrdinal();
         // restore the local register frame, generally done when you return from a
         // previous function
     }
@@ -540,9 +542,82 @@ namespace i960 {
 
         }
     }
+    bool
+    Core::registerSetNotAllocated(Ordinal address) const noexcept {
+        /// @todo implement register set support at some point
+        return true;
+    }
     void
     Core::ret() {
         syncf();
+        auto pfp = getPFP();
+        if (pfp.getPreReturnTraceFlag() && pc.getTraceEnableBit() && tc.getPrereturnTraceMode()) {
+            pfp.setPreReturnTraceFlag(false);
+            raiseFault(); // TRACE.PRERETURN
+        } else {
+            auto& fp = getFramePointer();
+            Ordinal tempa = 0;
+            Ordinal tempb = 0;
+            auto getFPAndIP = [this, &fp, &pfp]() {
+               fp.setOrdinal(pfp.getRawValue());
+               freeCurrentRegisterSet();
+               if (registerSetNotAllocated(fp.getOrdinal())) {
+                    restoreRegisterSet();
+               }
+               ip.setOrdinal(getReturnInstructionPointer().getOrdinal());
+            };
+            switch (pfp.getReturnType()) {
+                case PreviousFramePointer::ReturnStatusField::Local:
+                    getFPAndIP();
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Fault:
+                    tempa = loadOrdinal(fp.getOrdinal() - 16);
+                    tempb = loadOrdinal(fp.getOrdinal() - 12);
+                    getFPAndIP();
+                    ac.setRawValue(tempb);
+                    if (pc.inSupervisorMode()) {
+                        pc.setRawValue(tempa);
+                    }
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Supervisor_TraceDisabled:
+                    if (!pc.inSupervisorMode()) {
+                        getFPAndIP();
+                    } else {
+                        pc.setTraceEnableBit(false);
+                        pc.enterUserMode();
+                        getFPAndIP();
+                    }
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Supervisor_TraceEnabled:
+                    if (!pc.inSupervisorMode()) {
+                        getFPAndIP();
+                    } else {
+                       pc.setTraceEnableBit(true) ;
+                       pc.enterUserMode();
+                       getFPAndIP();
+                    }
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Reserved0:
+                    // unpredictable behavior
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Reserved1:
+                    // unpredictable behavior
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Reserved2:
+                    // unpredictable behavior
+                    break;
+                case PreviousFramePointer::ReturnStatusField::Interrupt:
+                    tempa = loadOrdinal(fp.getOrdinal() - 16);
+                    tempb = loadOrdinal(fp.getOrdinal() - 12);
+                    getFPAndIP();
+                    ac.setRawValue(tempb);
+                    if (pc.inSupervisorMode()) {
+                        pc.setRawValue(tempa);
+                    }
+                    checkPendingInterrupts();
+                    break;
+            }
+        }
         /// @todo continue implementing
     }
     void
@@ -1201,6 +1276,9 @@ namespace i960 {
     Register& Core::getReturnInstructionPointer() noexcept {
         return getRegister(RIP);
     }
+    void Core::freeCurrentRegisterSet() noexcept {
+        /// @todo implement when support for register sets is provided
+    }
 
     std::string
     RegFormatInstruction::decodeName() const noexcept {
@@ -1233,5 +1311,10 @@ namespace i960 {
         } else {
             return "";
         }
+    }
+
+    void
+    Core::checkPendingInterrupts() noexcept {
+        /// @todo implement support for this later on
     }
 }

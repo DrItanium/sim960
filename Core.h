@@ -254,9 +254,9 @@ namespace i960
         void post();
         void cycle();
         void cycle(Ordinal lower, Ordinal upper = 0);
-        Register& getRegister(RegisterIndex index) noexcept;
-        const Register& getRegister(RegisterIndex index) const noexcept;
-        const Register& getIP() const noexcept { return ip; }
+        [[nodiscard]] Register& getRegister(RegisterIndex index) noexcept;
+        [[nodiscard]] const Register& getRegister(RegisterIndex index) const noexcept;
+        [[nodiscard]] const Register& getIP() const noexcept { return ip; }
         /**
          * @brief Retrieve the word at the ip address
          * @param advance
@@ -288,6 +288,8 @@ namespace i960
         void execute(const CTRLInstruction &inst) noexcept;
 
     private: // common internal functions
+        void checkPendingInterrupts() noexcept;
+        void freeCurrentRegisterSet() noexcept;
         void saveRegisterSet() noexcept;
         void restoreRegisterSet() noexcept;
         bool getCarryFlag() const noexcept;
@@ -510,7 +512,8 @@ namespace i960
     private:
         void badInstruction(DecodedInstruction inst);
         Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
-        bool registerSetAvailable() const noexcept;
+        [[nodiscard]] bool registerSetAvailable() const noexcept;
+        [[nodiscard]] bool registerSetNotAllocated(Ordinal address) const noexcept;
     private:
         RegisterFile globals, locals;
         Register ip; // always start at address zero

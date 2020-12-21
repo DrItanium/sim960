@@ -26,6 +26,8 @@ namespace i960 {
         void setTraceFaultPending(bool value) noexcept { tfp = value; }
         void setStateFlag(bool value) noexcept { s = value; }
         void setRawValue(Ordinal value) noexcept { raw_ = value; }
+        void enterUserMode() noexcept { em = 0; }
+        void enterSupervisorMode() noexcept { em = 1; }
     private:
         union {
             Ordinal raw_;

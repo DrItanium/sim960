@@ -34,6 +34,7 @@ namespace i960 {
         void setRawValue(Ordinal value) noexcept {
             targetRegister_.setOrdinal(value);
         }
+        [[nodiscard]] constexpr auto getRawValue() const noexcept { return targetRegister_.getOrdinal(); }
     private:
         Register& targetRegister_;
     };
