@@ -511,7 +511,7 @@ namespace i960
         void nextInstruction();
     private:
         void badInstruction(DecodedInstruction inst);
-        Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
+        [[nodiscard]] Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
         [[nodiscard]] bool registerSetAvailable() const noexcept;
         [[nodiscard]] bool registerSetNotAllocated(Ordinal address) const noexcept;
         [[nodiscard]] Ordinal getSupervisorStackPointer() noexcept;
@@ -525,7 +525,12 @@ namespace i960
         bool _unalignedFaultEnabled = false;
         unsigned int salign_ = 1;
         Ordinal ibrBase_ = 0;
-        // just like the i960Hx, we need to also map the
+        // just like the i960Hx, we need to also map some on chip ram into the memory space.
+        // With the Zx variety, this will be around 64kb of on board chip ram (which the grand central m4 has plenty to spare!)
+        static constexpr Address onDieRamStart = 0x0000'0000;
+        static constexpr Address onDieRamSize= 0x0001'0000;
+        static constexpr Address onDieRamEnd = onDieRamSize + onDieRamStart;
+        std::array<Ordinal, onDieRamSize / sizeof(Ordinal)> onDieChipRam_ = { 0 };
     };
 
 }
