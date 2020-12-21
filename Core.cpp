@@ -459,18 +459,9 @@ namespace i960 {
     Core::flushreg() {
         // noop right now
     }
-    void
-    Core::modtc(const RegFormatInstruction& inst) {
-        getRegister(inst.getDestination()).setOrdinal(
-                tc.modify(extractValue(inst.getSrc1(), TreatAsOrdinal{}),
-                          extractValue(inst.getSrc2(), TreatAsOrdinal{})));
-    }
-    void
-    Core::modpc(const RegFormatInstruction& inst) {
-        /// @todo implement
-        auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
-        auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
-        auto dest = std::visit([](auto&& value) -> RegisterIndex {
+    RegisterIndex
+    forceIntoRegisterIndex(RegLit value) noexcept {
+        return std::visit([](auto&& value) -> RegisterIndex {
             using K = std::decay_t<decltype(value)>;
             if constexpr (std::is_same_v<K, RegisterIndex>) {
                 return value;
@@ -479,7 +470,21 @@ namespace i960 {
             } else {
                 static_assert(DependentFalse<K>, "Unresolved type!");
             }
-        }, inst.getSrc1());
+        }, value);
+    }
+    void
+    Core::modtc(const RegFormatInstruction& inst) {
+        auto dest = forceIntoRegisterIndex(inst.getSrc1());
+        auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
+        auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
+        getRegister(dest).setOrdinal( tc.modify(mask, src));
+    }
+    void
+    Core::modpc(const RegFormatInstruction& inst) {
+        /// @todo implement
+        auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
+        auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
+        auto dest = forceIntoRegisterIndex(inst.getSrc1());
         auto tmp = pc.getRawValue();
         pc.setRawValue((src & mask) | (tmp & (~mask)));
         getRegister(dest).setOrdinal(tmp);
@@ -491,16 +496,7 @@ namespace i960 {
         // dest is src1
         auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
         auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
-        auto dest = std::visit([](auto&& value) -> RegisterIndex {
-            using K = std::decay_t<decltype(value)>;
-            if constexpr (std::is_same_v<K, RegisterIndex>) {
-                return value;
-            } else if constexpr (std::is_same_v<K, Literal>) {
-                return toRegisterIndex(toInteger(value));
-            } else {
-                static_assert(DependentFalse<K>, "Unresolved type!");
-            }
-        }, inst.getSrc1());
+        auto dest = forceIntoRegisterIndex(inst.getSrc1());
         auto tmp = ac.getRawValue();
         ac.setRawValue((src & mask) | (tmp & (~mask)));
         getRegister(dest).setOrdinal(tmp);
