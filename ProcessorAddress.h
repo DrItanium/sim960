@@ -28,20 +28,34 @@ namespace i960 {
                          static_cast<Address>(blockId) << 8 |
                          static_cast<Address>(subsectionId) << 16 |
                          static_cast<Address>(sectionId) << 24) { }
+        [[nodiscard]] constexpr auto getAddress() const noexcept { return full_; }
         [[nodiscard]] constexpr ByteOrdinal getBlockOffset() const noexcept { return full_; }
         [[nodiscard]] constexpr ByteOrdinal getBlockId() const noexcept { return full_ >> 8; }
         [[nodiscard]] constexpr ByteOrdinal getSubsectionId() const noexcept { return full_ >> 16; }
         [[nodiscard]] constexpr ByteOrdinal getSectionId() const noexcept { return full_ >> 24; }
+        [[nodiscard]] constexpr auto isInIOSpace() const noexcept { return getSectionId() == 0xFF; }
     private:
         Address full_;
     };
+    // sanity checks
     static_assert(ProcessorAddress(0x01020304).getBlockOffset() == 0x04);
     static_assert(ProcessorAddress(0x01020304).getBlockId() == 0x03);
     static_assert(ProcessorAddress(0x01020304).getSubsectionId() == 0x02);
     static_assert(ProcessorAddress(0x01020304).getSectionId() == 0x01);
+    static_assert(!ProcessorAddress(0x01020304).isInIOSpace());
+    static_assert(ProcessorAddress(0xFF020304).isInIOSpace());
+
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getBlockOffset() == 0x04);
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getBlockId() == 0x03);
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getSubsectionId() == 0x02);
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getSectionId() == 0x01);
+    static_assert(!ProcessorAddress(0x04,0x03,0x02,0x01).isInIOSpace());
+    static_assert(ProcessorAddress(0x04,0x03,0x02,0xFF).isInIOSpace());
 } // end namespace i960
+constexpr bool operator==(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() == b.getAddress(); }
+constexpr bool operator!=(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() != b.getAddress(); }
+constexpr bool operator<(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() < b.getAddress(); }
+constexpr bool operator>(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() > b.getAddress(); }
+constexpr bool operator<=(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() <= b.getAddress(); }
+constexpr bool operator>=(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() >= b.getAddress(); }
 #endif //SIM960_PROCESSORADDRESS_H
