@@ -224,12 +224,7 @@ namespace i960
             Integer optionalDisplacement;
         };
     };
-    template<typename BIU, typename IPU,
-            std::enable_if_t<std::is_base_of_v<BusInterfaceUnit, BIU>, int> = 0,
-            std::enable_if_t<std::is_base_of_v<InternalPeripheralUnit, IPU>, int> = 0>
     class Core {
-        static_assert(std::is_default_constructible_v<BIU>, "The bus interface unit must be default constructible!");
-        static_assert(std::is_default_constructible_v<IPU>, "The internal peripheral unit must be default constructible!");
     private:
         static constexpr Ordinal computeSingleBitShiftMask(Ordinal value) noexcept {
             return 1 << (value & 0b11111);
@@ -252,7 +247,7 @@ namespace i960
          * @param ibrBase The address of the initialization boot record (defaults to 0xFEFF'FF30, same as the i960 Hx)
          * @param salign The stack alignment value (defaults to 1)
          */
-        explicit Core(Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : salign_(salign), ibrBase_(ibrBase) { }
+        explicit Core(BusInterfaceUnit& biu, InternalPeripheralUnit& ipu, Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : biu_(biu), ipu_(ipu), salign_(salign), ibrBase_(ibrBase) { }
         constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
             return (salign_ * 16) - 1;
         }
@@ -525,8 +520,8 @@ namespace i960
         [[nodiscard]] Ordinal getSupervisorStackPointer() noexcept;
         [[nodiscard]] Ordinal getSystemProcedureTableBase() noexcept;
     private:
-        BIU biu_;
-        IPU ipu_;
+        BusInterfaceUnit& biu_;
+        InternalPeripheralUnit& ipu_;
         RegisterFile globals, locals;
         Register ip; // always start at address zero
         ArithmeticControls ac;
