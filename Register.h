@@ -43,24 +43,12 @@ namespace i960 {
     constexpr bool divisibleByTwo(RegisterIndex value) noexcept { return (toInteger(value) & 0b1) == 0; }
     constexpr bool divisibleByFour(RegisterIndex value) noexcept { return (toInteger(value) & 0b11) == 0; }
 
-    /**
-     * @brief A register index
-     */
     class Displacement22 {
     public:
         constexpr Displacement22(int32_t disp) noexcept : value(disp) { }
         constexpr auto getValue() const noexcept { return value; }
     private:
         int32_t value : 22;
-    };
-    class Displacement11 {
-    public:
-        static constexpr int16_t DisplacementMask = 0b0111'1111'1111;
-    public:
-        constexpr Displacement11(int32_t disp) noexcept : value(disp) { }
-        [[nodiscard]] constexpr auto getValue() const noexcept { return value; }
-    private:
-        int32_t value : 11;
     };
     class AbsoluteOffset {
     public:
