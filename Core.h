@@ -11,6 +11,7 @@
 #include "ArithmeticControls.h"
 #include "ProcessControls.h"
 #include "Disassembly.h"
+#include "TraceControls.h"
 namespace i960
 {
 
@@ -495,6 +496,7 @@ namespace i960
         Register ip; // always start at address zero
         ArithmeticControls ac;
         ProcessControls pc;
+        TraceControls tc;
         bool _unalignedFaultEnabled = false;
         unsigned int _salign = 1;
         Ordinal _ibrBase = 0;

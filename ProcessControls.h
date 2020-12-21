@@ -10,15 +10,16 @@ namespace i960 {
     class ProcessControls {
     public:
         constexpr ProcessControls() noexcept : raw_(0) { }
-        constexpr auto getPriority() const noexcept { return p; }
-        constexpr auto getRawValue() const noexcept { return raw_; }
-        constexpr auto traceFaultsEnabledGlobally() const noexcept { return static_cast<bool>(te); }
-        constexpr auto inSupervisorMode() const noexcept { return em == 1; }
-        constexpr auto inUserMode() const noexcept { return em == 0; }
-        constexpr auto getExecutionMode() const noexcept { return em; }
-        constexpr auto traceFaultPending() const noexcept { return static_cast<bool>(tfp); }
-        constexpr auto isInterrupted() const noexcept { return static_cast<bool>(s); }
-        constexpr auto isExecuting() const noexcept { return !static_cast<bool>(s); }
+        [[nodiscard]] constexpr auto getPriority() const noexcept { return p; }
+        [[nodiscard]] constexpr auto getRawValue() const noexcept { return raw_; }
+        [[nodiscard]] constexpr auto traceFaultsEnabledGlobally() const noexcept { return static_cast<bool>(te); }
+        [[nodiscard]] constexpr auto inSupervisorMode() const noexcept { return em == 1; }
+        [[nodiscard]] constexpr auto inUserMode() const noexcept { return em == 0; }
+        [[nodiscard]] constexpr auto getExecutionMode() const noexcept { return em; }
+        [[nodiscard]] constexpr auto traceFaultPending() const noexcept { return static_cast<bool>(tfp); }
+        [[nodiscard]] constexpr auto isInterrupted() const noexcept { return static_cast<bool>(s); }
+        [[nodiscard]] constexpr auto isExecuting() const noexcept { return !static_cast<bool>(s); }
+        [[nodiscard]] constexpr auto getTraceEnableBit() const noexcept { return static_cast<bool>(te); }
         void setPriority(Ordinal priority) noexcept { p = priority; }
         void setTraceEnableBit(bool value) noexcept { te = value; }
         void setExecutionMode(bool value) noexcept { em = value; }

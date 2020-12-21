@@ -438,11 +438,15 @@ namespace i960 {
     }
     void
     Core::fmark() {
-        /// @todo implement
+        if (pc.getTraceEnableBit()) {
+            raiseFault(); // TRACE BREAKPOINT FAULT
+        }
     }
     void
     Core::mark() {
-        /// @todo implement
+        if (pc.getTraceEnableBit() && tc.getMarkTraceMode()) {
+            raiseFault(); // TRACE.MARK
+        }
     }
     void
     Core::syncf() {
@@ -457,7 +461,9 @@ namespace i960 {
     }
     void
     Core::modtc(const RegFormatInstruction& inst) {
-        /// @todo implement
+        getRegister(inst.getDestination()).setOrdinal(
+                tc.modify(extractValue(inst.getSrc1(), TreatAsOrdinal{}),
+                          extractValue(inst.getSrc2(), TreatAsOrdinal{})));
     }
     void
     Core::modpc(const RegFormatInstruction& inst) {
