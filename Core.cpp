@@ -556,69 +556,27 @@ namespace i960 {
         auto opcode = inst.getOpcode();
         auto displacement = inst.getDisplacement();
         switch (opcode) {
-            case 0x080:
-                b(displacement);
-                break;
-            case 0x090:
-                call(displacement);
-                break;
-            case 0x0A0:
-                ret();
-                break;
-            case 0x0B0:
-                bal(Displacement22{displacement});
-                break;
-            case 0x100:
-                conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{displacement});
-                break;
-            case 0x110:
-                conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{displacement});
-                break;
-            case 0x120:
-                conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{displacement});
-                break;
-            case 0x130:
-                conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{displacement});
-                break;
-            case 0x140:
-                conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{displacement});
-                break;
-            case 0x150:
-                conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{displacement});
-                break;
-            case 0x160:
-                conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{displacement});
-                break;
-            case 0x170:
-                conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{displacement});
-                break;
-            case 0x180:
-                conditionalFault<ConditionCodeKind::Unordered>();
-                break;
-            case 0x190:
-                conditionalFault<ConditionCodeKind::GreaterThan>();
-                break;
-            case 0x1A0:
-                conditionalFault<ConditionCodeKind::EqualTo>();
-                break;
-            case 0x1B0:
-                conditionalFault<ConditionCodeKind::GreaterThanOrEqualTo>();
-                break;
-            case 0x1C0:
-                conditionalFault<ConditionCodeKind::LessThan>();
-                break;
-            case 0x1D0:
-                conditionalFault<ConditionCodeKind::NotEqual>();
-                break;
-            case 0x1E0:
-                conditionalFault<ConditionCodeKind::LessThanOrEqual>();
-                break;
-            case 0x1F0:
-                conditionalFault<ConditionCodeKind::Ordered>();
-                break;
-            default:
-                badInstruction(inst);
-                break;
+            case 0x080: b(displacement); break;
+            case 0x090: call(displacement); break;
+            case 0x0A0: ret(); break;
+            case 0x0B0: bal(Displacement22{displacement}); break;
+            case 0x100: conditionalBranch<ConditionCodeKind::Unordered>(Displacement22{displacement}); break;
+            case 0x110: conditionalBranch<ConditionCodeKind::GreaterThan>(Displacement22{displacement}); break;
+            case 0x120: conditionalBranch<ConditionCodeKind::EqualTo>(Displacement22{displacement}); break;
+            case 0x130: conditionalBranch<ConditionCodeKind::GreaterThanOrEqualTo>(Displacement22{displacement}); break;
+            case 0x140: conditionalBranch<ConditionCodeKind::LessThan>(Displacement22{displacement}); break;
+            case 0x150: conditionalBranch<ConditionCodeKind::NotEqual>(Displacement22{displacement}); break;
+            case 0x160: conditionalBranch<ConditionCodeKind::LessThanOrEqual>(Displacement22{displacement}); break;
+            case 0x170: conditionalBranch<ConditionCodeKind::Ordered>(Displacement22{displacement}); break;
+            case 0x180: conditionalFault<ConditionCodeKind::Unordered>(); break;
+            case 0x190: conditionalFault<ConditionCodeKind::GreaterThan>(); break;
+            case 0x1A0: conditionalFault<ConditionCodeKind::EqualTo>(); break;
+            case 0x1B0: conditionalFault<ConditionCodeKind::GreaterThanOrEqualTo>(); break;
+            case 0x1C0: conditionalFault<ConditionCodeKind::LessThan>(); break;
+            case 0x1D0: conditionalFault<ConditionCodeKind::NotEqual>(); break;
+            case 0x1E0: conditionalFault<ConditionCodeKind::LessThanOrEqual>(); break;
+            case 0x1F0: conditionalFault<ConditionCodeKind::Ordered>(); break;
+            default: badInstruction(inst); break;
         }
     }
     void
