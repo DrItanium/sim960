@@ -151,38 +151,5 @@ namespace i960 {
         Register& _lower;
         Register& _upper;
     };
-    /**
-     * @brief Wrapper class to inspect a Register as a PFP
-     */
-    class PreviousFramePointer {
-    public:
-        PreviousFramePointer(Register& pfp) : _pfp(pfp) { }
-        constexpr auto getAddress() const noexcept { return 0xFFFF'FFF0 & _pfp.getOrdinal(); }
-        void setAddress(Ordinal address) noexcept {
-            auto lowest4 = _pfp.getOrdinal() & 0x0000'000F;
-            auto addr = address & 0xFFFF'FFF0;
-            _pfp.setOrdinal(addr | lowest4);
-        }
-        constexpr bool getPreReturnTraceFlag() const noexcept {
-            return static_cast<bool>(_pfp.getOrdinal() & 0b1000);
-        }
-        void setPreReturnTraceFlag(bool p) const noexcept {
-            auto value = _pfp.getOrdinal() & (~0b1000);
-            if (p)  {
-                value |= 0b1000;
-            }
-            _pfp.setOrdinal(value);
-        }
-        constexpr auto getReturnType() const noexcept {
-            return static_cast<Ordinal>(_pfp.getOrdinal() & 0b111);
-        }
-        void setReturnType(Ordinal value) noexcept {
-            auto unmasked = _pfp.getOrdinal() & (~0b111);
-            auto rt = value & 0b111;
-            _pfp.setOrdinal(static_cast<Ordinal>(unmasked | rt));
-        }
-    private:
-        Register& _pfp;
-    };
 } // end namespace i960
 #endif //I960_PROTOTYPE_SIMULATOR_REGISTER_H

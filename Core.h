@@ -12,6 +12,7 @@
 #include "ProcessControls.h"
 #include "Disassembly.h"
 #include "TraceControls.h"
+#include "PreviousFramePointer.h"
 namespace i960
 {
 
@@ -450,12 +451,11 @@ namespace i960
             getRegister(dest).setOrdinal(ac.conditionIs<cck>() ? 1 : 0);
         }
     private:
-        Ordinal getStackPointerAddress() const noexcept;
-        void setRIP(const Register& ip) noexcept;
-        Ordinal getFramePointerAddress() const noexcept;
-        void setPFP(Ordinal value) noexcept;
-        void setFramePointer(Ordinal value) noexcept;
-        void setStackPointer(Ordinal value) noexcept;
+        [[nodiscard]] PreviousFramePointer getPFP() noexcept;
+        [[nodiscard]] Register& getStackPointer() noexcept;
+        [[nodiscard]] Register& getFramePointer() noexcept;
+        [[nodiscard]] Register& getReturnInstructionPointer() noexcept;
+
         void allocateNewLocalRegisterSet();
     private: // call and return
         void call(Displacement22 targ);

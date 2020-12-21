@@ -3,6 +3,7 @@
 //
 #include "ArithmeticControls.h"
 #include "Core.h"
+#include "PreviousFramePointer.h"
 
 namespace i960 {
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
@@ -547,33 +548,41 @@ namespace i960 {
     void
     Core::callx(Ordinal targ) {
 
+        auto& sp = getStackPointer();
+        auto& rip = getReturnInstructionPointer();
+        auto& fp = getFramePointer();
+        auto pfp = getPFP();
         // the and operation clears out the least significant N bits of this new address
         // make a new stack frame
-        auto tmp = (getStackPointerAddress() + computeAlignmentBoundaryConstant()) &
+        auto tmp = (sp.getOrdinal() + computeAlignmentBoundaryConstant()) &
                    (~computeAlignmentBoundaryConstant());
-        setRIP(ip);
+        rip.setOrdinal(ip.getOrdinal());
         saveRegisterSet();
         allocateNewLocalRegisterSet();
         ip.setOrdinal(targ);
-        setPFP(getFramePointerAddress());
-        setFramePointer(tmp);
-        setStackPointer(tmp + 64);
+        pfp.setRawValue(fp.getOrdinal());
+        fp.setOrdinal(tmp);
+        sp.setOrdinal(tmp + 64);
     }
     void
     Core::call(Displacement22 targ) {
+        auto& sp = getStackPointer();
+        auto& rip = getReturnInstructionPointer();
+        auto& fp = getFramePointer();
+        auto pfp = getPFP();
         auto newAddress = targ.getValue();
         // the and operation clears out the least significant N bits of this new address
         // make a new stack frame
-        auto tmp = (getStackPointerAddress() + computeAlignmentBoundaryConstant()) &
+        auto tmp = (sp.getOrdinal() + computeAlignmentBoundaryConstant()) &
                    (~computeAlignmentBoundaryConstant());
-        setRIP(ip);
+        rip.setOrdinal(ip.getOrdinal());
         saveRegisterSet();
         allocateNewLocalRegisterSet();
         auto addr = ip.getInteger();
         ip.setInteger(addr + newAddress);
-        setPFP(getFramePointerAddress());
-        setFramePointer(tmp);
-        setStackPointer(tmp + 64);
+        pfp.setRawValue(fp.getOrdinal());
+        fp.setOrdinal(tmp);
+        sp.setOrdinal(tmp + 64);
     }
 
     void
@@ -1171,30 +1180,6 @@ namespace i960 {
                     extractValue(nextValue(nextValue(nextValue(src))), TreatAsOrdinal{}));
         }
     }
-    Ordinal
-    Core::getStackPointerAddress() const noexcept {
-        return getRegister(SP).getOrdinal();
-    }
-    void
-    Core::setRIP(const Register &ip) noexcept {
-        getRegister(RIP).setOrdinal(ip.getOrdinal());
-    }
-    Ordinal
-    Core::getFramePointerAddress() const noexcept {
-        return getRegister(FP).getOrdinal();
-    }
-    void
-    Core::setPFP(Ordinal value) noexcept {
-        getRegister(PFP).setOrdinal(value);
-    }
-    void
-    Core::setFramePointer(Ordinal value) noexcept {
-        getRegister(FP).setOrdinal(value);
-    }
-    void
-    Core::setStackPointer(Ordinal value) noexcept {
-        getRegister(SP).setOrdinal(value);
-    }
     void
     Core::allocateNewLocalRegisterSet() {
         /// @todo implement at some point
@@ -1203,6 +1188,18 @@ namespace i960 {
     void
     Core::post() {
 
+    }
+    PreviousFramePointer Core::getPFP() noexcept {
+        return PreviousFramePointer{getRegister(PFP)};
+    }
+    Register& Core::getStackPointer() noexcept {
+        return getRegister(SP);
+    }
+    Register& Core::getFramePointer() noexcept {
+        return getRegister(FP);
+    }
+    Register& Core::getReturnInstructionPointer() noexcept {
+        return getRegister(RIP);
     }
 
     std::string
