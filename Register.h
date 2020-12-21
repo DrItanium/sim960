@@ -110,8 +110,6 @@ namespace i960 {
         void setByteInteger(ByteInteger value, int index = 0) noexcept { byteInts[index & 0b11] = value; }
         void set(Ordinal value, TreatAsOrdinal) noexcept { setOrdinal(value); }
         void set(Integer value, TreatAsInteger) noexcept { setInteger(value); }
-        void increment() noexcept { ++ordValue; }
-        void decrement() noexcept { --ordValue; }
         explicit operator Ordinal() const noexcept { return getOrdinal(); }
         explicit operator Integer() const noexcept { return getInteger(); }
     private:
