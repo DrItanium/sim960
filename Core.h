@@ -329,11 +329,14 @@ namespace i960
         ArithmeticControls ac;
         ProcessControls pc;
         TraceControls tc;
-        bool _unalignedFaultEnabled = false;
+        bool _unalignedFaultEnabled = true;
         unsigned int salign_ = 1;
         Ordinal ibrBase_ = 0;
         Ordinal prcbBase_ = 0;
         Ordinal ctrlTableBase_ = 0;
+        Ordinal faultTableBase_ = 0;
+        Ordinal interruptTableBase_ = 0;
+        Ordinal nmiVector_ = 0;
         // no on die ram yet, at some point I may consider doing this, I have no idea how much space different peripherals will take
 
     };

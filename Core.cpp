@@ -1286,6 +1286,28 @@ namespace i960 {
     void
     Core::processPRCB() noexcept {
         /// @todo implement based off of the i960Hx manual
+        /// setup the internal peripherals
+        auto pcrbMMR = prcbBase_;
+        faultTableBase_ = loadOrdinal(pcrbMMR);
+        ctrlTableBase_ = loadOrdinal(pcrbMMR + 0x4);
+        ac.setRawValue(loadOrdinal(pcrbMMR + 0x8));
+        auto faultConfig = loadOrdinal(pcrbMMR + 0xc);
+
+        if ((faultConfig >> 30) & 1) {
+            _unalignedFaultEnabled = false;
+        } else {
+            _unalignedFaultEnabled = true;
+        }
+        // load interrupt table and cache nmi vector entry
+        // resetBlockNMI
+        interruptTableBase_= loadOrdinal(pcrbMMR + 0x10);
+        nmiVector_ = loadOrdinal(interruptTableBase_ + (248*4) + 4);
+        // process system procedure table
+        // initialize isp, fp, sp, and pfp
+        // initialize instruction cache
+        // configure local register cache
+        // load control table
+        ipu_.begin();
     }
     PreviousFramePointer Core::getPFP() noexcept {
         return PreviousFramePointer{getRegister(PFP)};

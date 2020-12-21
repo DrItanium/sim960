@@ -14,6 +14,7 @@ namespace i960 {
     public:
         using InterfaceUnit::InterfaceUnit;
         ~InternalPeripheralUnit() override = default;
+        virtual void begin() noexcept = 0;
     };
 }
 #endif //SIM960_INTERNALPERIPHERALUNIT_H

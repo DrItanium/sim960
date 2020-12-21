@@ -118,6 +118,9 @@ namespace i960 {
     public:
         using InternalPeripheralUnit::InternalPeripheralUnit;
         ~TestInternalPeripheralUnit() override = default;
+        void begin() noexcept override {
+
+        }
         ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
             CellTarget cell(address);
             return theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()];
