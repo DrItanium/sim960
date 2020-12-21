@@ -620,7 +620,6 @@ namespace i960 {
                     break;
             }
         }
-        /// @todo continue implementing
     }
     void
     Core::callx(Ordinal targ) {
@@ -826,7 +825,6 @@ namespace i960 {
     Core::setCarryFlag(bool value) noexcept {
         ac.setCarryFlag(value);
     }
-    /// @todo figure out correct signatures
     void
     Core::b(Displacement22 targ) {
         ip.setInteger(ip.getInteger() + targ.getValue());
