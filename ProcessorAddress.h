@@ -34,6 +34,11 @@ namespace i960 {
         [[nodiscard]] constexpr ByteOrdinal getSubsectionId() const noexcept { return full_ >> 16; }
         [[nodiscard]] constexpr ByteOrdinal getSectionId() const noexcept { return full_ >> 24; }
         [[nodiscard]] constexpr auto isInIOSpace() const noexcept { return getSectionId() == 0xFF; }
+        /**
+         * @brief Get the offset into the current section by stripping the section id off
+         * @return the offset into the current section (chop off the upper most 8 bits) and get a 24 bit address back
+         */
+        [[nodiscard]] constexpr auto getSectionOffset() const noexcept { return full_ & 0x00FFFFFF; }
     private:
         Address full_;
     };
@@ -44,6 +49,7 @@ namespace i960 {
     static_assert(ProcessorAddress(0x01020304).getSectionId() == 0x01);
     static_assert(!ProcessorAddress(0x01020304).isInIOSpace());
     static_assert(ProcessorAddress(0xFF020304).isInIOSpace());
+    static_assert(ProcessorAddress(0xFF020304).getSectionOffset() == 0x020304);
 
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getBlockOffset() == 0x04);
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getBlockId() == 0x03);
@@ -51,6 +57,7 @@ namespace i960 {
     static_assert(ProcessorAddress(0x04,0x03,0x02,0x01).getSectionId() == 0x01);
     static_assert(!ProcessorAddress(0x04,0x03,0x02,0x01).isInIOSpace());
     static_assert(ProcessorAddress(0x04,0x03,0x02,0xFF).isInIOSpace());
+    static_assert(ProcessorAddress(0x04,0x03,0x02,0xFF).getSectionOffset() == 0x020304);
 } // end namespace i960
 constexpr bool operator==(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() == b.getAddress(); }
 constexpr bool operator!=(const i960::ProcessorAddress& a, const i960::ProcessorAddress& b) noexcept { return a.getAddress() != b.getAddress(); }
