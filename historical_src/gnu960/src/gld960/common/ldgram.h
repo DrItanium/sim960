@@ -1,2 +1,0 @@
-
-PROTO(int, yyparse,(void));
