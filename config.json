@@ -1,0 +1,28 @@
+{
+	"name": "i960 ZA Processor",
+	"blocks": [
+	{
+		"index": 0,
+		"type": "sd",
+		"description": "Initial Boot Record/IBR/BIOS",
+		"filename": "bios/ibr.rom",
+		"perms": "r"
+	},
+	{
+		"index": 1,
+		"type": "sd",
+		"description": "Ram Bank 0",
+		"filename": "ram/bank0.bin",
+		"perms": "rw"
+	},
+	{
+		"index": 254,
+		"type": "external-io",
+		"description": "IO Space"
+	},
+	{
+		"index": 255,
+		"type": "onchip",
+		"description": "on chip peripherals"
+	}]
+}
