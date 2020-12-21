@@ -4,6 +4,7 @@
 #include <tuple>
 #include <variant>
 #include <algorithm>
+#include <memory>
 
 #include "CoreTypes.h"
 #include "Register.h"
@@ -13,6 +14,8 @@
 #include "Disassembly.h"
 #include "TraceControls.h"
 #include "PreviousFramePointer.h"
+#include "InternalPeripheralUnit.h"
+#include "BusInterfaceUnit.h"
 namespace i960
 {
 
@@ -221,7 +224,12 @@ namespace i960
             Integer optionalDisplacement;
         };
     };
+    template<typename BIU, typename IPU,
+            std::enable_if_t<std::is_base_of_v<BusInterfaceUnit, BIU>, int> = 0,
+            std::enable_if_t<std::is_base_of_v<InternalPeripheralUnit, IPU>, int> = 0>
     class Core {
+        static_assert(std::is_default_constructible_v<BIU>, "The bus interface unit must be default constructible!");
+        static_assert(std::is_default_constructible_v<IPU>, "The internal peripheral unit must be default constructible!");
     private:
         static constexpr Ordinal computeSingleBitShiftMask(Ordinal value) noexcept {
             return 1 << (value & 0b11111);
@@ -517,6 +525,8 @@ namespace i960
         [[nodiscard]] Ordinal getSupervisorStackPointer() noexcept;
         [[nodiscard]] Ordinal getSystemProcedureTableBase() noexcept;
     private:
+        BIU biu_;
+        IPU ipu_;
         RegisterFile globals, locals;
         Register ip; // always start at address zero
         ArithmeticControls ac;
@@ -525,12 +535,8 @@ namespace i960
         bool _unalignedFaultEnabled = false;
         unsigned int salign_ = 1;
         Ordinal ibrBase_ = 0;
-        // just like the i960Hx, we need to also map some on chip ram into the memory space.
-        // With the Zx variety, this will be around 64kb of on board chip ram (which the grand central m4 has plenty to spare!)
-        static constexpr Address onDieRamStart = 0x0000'0000;
-        static constexpr Address onDieRamSize= 0x0001'0000;
-        static constexpr Address onDieRamEnd = onDieRamSize + onDieRamStart;
-        std::array<Ordinal, onDieRamSize / sizeof(Ordinal)> onDieChipRam_ = { 0 };
+        // no on die ram yet, at some point I may consider doing this, I have no idea how much space different peripherals will take
+
     };
 
 }

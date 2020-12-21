@@ -55,35 +55,58 @@ namespace i960 {
         ByteOrdinal cellByteOffset;
         ByteOrdinal cellShortOffset;
     };
+    class TestBusInterfaceUnit : public BusInterfaceUnit {
+    public:
+        using BusInterfaceUnit::BusInterfaceUnit;
+        ~TestBusInterfaceUnit() override = default;
+        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
+            CellTarget cell(address);
+            return theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()];
+        }
+        ByteInteger load(Address address, TreatAsByteInteger integer) override {
+            CellTarget cell(address);
+            return theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()];
+        }
+        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
+            CellTarget cell(address);
+            return theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()];
+        }
+        ShortInteger load(Address address, TreatAsShortInteger integer) override {
+            return 0;
+        }
+        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+            CellTarget cell(address);
+            return theMemorySpace[cell.getSectionId()][cell.getCellId()].ord;
+        }
+        Integer load(Address address, TreatAsInteger integer) override {
+            CellTarget cell(address);
+            return theMemorySpace[cell.getSectionId()][cell.getCellId()].ival;
+        }
+        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
+
+        }
+        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
+
+        }
+        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
+
+        }
+        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
+
+        }
+        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+
+        }
+        void store(Address address, Integer value, TreatAsInteger integer) override {
+
+        }
+    };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
-    Ordinal
-    Core::loadOrdinal(Address address) noexcept {
-        CellTarget cell(address);
-        return theMemorySpace[cell.getSectionId()][cell.getCellId()].ord;
-    }
 
-    Integer
-    Core::loadInteger(Address address) noexcept {
-        CellTarget cell(address);
-        return theMemorySpace[cell.getSectionId()][cell.getCellId()].ival;
-    }
 
-    ByteOrdinal
-    Core::loadByteOrdinal(Address address) noexcept {
-        CellTarget cell(address);
-        return theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()];
-    }
-
-    ByteInteger
-    Core::loadByteInteger(Address address) noexcept {
-        CellTarget cell(address);
-        return theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()];
-    }
 
     ShortOrdinal
     Core::loadShortOrdinal(Address address) noexcept {
-        CellTarget cell(address);
-        return theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()];
     }
 
     ShortInteger
