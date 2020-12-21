@@ -241,12 +241,12 @@ namespace i960
     public:
         /**
          * @brief Construct a core object
-         * @param ibrBase The address of the initialization boot record
+         * @param ibrBase The address of the initialization boot record (defaults to 0xFEFF'FF30, same as the i960 Hx)
          * @param salign The stack alignment value (defaults to 1)
          */
-        explicit Core(Ordinal ibrBase, unsigned int salign = 1) : _salign(salign), _ibrBase(ibrBase) { }
+        explicit Core(Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : salign_(salign), ibrBase_(ibrBase) { }
         constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
-            return (_salign * 16) - 1;
+            return (salign_ * 16) - 1;
         }
         /**
          * @brief Perform the power on self test, get the image information, and then return
@@ -523,8 +523,9 @@ namespace i960
         ProcessControls pc;
         TraceControls tc;
         bool _unalignedFaultEnabled = false;
-        unsigned int _salign = 1;
-        Ordinal _ibrBase = 0;
+        unsigned int salign_ = 1;
+        Ordinal ibrBase_ = 0;
+        // just like the i960Hx, we need to also map the
     };
 
 }

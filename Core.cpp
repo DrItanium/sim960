@@ -1262,7 +1262,11 @@ namespace i960 {
 
     void
     Core::post() {
-
+        /// load the IBR
+        auto pmcon0 = loadOrdinal(ibrBase_);
+        auto pmcon1 = loadOrdinal(ibrBase_+4);
+        auto pmcon2 = loadOrdinal(ibrBase_+8);
+        auto pmcon3 = loadOrdinal(ibrBase_+12);
     }
     PreviousFramePointer Core::getPFP() noexcept {
         return PreviousFramePointer{getRegister(PFP)};
