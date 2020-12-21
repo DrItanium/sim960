@@ -287,8 +287,8 @@ namespace i960
         void execute(const CTRLInstruction &inst) noexcept;
 
     private: // common internal functions
-        void saveLocals() noexcept;
-        void restoreLocals() noexcept;
+        void saveRegisterSet() noexcept;
+        void restoreRegisterSet() noexcept;
         bool getCarryFlag() const noexcept;
         void setCarryFlag(bool value) noexcept;
     private: // data movement operations
@@ -491,6 +491,8 @@ namespace i960
         void nextInstruction();
     private:
         void badInstruction(DecodedInstruction inst);
+        Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
+        bool registerSetAvailable() const noexcept;
     private:
         RegisterFile globals, locals;
         Register ip; // always start at address zero
