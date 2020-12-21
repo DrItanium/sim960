@@ -497,8 +497,7 @@ namespace i960 {
     }
     Ordinal
     Core::getSystemProcedureEntry(Ordinal targ) noexcept {
-        /// @todo implement
-        return 0;
+        return loadOrdinal((getSystemProcedureTableBase() + 0x30) + targ);
     }
     bool
     Core::registerSetAvailable() const noexcept {
