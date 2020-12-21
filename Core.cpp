@@ -12,6 +12,7 @@ namespace i960 {
     constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
     constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
     constexpr RegisterIndex RIP = static_cast<RegisterIndex>(0b00010);
+    constexpr RegisterIndex g0 = static_cast<RegisterIndex>(0b10000);
     constexpr RegisterIndex FP = static_cast<RegisterIndex>(0b11111);
     Core::DecodedInstruction
     Core::decode(Ordinal lower, Ordinal upper) noexcept {
@@ -1261,14 +1262,30 @@ namespace i960 {
     Core::allocateNewLocalRegisterSet() {
         /// @todo implement at some point
     }
+    Ordinal
+    Core::bootChecksum() noexcept {
+        /// @todo compute checksum properly
+        return 0;
+    }
 
     void
     Core::post() {
         /// load the IBR
-        auto pmcon0 = loadOrdinal(ibrBase_);
-        auto pmcon1 = loadOrdinal(ibrBase_+4);
-        auto pmcon2 = loadOrdinal(ibrBase_+8);
-        auto pmcon3 = loadOrdinal(ibrBase_+12);
+        /// @todo handle the PMCON setup as described by the i960Hx manual
+        if (bootChecksum() != 0) {
+            busTestFailed();
+        }
+        prcbBase_ = loadOrdinal(ibrBase_ + 0x14);
+        ctrlTableBase_ = loadOrdinal(prcbBase_ + 0x4);
+        processPRCB();
+        ip.setOrdinal(loadOrdinal(ibrBase_+0x10));
+        /// @todo set the device id correctly
+        getRegister(g0).setOrdinal(0xFDEDABCD);
+        /// and done...
+    }
+    void
+    Core::processPRCB() noexcept {
+        /// @todo implement based off of the i960Hx manual
     }
     PreviousFramePointer Core::getPFP() noexcept {
         return PreviousFramePointer{getRegister(PFP)};

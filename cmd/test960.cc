@@ -56,6 +56,10 @@ namespace i960 {
         ByteOrdinal cellByteOffset;
         ByteOrdinal cellShortOffset;
     };
+    void
+    Core::busTestFailed() noexcept {
+        throw "BUS TEST FAILED!";
+    }
     class TestBusInterfaceUnit : public BusInterfaceUnit {
     public:
         using BusInterfaceUnit::BusInterfaceUnit;

@@ -56,6 +56,7 @@ namespace i960
         [[nodiscard]] Register& getRegister(RegisterIndex index) noexcept;
         [[nodiscard]] const Register& getRegister(RegisterIndex index) const noexcept;
         [[nodiscard]] const Register& getIP() const noexcept { return ip; }
+        [[noreturn]] void busTestFailed() noexcept;
         /**
          * @brief Retrieve the word at the ip address
          * @param advance
@@ -317,6 +318,10 @@ namespace i960
         [[nodiscard]] Ordinal getSupervisorStackPointer() noexcept;
         [[nodiscard]] Ordinal getSystemProcedureTableBase() noexcept;
     private:
+        Ordinal bootChecksum() noexcept;
+    private:
+        void processPRCB() noexcept;
+    private:
         BusInterfaceUnit& biu_;
         InternalPeripheralUnit& ipu_;
         RegisterFile globals, locals;
@@ -327,6 +332,8 @@ namespace i960
         bool _unalignedFaultEnabled = false;
         unsigned int salign_ = 1;
         Ordinal ibrBase_ = 0;
+        Ordinal prcbBase_ = 0;
+        Ordinal ctrlTableBase_ = 0;
         // no on die ram yet, at some point I may consider doing this, I have no idea how much space different peripherals will take
 
     };
