@@ -505,6 +505,12 @@ namespace i960 {
         /// @todo update this when I implement proper register sets
         return false;
     }
+    constexpr bool isSupervisorProcedure(Ordinal address) noexcept {
+        return (address & 0b10);
+    }
+    constexpr bool isLocalProcedure(Ordinal address) noexcept {
+        return !isSupervisorProcedure(address);
+    }
     void
     Core::calls(RegLit targ) {
         syncf();
@@ -519,27 +525,24 @@ namespace i960 {
                 saveRegisterSet();
                 allocateNewLocalRegisterSet();
             }
-            /// @todo implement this psuedo-code
-            // RIP = IP
-            // IP[31:2] = effective_address(temp[31:2]);
-            // IP[1:0] = 0;
-            // if ((temp.type == local) || (pc.inSupervisorMode()) {
-            // Local call or supervisor call from supervisor mode
-            // tempa = (sp + (salign * 16 - 1)) & ~(salign * 16 - 1));
-            // round stack pointer to next boundary
-            // salign = 1 on i960 Hx processors
-            // temp.rrr = 000;
-            // } else {
-            // tempa = SSP; // get supervisor stack pointer
-            // temp.rrr = 0b010 | pc.te;
-            // pc.em = supervisor;
-            // pc.te = temp.te;
-            // }
-            // PFP = fp;
-            // pfp.rrr = temp.rrr;
-            // fp = tempa;
-            // sp = tempa + 64;
-
+            getReturnInstructionPointer().setOrdinal(ip.getOrdinal());
+            ip.setOrdinal(temp & (~0b11));
+            Ordinal tempa = 0;
+            if (isLocalProcedure(temp) || pc.inSupervisorMode()) {
+                // Local call or supervisor call from supervisor mode
+               tempa = (getStackPointer().getOrdinal() + (computeAlignmentBoundaryConstant())) & (~computeAlignmentBoundaryConstant());
+               temp = 0;
+            } else {
+                tempa = getSupervisorStackPointer();
+                temp = 0b010 | pc.getTraceEnableBit();
+                pc.enterSupervisorMode();
+                pc.setTraceEnableBit( temp & 0b1 );
+            }
+            auto pfp = getPFP();
+            pfp.setRawValue(getFramePointer().getOrdinal());
+            pfp.setReturnStatus(static_cast<PreviousFramePointer::ReturnStatusField>(temp));
+            getFramePointer().setOrdinal(tempa);
+            getStackPointer().setOrdinal(tempa + 64);
         }
     }
     bool
@@ -1316,5 +1319,14 @@ namespace i960 {
     void
     Core::checkPendingInterrupts() noexcept {
         /// @todo implement support for this later on
+    }
+    Ordinal
+    Core::getSystemProcedureTableBase() noexcept {
+        /// @todo implement
+        return 0;
+    }
+    Ordinal
+    Core::getSupervisorStackPointer() noexcept {
+        return loadOrdinal(getSystemProcedureTableBase() + 0xC);
     }
 }

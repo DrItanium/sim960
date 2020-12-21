@@ -514,6 +514,8 @@ namespace i960
         Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
         [[nodiscard]] bool registerSetAvailable() const noexcept;
         [[nodiscard]] bool registerSetNotAllocated(Ordinal address) const noexcept;
+        [[nodiscard]] Ordinal getSupervisorStackPointer() noexcept;
+        [[nodiscard]] Ordinal getSystemProcedureTableBase() noexcept;
     private:
         RegisterFile globals, locals;
         Register ip; // always start at address zero
