@@ -110,61 +110,77 @@ namespace i960 {
      * - FLASH memory
      * - etc
      */
-#if 0
-    Ordinal
-    Core::loadOrdinal(Address address) noexcept {
-        return 0;
-    }
-
-    Integer
-    Core::loadInteger(Address address) noexcept {
-        return 0;
-    }
-
-    ByteOrdinal
-    Core::loadByteOrdinal(Address address) noexcept {
-        return 0;
-    }
-
-    ByteInteger
-    Core::loadByteInteger(Address address) noexcept {
-        return 0;
-    }
-
-    ShortOrdinal
-    Core::loadShortOrdinal(Address address) noexcept {
-        return 0;
-    }
-
-    ShortInteger
-    Core::loadShortInteger(Address address) noexcept {
-        return 0;
-    }
-
-    void
-    Core::storeOrdinal(Address address, Ordinal value) noexcept {
-    }
-
-    void
-    Core::storeByteInteger(Address address, ByteInteger value) {
-    }
-
-    void
-    Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
-    }
-
-    void
-    Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
-    }
-
-    void
-    Core::storeShortInteger(Address address, ShortInteger value) noexcept {
-    }
-
-    void
-    Core::storeInteger(Address address, Integer value) noexcept {
-    }
-#endif
+    class ZxBusInterfaceUnit : public BusInterfaceUnit {
+    public:
+        using BusInterfaceUnit::BusInterfaceUnit;
+        ~ZxBusInterfaceUnit() override = default;
+        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
+            return 0;
+        }
+        ByteInteger load(Address address, TreatAsByteInteger integer) override {
+            return 0;
+        }
+        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
+            return 0;
+        }
+        ShortInteger load(Address address, TreatAsShortInteger integer) override {
+            return 0;
+        }
+        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+            return 0;
+        }
+        Integer load(Address address, TreatAsInteger integer) override {
+            return 0;
+        }
+        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
+        }
+        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
+        }
+        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
+        }
+        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
+        }
+        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+        }
+        void store(Address address, Integer value, TreatAsInteger integer) override {
+        }
+    };
+    /// @todo handle unaligned load/store and loads/store which span multiple sections
+    class ZxInternalPeripheralUnit : public InternalPeripheralUnit {
+    public:
+        using InternalPeripheralUnit::InternalPeripheralUnit;
+        ~ZxInternalPeripheralUnit() override = default;
+        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
+            return 0;
+        }
+        ByteInteger load(Address address, TreatAsByteInteger integer) override {
+            return 0;
+        }
+        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
+            return 0;
+        }
+        ShortInteger load(Address address, TreatAsShortInteger integer) override {
+            return 0;
+        }
+        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+            return 0;
+        }
+        Integer load(Address address, TreatAsInteger integer) override {
+            return 0;
+        }
+        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
+        }
+        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
+        }
+        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
+        }
+        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
+        }
+        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+        }
+        void store(Address address, Integer value, TreatAsInteger integer) override {
+        }
+    };
     void
     Core::badInstruction(DecodedInstruction inst) {
         Serial.println("BAD INSTRUCTION!");
@@ -184,7 +200,9 @@ namespace i960 {
         raiseFault();
     }
 }
-i960::Core cpuCore(0, i960Zx_SALIGN);
+i960::ZxBusInterfaceUnit zxBXU;
+i960::ZxInternalPeripheralUnit zxIPU;
+i960::Core cpuCore(zxBXU, zxIPU, 0, i960Zx_SALIGN);
 /// @todo implement the register frames "in hardware"
 void setup() {
     Serial.begin(9600);
