@@ -4,6 +4,7 @@
 #include "ArithmeticControls.h"
 #include "Core.h"
 #include "PreviousFramePointer.h"
+#include "ProcessorAddress.h"
 
 namespace i960 {
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
@@ -1329,5 +1330,50 @@ namespace i960 {
     Ordinal
     Core::getSupervisorStackPointer() noexcept {
         return loadOrdinal(getSystemProcedureTableBase() + 0xC);
+    }
+    InterfaceUnit &Core::getInterfaceUnit(Address address) noexcept {
+        if (ProcessorAddress pa(address); pa.isInIOSpace()) {
+            return ipu_;
+        } else {
+            return biu_;
+        }
+    }
+    Ordinal Core::loadOrdinal(Address address) noexcept {
+        return getInterfaceUnit(address).load(address, TreatAsOrdinal{});
+    }
+    Integer Core::loadInteger(Address address) noexcept {
+        return getInterfaceUnit(address).load(address, TreatAsInteger{});
+    }
+    ByteOrdinal Core::loadByteOrdinal(Address address) noexcept {
+        return getInterfaceUnit(address).load(address, TreatAsByteOrdinal{});
+    }
+    ByteInteger Core::loadByteInteger(Address address) noexcept {
+        return getInterfaceUnit(address).load(address, TreatAsByteInteger{});
+    }
+    ShortOrdinal Core::loadShortOrdinal(Address address) noexcept {
+        return getInterfaceUnit(address).load(address, TreatAsShortOrdinal{});
+    }
+    ShortInteger Core::loadShortInteger(Address address) noexcept {
+        return getInterfaceUnit(address).load(address, TreatAsShortInteger{});
+    }
+    void Core::storeOrdinal(Address address, Ordinal value) noexcept {
+        getInterfaceUnit(address).store(address, value, TreatAsOrdinal{});
+    }
+    void Core::storeInteger(Address address, Integer value) noexcept {
+        getInterfaceUnit(address).store(address, value, TreatAsInteger{});
+    }
+    void Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
+        getInterfaceUnit(address).store(address, value, TreatAsByteOrdinal{});
+
+    }
+    void Core::storeByteInteger(Address address, ByteInteger value) {
+        getInterfaceUnit(address).store(address, value, TreatAsByteInteger{});
+
+    }
+    void Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
+        getInterfaceUnit(address).store(address, value, TreatAsShortOrdinal{});
+    }
+    void Core::storeShortInteger(Address address, ShortInteger value) noexcept {
+        getInterfaceUnit(address).store(address, value, TreatAsShortInteger{});
     }
 }

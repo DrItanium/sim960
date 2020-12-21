@@ -110,6 +110,7 @@ namespace i960 {
      * - FLASH memory
      * - etc
      */
+#if 0
     Ordinal
     Core::loadOrdinal(Address address) noexcept {
         return 0;
@@ -163,6 +164,7 @@ namespace i960 {
     void
     Core::storeInteger(Address address, Integer value) noexcept {
     }
+#endif
     void
     Core::badInstruction(DecodedInstruction inst) {
         Serial.println("BAD INSTRUCTION!");

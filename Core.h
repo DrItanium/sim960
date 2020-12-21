@@ -267,6 +267,7 @@ namespace i960
          */
         Ordinal getWordAtIP(bool advance = false) noexcept;
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
+        InterfaceUnit& getInterfaceUnit(Address address) noexcept;
         Ordinal loadOrdinal(Address address) noexcept;
         void storeOrdinal (Address address, Ordinal value) noexcept;
         Integer loadInteger(Address address) noexcept;
