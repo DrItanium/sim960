@@ -71,12 +71,12 @@ namespace i960 {
     class Register {
     public:
         constexpr Register() : ordValue(0) { }
-        constexpr Ordinal getOrdinal() const noexcept { return ordValue; }
-        constexpr Integer getInteger() const noexcept { return intValue; }
-        constexpr auto getShortOrdinal(bool upper = false) const noexcept { return shortOrds[upper ? 1 : 0 ]; }
-        constexpr auto getShortInteger(bool upper = false) const noexcept { return shortInts[upper ? 1 : 0 ]; }
-        constexpr auto getByteOrdinal(int index = 0) const noexcept { return byteOrds[index & 0b11]; }
-        constexpr auto getByteInteger(int index = 0) const noexcept { return byteInts[index & 0b11]; }
+        [[nodiscard]] constexpr Ordinal getOrdinal() const noexcept { return ordValue; }
+        [[nodiscard]] constexpr Integer getInteger() const noexcept { return intValue; }
+        [[nodiscard]] constexpr auto getShortOrdinal(bool upper = false) const noexcept { return shortOrds[upper ? 1 : 0 ]; }
+        [[nodiscard]] constexpr auto getShortInteger(bool upper = false) const noexcept { return shortInts[upper ? 1 : 0 ]; }
+        [[nodiscard]] constexpr auto getByteOrdinal(int index = 0) const noexcept { return byteOrds[index & 0b11]; }
+        [[nodiscard]] constexpr auto getByteInteger(int index = 0) const noexcept { return byteInts[index & 0b11]; }
         void setOrdinal(Ordinal value) noexcept { ordValue = value; }
         void setInteger(Integer value) noexcept { intValue = value; }
         void setShortOrdinal(ShortOrdinal value, bool upper = false) noexcept { shortOrds[upper ? 1 : 0] = value; }
