@@ -18,6 +18,15 @@ add_library(core960
         TraceControls.h
         Disassembly.h
         OpcodesRaw.h
-        GenericNumber.h ProcessorMappingConfiguration.cpp ProcessorMappingConfiguration.h ProcessorAddress.h TraceControls.cpp InterfaceUnit.h InternalPeripheralUnit.h BusInterfaceUnit.h)
+        GenericNumber.h
+        ProcessorMappingConfiguration.cpp
+        ProcessorMappingConfiguration.h
+        ProcessorAddress.h
+        TraceControls.cpp
+        InterfaceUnit.h
+        InternalPeripheralUnit.h
+        BusInterfaceUnit.h
+        InstructionFormats.cpp
+        InstructionFormats.h)
 
 add_subdirectory(cmd)

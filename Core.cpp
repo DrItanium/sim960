@@ -5,6 +5,7 @@
 #include "Core.h"
 #include "PreviousFramePointer.h"
 #include "ProcessorAddress.h"
+#include "InstructionFormats.h"
 
 namespace i960 {
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
@@ -1285,38 +1286,6 @@ namespace i960 {
         /// @todo implement when support for register sets is provided
     }
 
-    std::string
-    RegFormatInstruction::decodeName() const noexcept {
-        if (auto result = getNameFromOpcode(getOpcode()); result) {
-            return *result;
-        } else {
-            return "";
-        }
-    }
-    std::string
-    COBRInstruction::decodeName() const noexcept {
-        if (auto result = getNameFromOpcode(getOpcode()); result) {
-            return *result;
-        } else {
-            return "";
-        }
-    }
-    std::string
-    CTRLInstruction::decodeName() const noexcept {
-        if (auto result = getNameFromOpcode(getOpcode()); result) {
-            return *result;
-        } else {
-            return "";
-        }
-    }
-    std::string
-    MEMFormatInstruction::decodeName() const noexcept {
-        if (auto result = getNameFromOpcode(getOpcode()); result) {
-            return *result;
-        } else {
-            return "";
-        }
-    }
 
     void
     Core::checkPendingInterrupts() noexcept {

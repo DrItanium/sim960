@@ -3,6 +3,7 @@
 //
 
 #include "Core.h"
+#include "InstructionFormats.h"
 #include <iostream>
 #include <memory>
 #include <tuple>
@@ -170,7 +171,7 @@ namespace i960 {
         std::visit([](auto &&value) {
             using K = std::decay_t<decltype(value)>;
             std::cerr << "Instruction opcode: 0x";
-            if constexpr (std::is_same_v<K, i960::MEMFormatInstruction>) {
+            if constexpr (std::is_same_v<K, MEMFormatInstruction>) {
                 std::cerr << std::hex << value.upperHalf();
             }
             std::cerr << std::hex << value.lowerHalf() << std::endl;
