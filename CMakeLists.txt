@@ -26,6 +26,6 @@ add_library(core960
         InterfaceUnit.h
         BusInterfaceUnit.h
         InstructionFormats.cpp
-        InstructionFormats.h)
+        InstructionFormats.h MemoryCell.h)
 
 add_subdirectory(cmd)
