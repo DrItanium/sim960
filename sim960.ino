@@ -11,33 +11,18 @@
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_SPIFlash.h>
 #include <ArduinoJson.h>
-#include <OPL3Duo.h>
-#include <Adafruit_seesaw.h>
-#include <Adafruit_SI5351.h>
 #include <array>
 #include "CoreTypes.h"
 #include "Core.h"
 #include "ProcessorMappingConfiguration.h"
 #include "ProcessorAddress.h"
 
-constexpr auto OPL3Duo_A2 = 22;
-constexpr auto OPL3Duo_A1 = 23;
-constexpr auto OPL3Duo_A0 = 24;
-constexpr auto OPL3Duo_Latch = 25;
-constexpr auto OPL3Duo_Reset = 26;
 constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 Adafruit_FlashTransport_QSPI flashTransport;
 Adafruit_SPIFlash flash(&flashTransport);
 FatFileSystem fatfs;
 SdFat sdCard; // use SDCARD_SS_PIN for this one
-OPL3Duo theOPL3Duo(OPL3Duo_A2,
-                   OPL3Duo_A1,
-                   OPL3Duo_A0,
-                   OPL3Duo_Latch,
-                   OPL3Duo_Reset);
-Adafruit_seesaw theSoilSensor;
-Adafruit_SI5351 clockgen;
 union MemoryCell {
     constexpr explicit MemoryCell(Ordinal value = 0) : oval(value) { }
     Ordinal oval = 0;
@@ -123,13 +108,6 @@ namespace i960 {
      * - etc
      */
     class ZxBusInterfaceUnit : public BusInterfaceUnit {
-    public:
-        static constexpr Address ExternalAddressBlockID = 0xFE00'0000;
-        static constexpr Address LedBlock = ExternalAddressBlockID | 0x100;
-        static constexpr Address BuiltinLedOffset = LedBlock | 0x00;
-        static constexpr Address BuiltinLedValueRegister = BuiltinLedOffset;
-        static constexpr Address BuiltinRGBLedOffset = LedBlock | 0x10;
-        static constexpr Address BuiltinRGBLedValuesRegister = BuiltinRGBLedOffset;
 
     public:
         using BusInterfaceUnit::BusInterfaceUnit;
@@ -370,29 +348,6 @@ void setupNeoPixel() {
     onboardNeoPixel.show();
     Serial.println("Done");
 }
-void setupOPL3Duo() {
-    Serial.print("Starting up OPL3Duo...");
-    theOPL3Duo.begin();
-    Serial.println("Done");
-}
-void setupSoilSensor() {
-    Serial.print("Bringing up the soil sensor...");
-    if (!theSoilSensor.begin(0x36)) {
-        Serial.println("Soil Sensor Not Found!");
-    } else {
-        Serial.println("Soil Sensor Found!");
-        Serial.println(theSoilSensor.getVersion(), HEX);
-    }
-}
-void setupClockChip() {
-    Serial.print("Bringing up Si5351 Clock Chip...");
-    if (clockgen.begin() != ERROR_NONE) {
-        Serial.println("No Clock Chip Detected ... forget to hook it up?");
-    } else {
-        Serial.println("Done");
-    }
-
-}
 void setupMappingConfiguration() {
     Serial.println(F("Loading mapping configuration..."));
     if (!loadConfiguration(filename, mapping)) {
@@ -408,9 +363,6 @@ void setup() {
     setupSPI();
     setupSDCard();
     setupNeoPixel();
-    setupOPL3Duo();
-    setupSoilSensor();
-    setupClockChip();
     setupMappingConfiguration();
 
     // last thing to do is do the post
@@ -420,7 +372,7 @@ void setup() {
 void loop() {
     digitalWrite(LED_BUILTIN, HIGH);
     cpuCore.cycle(); // put a single cycle through
-    delay(100);
+    delay(10);
     digitalWrite(LED_BUILTIN, LOW);
-    delay(100);
+    delay(10);
 }
