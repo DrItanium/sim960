@@ -18,6 +18,7 @@
 #include "CoreTypes.h"
 #include "Core.h"
 #include "ProcessorMappingConfiguration.h"
+#include "ProcessorAddress.h"
 
 constexpr auto OPL3Duo_A2 = 22;
 constexpr auto OPL3Duo_A1 = 23;
@@ -185,14 +186,55 @@ namespace i960 {
          * PB - PB00-PB31
          * PC - PC31-PC30, PC28 - PC10, PC07 - PC00 (NO PC29, PC9, PC8)
          * PD - PD21-PD20, PD12 - PD08, PD01-PD00 (NO PD31-PD22, PD19-PD13, PD7-PD2)
+         * 0xFF00'1000 : LED_BUILTIN
+         *
          */
+    public:
+        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
+            ProcessorAddress pa(address);
+            if (pa.getSectionOffset() == 0x00'1000) {
+                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            }
+        }
+        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
+            ProcessorAddress pa(address);
+            if (pa.getSectionOffset() == 0x00'1000) {
+                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            }
+        }
+        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
+            ProcessorAddress pa(address);
+            if (pa.getSectionOffset() == 0x00'1000) {
+                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            }
+        }
+        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
+            ProcessorAddress pa(address);
+            if (pa.getSectionOffset() == 0x00'1000) {
+                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            }
+        }
+        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+            ProcessorAddress pa(address);
+            if (pa.getSectionOffset() == 0x00'1000) {
+                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            }
+        }
+        void store(Address address, Integer value, TreatAsInteger integer) override {
+            ProcessorAddress pa(address);
+            if (pa.getSectionOffset() == 0x00'1000) {
+                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            }
+        }
     public:
         using InternalPeripheralUnit::InternalPeripheralUnit;
         ~ZxInternalPeripheralUnit() override = default;
-        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
+        ByteOrdinal
+        load(Address address, TreatAsByteOrdinal ordinal) override {
             return 0;
         }
-        ByteInteger load(Address address, TreatAsByteInteger integer) override {
+        ByteInteger
+        load(Address address, TreatAsByteInteger integer) override {
             return 0;
         }
         ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
@@ -207,20 +249,7 @@ namespace i960 {
         Integer load(Address address, TreatAsInteger integer) override {
             return 0;
         }
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
-        }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
-        }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
-        }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
-        }
-        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
-        }
-        void store(Address address, Integer value, TreatAsInteger integer) override {
-        }
         void begin() noexcept override {
-
         }
     };
 }
