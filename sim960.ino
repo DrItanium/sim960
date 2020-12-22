@@ -17,6 +17,7 @@
 #include "ProcessorMappingConfiguration.h"
 #include "ProcessorAddress.h"
 
+constexpr bool doCPUComputation = false;
 constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 Adafruit_FlashTransport_QSPI flashTransport;
@@ -82,33 +83,7 @@ somethingBadHappened() {
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
 // directly
 namespace i960 {
-    /*
-     * Memory Map So far (broken up into 16 megabyte blocks)
-     * 0x0000'0000 - 0xFEFF'FFFF: FRAM / SD Card memory / memory buffer /etc
-     * 0xFF00'0000 - 0xFFFF'FFFF: Internal IO Space (Where I expose the SAMD51 peripherals)
-     */
-    /*
-     * For now, the Grand Central M4 uses an SD Card for its memory with a small portion of the on board sram used for scratchpad / always
-     * available memory. On board devices are mapped into the implicit onboard device area of [0xFF00'0000,0xFFFF'FFFF]. The IO device bus
-     * exists here as extra "modules" such as:
-     * - Clock Generator
-     * - RTC
-     * - ESP32 Wifi Coprocessor
-     * - Display
-     * - Sharp Memory Display
-     * - GPIOs from the Grand Central
-     * - SPI IO Expanders
-     * - Speaker
-     * - Control Registers
-     * - 2 MB Onboard SPI Flash directly mapped into IO Device Space
-     * - OPL3 Device
-     * - Neopixels
-     * - EEPROM
-     * - FLASH memory
-     * - etc
-     */
     class ZxBusInterfaceUnit : public BusInterfaceUnit {
-
     public:
         using BusInterfaceUnit::BusInterfaceUnit;
         ~ZxBusInterfaceUnit() override = default;
@@ -166,8 +141,6 @@ namespace i960 {
     Core::busTestFailed() noexcept {
         somethingBadHappened();
     }
-    volatile uint8_t& memory(const uint32_t address, TreatAsByteOrdinal) noexcept { return *reinterpret_cast<uint8_t*>(address); }
-    volatile uint32_t& memory(const uint32_t address, TreatAsOrdinal) noexcept { return *reinterpret_cast<uint32_t*>(address); }
     class ZxInternalPeripheralUnit : public InternalPeripheralUnit {
         /*
          * PA - PA31,PA30,PA27,PA25-PA00 (NO PA29, PA28, PA26)
@@ -366,13 +339,17 @@ void setup() {
     setupMappingConfiguration();
 
     // last thing to do is do the post
-    cpuCore.post();
+    if constexpr (doCPUComputation) {
+        cpuCore.post();
+    }
 }
 
 void loop() {
-    digitalWrite(LED_BUILTIN, HIGH);
-    cpuCore.cycle(); // put a single cycle through
-    delay(10);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(10);
+    if constexpr (doCPUComputation) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        cpuCore.cycle(); // put a single cycle through
+        delay(10);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(10);
+    }
 }
