@@ -224,9 +224,25 @@ namespace i960 {
 
             }
         }
+        Ordinal
+        readSubsection0(const ProcessorAddress& pa) {
+            switch (pa.getBlockId()) {
+                case 0x10: return readLEDBlock(pa);
+                default: return 0;
+            }
+        }
     public:
+        Ordinal
+        load(Address address, TreatAsOrdinal ) override {
+            ProcessorAddress pa(address);
+            switch (pa.getSubsectionId()) {
+                case 0x00: return readSubsection0(pa);
+                default: return 0;
+            }
+        }
 
-        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+        void
+        store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
             ProcessorAddress pa(address);
             switch (pa.getSubsectionId()) {
                 case 0x00:
@@ -240,9 +256,7 @@ namespace i960 {
         void store(Address address, ByteInteger value, TreatAsByteInteger integer) override { }
         void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override { }
         void store(Address address, ShortInteger value, TreatAsShortInteger integer) override { }
-        void store(Address address, Integer value, TreatAsInteger integer) override {
-            store(address, value, TreatAsOrdinal{});
-        }
+        void store(Address address, Integer value, TreatAsInteger integer) override { store(address, value, TreatAsOrdinal{}); }
     public:
         using InternalPeripheralUnit::InternalPeripheralUnit;
         ~ZxInternalPeripheralUnit() override = default;
@@ -260,13 +274,11 @@ namespace i960 {
         ShortInteger load(Address address, TreatAsShortInteger integer) override {
             return 0;
         }
-        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
-            return 0;
-        }
         Integer load(Address address, TreatAsInteger integer) override {
             return 0;
         }
         void begin() noexcept override {
+
         }
     };
 }
