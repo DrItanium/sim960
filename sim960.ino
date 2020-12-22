@@ -188,7 +188,6 @@ namespace i960 {
          * PD - PD21-PD20, PD12 - PD08, PD01-PD00 (NO PD31-PD22, PD19-PD13, PD7-PD2)
          * 0xFF00'0F00 : Cortex M Cache Controller
          * 0xFF00'1000 : LED_BUILTIN value
-         * 0xFF00'1004 : LED_BUILTIN OFF
          * 0xFF00'1010 : Neopixel 0 color
          * 0xFF00'1014 : Neopixel 0 show
          * 0xFF00'1018 : Neopixel 0 clear
@@ -198,7 +197,6 @@ namespace i960 {
         void writeLEDBlock(const ProcessorAddress& pa, Ordinal value) {
             switch (pa.getBlockOffset()) {
                 case 0x00: digitalWrite(LED_BUILTIN, value ? HIGH : LOW); break;
-                case 0x04: digitalWrite(LED_BUILTIN, LOW); break;
                 case 0x10: onboardNeoPixel.setPixelColor(0, value); break;
                 case 0x14: onboardNeoPixel.show(); break;
                 case 0x18: onboardNeoPixel.clear(); break;
@@ -216,12 +214,8 @@ namespace i960 {
         }
         void writeSubsection0(const ProcessorAddress& pa, Ordinal value) {
             switch (pa.getBlockId()) {
-                case 0x10:
-                    writeLEDBlock(pa, value);
-                    break;
-                default:
-                    break;
-
+                case 0x10: writeLEDBlock(pa, value); break;
+                default: break;
             }
         }
         Ordinal
