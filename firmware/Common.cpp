@@ -7,3 +7,9 @@
 namespace firmware
 {
 }
+
+extern "C" {
+    void bootup(void) {
+
+    }
+}

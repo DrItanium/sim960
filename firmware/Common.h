@@ -5,6 +5,7 @@
 #ifndef SIM960_COMMON_H
 #define SIM960_COMMON_H
 #include <stdint.h>
+#include <string>
 namespace firmware {
 
     template<typename T>
@@ -12,4 +13,7 @@ namespace firmware {
         return *reinterpret_cast<T*>(address);
     }
 } // end namespace firmware
+extern "C" {
+    void bootup(void);
+}
 #endif //SIM960_COMMON_H
