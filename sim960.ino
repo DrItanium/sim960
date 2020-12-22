@@ -26,7 +26,7 @@ constexpr auto OPL3Duo_A0 = 24;
 constexpr auto OPL3Duo_Latch = 25;
 constexpr auto OPL3Duo_Reset = 26;
 constexpr auto i960Zx_SALIGN = 4;
-Adafruit_NeoPixel onboardNeoPixel(1, 88, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel onboardNeoPixel(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 Adafruit_FlashTransport_QSPI flashTransport;
 Adafruit_SPIFlash flash(&flashTransport);
 FatFileSystem fatfs;
@@ -192,8 +192,68 @@ namespace i960 {
          * 0xFF00'1014 : Neopixel 0 show
          * 0xFF00'1018 : Neopixel 0 clear
          * 0xFF00'101C : Neopixel 0 brightness
+         * 0xFF00'0100 : A0
+         * 0xFF00'0104 : A1
+         * 0xFF00'0108 : A2
+         * 0xFF00'010C : A3
+         * 0xFF00'0110 : A4
+         * 0xFF00'0114 : A5
+         * 0xFF00'0118 : A6
+         * 0xFF00'011C : A7
+         * 0xFF00'0120 : A8
+         * 0xFF00'0124 : A9
+         * 0xFF00'0128 : A10
+         * 0xFF00'012C : A11
+         * 0xFF00'0130 : A12
+         * 0xFF00'0134 : A13
+         * 0xFF00'0138 : A14
+         * 0xFF00'013C : A15
          */
     private:
+        Ordinal
+        analogReadPins(const ProcessorAddress& pa) {
+            switch (pa.getBlockOffset()) {
+                case 0x00: return analogRead(A0);
+                case 0x04: return analogRead(A1);
+                case 0x08: return analogRead(A2);
+                case 0x0c: return analogRead(A3);
+                case 0x10: return analogRead(A4);
+                case 0x14: return analogRead(A5);
+                case 0x18: return analogRead(A6);
+                case 0x1c: return analogRead(A7);
+                case 0x20: return analogRead(A8);
+                case 0x24: return analogRead(A9);
+                case 0x28: return analogRead(A10);
+                case 0x2c: return analogRead(A11);
+                case 0x30: return analogRead(A12);
+                case 0x34: return analogRead(A13);
+                case 0x38: return analogRead(A14);
+                case 0x3c: return analogRead(A15);
+                default: return 0;
+            }
+        }
+        void
+        analogWritePins(const ProcessorAddress& pa, Ordinal value) {
+            switch (pa.getBlockOffset()) {
+                case 0x00: analogWrite(A0, value); break;
+                case 0x04: analogWrite(A1, value); break;
+                case 0x08: analogWrite(A2, value); break;
+                case 0x0c: analogWrite(A3, value); break;
+                case 0x10: analogWrite(A4, value); break;
+                case 0x14: analogWrite(A5, value); break;
+                case 0x18: analogWrite(A6, value); break;
+                case 0x1c: analogWrite(A7, value); break;
+                case 0x20: analogWrite(A8, value); break;
+                case 0x24: analogWrite(A9, value); break;
+                case 0x28: analogWrite(A10, value); break;
+                case 0x2c: analogWrite(A11, value); break;
+                case 0x30: analogWrite(A12, value); break;
+                case 0x34: analogWrite(A13, value); break;
+                case 0x38: analogWrite(A14, value); break;
+                case 0x3c: analogWrite(A15, value); break;
+                default: break;
+            }
+        }
         void writeLEDBlock(const ProcessorAddress& pa, Ordinal value) {
             switch (pa.getBlockOffset()) {
                 case 0x00: digitalWrite(LED_BUILTIN, value ? HIGH : LOW); break;
@@ -214,6 +274,7 @@ namespace i960 {
         }
         void writeSubsection0(const ProcessorAddress& pa, Ordinal value) {
             switch (pa.getBlockId()) {
+                case 0x01: analogWritePins(pa, value); break;
                 case 0x10: writeLEDBlock(pa, value); break;
                 default: break;
             }
@@ -221,6 +282,7 @@ namespace i960 {
         Ordinal
         readSubsection0(const ProcessorAddress& pa) {
             switch (pa.getBlockId()) {
+                case 0x01: return analogReadPins(pa);
                 case 0x10: return readLEDBlock(pa);
                 default: return 0;
             }
