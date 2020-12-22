@@ -124,6 +124,14 @@ namespace i960 {
      */
     class ZxBusInterfaceUnit : public BusInterfaceUnit {
     public:
+        static constexpr Address ExternalAddressBlockID = 0xFE00'0000;
+        static constexpr Address LedBlock = ExternalAddressBlockID | 0x100;
+        static constexpr Address BuiltinLedOffset = LedBlock | 0x00;
+        static constexpr Address BuiltinLedValueRegister = BuiltinLedOffset;
+        static constexpr Address BuiltinRGBLedOffset = LedBlock | 0x10;
+        static constexpr Address BuiltinRGBLedValuesRegister = BuiltinRGBLedOffset;
+
+    public:
         using BusInterfaceUnit::BusInterfaceUnit;
         ~ZxBusInterfaceUnit() override = default;
         ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
@@ -290,6 +298,13 @@ namespace i960 {
             }
         }
     public:
+        using InternalPeripheralUnit::InternalPeripheralUnit;
+        ~ZxInternalPeripheralUnit() override = default;
+
+        void
+        begin() noexcept override {
+
+        }
         Ordinal
         load(Address address, TreatAsOrdinal ) override {
             ProcessorAddress pa(address);
@@ -309,34 +324,6 @@ namespace i960 {
                 default:
                     break;
             }
-        }
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override { }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override { }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override { }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override { }
-        void store(Address address, Integer value, TreatAsInteger integer) override { store(address, value, TreatAsOrdinal{}); }
-    public:
-        using InternalPeripheralUnit::InternalPeripheralUnit;
-        ~ZxInternalPeripheralUnit() override = default;
-        ByteOrdinal
-        load(Address address, TreatAsByteOrdinal ordinal) override {
-            return 0;
-        }
-        ByteInteger
-        load(Address address, TreatAsByteInteger integer) override {
-            return 0;
-        }
-        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
-            return 0;
-        }
-        ShortInteger load(Address address, TreatAsShortInteger integer) override {
-            return 0;
-        }
-        Integer load(Address address, TreatAsInteger integer) override {
-            return 0;
-        }
-        void begin() noexcept override {
-
         }
     };
 }
