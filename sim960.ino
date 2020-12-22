@@ -186,45 +186,62 @@ namespace i960 {
          * PB - PB00-PB31
          * PC - PC31-PC30, PC28 - PC10, PC07 - PC00 (NO PC29, PC9, PC8)
          * PD - PD21-PD20, PD12 - PD08, PD01-PD00 (NO PD31-PD22, PD19-PD13, PD7-PD2)
-         * 0xFF00'1000 : LED_BUILTIN
-         *
+         * 0xFF00'0F00 : Cortex M Cache Controller
+         * 0xFF00'1000 : LED_BUILTIN value
+         * 0xFF00'1004 : LED_BUILTIN OFF
+         * 0xFF00'1010 : Neopixel 0 color
+         * 0xFF00'1014 : Neopixel 0 show
+         * 0xFF00'1018 : Neopixel 0 clear
+         * 0xFF00'101C : Neopixel 0 brightness
          */
+    private:
+        void writeLEDBlock(const ProcessorAddress& pa, Ordinal value) {
+            switch (pa.getBlockOffset()) {
+                case 0x00: digitalWrite(LED_BUILTIN, value ? HIGH : LOW); break;
+                case 0x04: digitalWrite(LED_BUILTIN, LOW); break;
+                case 0x10: onboardNeoPixel.setPixelColor(0, value); break;
+                case 0x14: onboardNeoPixel.show(); break;
+                case 0x18: onboardNeoPixel.clear(); break;
+                case 0x1C: onboardNeoPixel.setBrightness(value); break;
+                default:
+                    break;
+            }
+        }
+        Ordinal readLEDBlock(const ProcessorAddress& pa) {
+            switch (pa.getBlockOffset()) {
+                case 0x10: return onboardNeoPixel.getPixelColor(0);
+                case 0x1C: return onboardNeoPixel.getBrightness();
+                default: return 0;
+            }
+        }
+        void writeSubsection0(const ProcessorAddress& pa, Ordinal value) {
+            switch (pa.getBlockId()) {
+                case 0x10:
+                    writeLEDBlock(pa, value);
+                    break;
+                default:
+                    break;
+
+            }
+        }
     public:
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
-            ProcessorAddress pa(address);
-            if (pa.getSectionOffset() == 0x00'1000) {
-                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
-            }
-        }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
-            ProcessorAddress pa(address);
-            if (pa.getSectionOffset() == 0x00'1000) {
-                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
-            }
-        }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
-            ProcessorAddress pa(address);
-            if (pa.getSectionOffset() == 0x00'1000) {
-                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
-            }
-        }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
-            ProcessorAddress pa(address);
-            if (pa.getSectionOffset() == 0x00'1000) {
-                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
-            }
-        }
+
         void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
             ProcessorAddress pa(address);
-            if (pa.getSectionOffset() == 0x00'1000) {
-                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
+            switch (pa.getSubsectionId()) {
+                case 0x00:
+                    writeSubsection0(pa, value);
+                    break;
+                default:
+                    break;
             }
         }
+        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override { }
+        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override { }
+        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override { }
+        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override { }
         void store(Address address, Integer value, TreatAsInteger integer) override {
-            ProcessorAddress pa(address);
-            if (pa.getSectionOffset() == 0x00'1000) {
-                digitalWrite(LED_BUILTIN, value ? HIGH : LOW);
-            }
+            store(address, value, TreatAsOrdinal{});
         }
     public:
         using InternalPeripheralUnit::InternalPeripheralUnit;
