@@ -82,6 +82,16 @@ loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMa
   file.close();
   return true;
 }
+
+void
+somethingBadHappened() {
+    while (true) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(1000);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(1000);
+    }
+}
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
 // directly
 namespace i960 {
@@ -147,6 +157,12 @@ namespace i960 {
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
     class ZxInternalPeripheralUnit : public InternalPeripheralUnit {
+        /*
+         * PA - PA31,PA30,PA27,PA25-PA00 (NO PA29, PA28, PA26)
+         * PB - PB00-PB31
+         * PC - PC31-PC30, PC28 - PC10, PC07 - PC00 (NO PC29, PC9, PC8)
+         * PD - PD21-PD20, PD12 - PD08, PD01-PD00 (NO PD31-PD22, PD19-PD13, PD7-PD2)
+         */
     public:
         using InternalPeripheralUnit::InternalPeripheralUnit;
         ~ZxInternalPeripheralUnit() override = default;
@@ -180,6 +196,9 @@ namespace i960 {
         }
         void store(Address address, Integer value, TreatAsInteger integer) override {
         }
+        void begin() noexcept override {
+
+        }
     };
     void
     Core::badInstruction(DecodedInstruction inst) {
@@ -199,21 +218,26 @@ namespace i960 {
         }, inst);
         raiseFault();
     }
+    void
+    Core::busTestFailed() noexcept {
+        somethingBadHappened();
+    }
 }
 i960::ZxBusInterfaceUnit zxBXU;
 i960::ZxInternalPeripheralUnit zxIPU;
 i960::Core cpuCore(zxBXU, zxIPU, 0, i960Zx_SALIGN);
-/// @todo implement the register frames "in hardware"
-void setup() {
+void setupSerial() {
     Serial.begin(9600);
     while (!Serial) {
         delay(100);
     }
-    Serial.println("i960 Simulator Starting up");
-    pinMode(LED_BUILTIN, OUTPUT);
+}
+void setupSPI() {
     Serial.print("Starting up SPI...");
     SPI.begin();
     Serial.println("Done");
+}
+void setupSDCard() {
     Serial.print("Starting up onboard QSPI Flash...");
     flash.begin();
     Serial.println("Done");
@@ -226,9 +250,7 @@ void setup() {
     Serial.print("Initializing fileysstem on external flash...");
     if (!fatfs.begin(&flash)) {
         Serial.println("Error: filesystem does not exist! Please try SdFat_format example to make one!");
-        while (1) {
-            yield();
-        }
+        somethingBadHappened();
     }
     Serial.println("Done");
     Serial.print("Starting up SD Card...");
@@ -237,13 +259,19 @@ void setup() {
     } else {
         Serial.println("Card found!");
     }
+}
+void setupNeoPixel() {
     Serial.print("Initialzing onboard NeoPixel...");
     onboardNeoPixel.begin();
     onboardNeoPixel.show();
     Serial.println("Done");
+}
+void setupOPL3Duo() {
     Serial.print("Starting up OPL3Duo...");
     theOPL3Duo.begin();
     Serial.println("Done");
+}
+void setupSoilSensor() {
     Serial.print("Bringing up the soil sensor...");
     if (!theSoilSensor.begin(0x36)) {
         Serial.println("Soil Sensor Not Found!");
@@ -251,7 +279,8 @@ void setup() {
         Serial.println("Soil Sensor Found!");
         Serial.println(theSoilSensor.getVersion(), HEX);
     }
-
+}
+void setupClockChip() {
     Serial.print("Bringing up Si5351 Clock Chip...");
     if (clockgen.begin() != ERROR_NONE) {
         Serial.println("No Clock Chip Detected ... forget to hook it up?");
@@ -259,16 +288,29 @@ void setup() {
         Serial.println("Done");
     }
 
+}
+void setupMappingConfiguration() {
     Serial.println(F("Loading mapping configuration..."));
     if (!loadConfiguration(filename, mapping)) {
         Serial.println("Unable to find mapping configuration, stopping!");
-        while(true) {
-            digitalWrite(LED_BUILTIN, HIGH);
-            delay(1000);
-            digitalWrite(LED_BUILTIN, LOW);
-            delay(1000);
-        }
+        somethingBadHappened();
     }
+}
+/// @todo implement the register frames "in hardware"
+void setup() {
+    setupSerial();
+    Serial.println("i960 Simulator Starting up");
+    pinMode(LED_BUILTIN, OUTPUT);
+    setupSPI();
+    setupSDCard();
+    setupNeoPixel();
+    setupOPL3Duo();
+    setupSoilSensor();
+    setupClockChip();
+    setupMappingConfiguration();
+
+    // last thing to do is do the post
+    cpuCore.post();
 }
 
 void loop() {
