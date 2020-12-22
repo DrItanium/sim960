@@ -180,6 +180,8 @@ namespace i960 {
     Core::busTestFailed() noexcept {
         somethingBadHappened();
     }
+    volatile uint8_t& memory(const uint32_t address, TreatAsByteOrdinal) noexcept { return *reinterpret_cast<uint8_t*>(address); }
+    volatile uint32_t& memory(const uint32_t address, TreatAsOrdinal) noexcept { return *reinterpret_cast<uint32_t*>(address); }
     class ZxInternalPeripheralUnit : public InternalPeripheralUnit {
         /*
          * PA - PA31,PA30,PA27,PA25-PA00 (NO PA29, PA28, PA26)
