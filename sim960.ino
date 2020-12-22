@@ -83,6 +83,7 @@ loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMa
   return true;
 }
 
+[[noreturn]]
 void
 somethingBadHappened() {
     while (true) {
