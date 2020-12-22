@@ -14,7 +14,6 @@
 #include "Disassembly.h"
 #include "TraceControls.h"
 #include "PreviousFramePointer.h"
-#include "InternalPeripheralUnit.h"
 #include "BusInterfaceUnit.h"
 #include "InstructionFormats.h"
 namespace i960
@@ -43,7 +42,7 @@ namespace i960
          * @param ibrBase The address of the initialization boot record (defaults to 0xFEFF'FF30, same as the i960 Hx)
          * @param salign The stack alignment value (defaults to 1)
          */
-        explicit Core(BusInterfaceUnit& biu, InternalPeripheralUnit& ipu, Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : biu_(biu), ipu_(ipu), salign_(salign), ibrBase_(ibrBase) { }
+        explicit Core(BusInterfaceUnit& biu, Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : biu_(biu), salign_(salign), ibrBase_(ibrBase) { }
         constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
             return (salign_ * 16) - 1;
         }
@@ -323,7 +322,6 @@ namespace i960
         void processPRCB() noexcept;
     private:
         BusInterfaceUnit& biu_;
-        InternalPeripheralUnit& ipu_;
         RegisterFile globals, locals;
         Register ip; // always start at address zero
         ArithmeticControls ac;

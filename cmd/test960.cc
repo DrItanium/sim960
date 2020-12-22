@@ -114,62 +114,6 @@ namespace i960 {
         }
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
-    class TestInternalPeripheralUnit : public InternalPeripheralUnit {
-    public:
-        using InternalPeripheralUnit::InternalPeripheralUnit;
-        ~TestInternalPeripheralUnit() override = default;
-        void begin() noexcept override {
-
-        }
-        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()];
-        }
-        ByteInteger load(Address address, TreatAsByteInteger integer) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()];
-        }
-        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()];
-        }
-        ShortInteger load(Address address, TreatAsShortInteger integer) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()];
-        }
-        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].ord;
-        }
-        Integer load(Address address, TreatAsInteger integer) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].ival;
-        }
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()]= value;
-        }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()]= value;
-        }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()]= value;
-        }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()]= value;
-        }
-        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].ord = value;
-        }
-        void store(Address address, Integer value, TreatAsInteger integer) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].ival = value;
-        }
-    };
 
 
     void
@@ -195,9 +139,8 @@ namespace i960 {
     test0() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
         // make sure that each instruction operates as expected
-        i960::Core testCore(tbiu,tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
@@ -243,8 +186,7 @@ namespace i960 {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
-        i960::Core testCore(tbiu, tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
@@ -297,8 +239,7 @@ namespace i960 {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
-        i960::Core testCore(tbiu, tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
@@ -357,8 +298,7 @@ namespace i960 {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
-        i960::Core testCore(tbiu, tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // double check that registers are clear at this point
         if (testCore.getIP().getOrdinal() != 0) {
@@ -380,8 +320,7 @@ namespace i960 {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
-        i960::Core testCore(tbiu, tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // double check that registers are clear at this point
         if (testCore.getIP().getOrdinal() != 0) {
@@ -403,8 +342,7 @@ namespace i960 {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
-        i960::Core testCore(tbiu, tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // double check that registers are clear at this point
         if (testCore.getIP().getOrdinal() != 0) {
@@ -439,8 +377,7 @@ namespace i960 {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
         TestBusInterfaceUnit tbiu;
-        TestInternalPeripheralUnit tipu;
-        i960::Core testCore(tbiu, tipu, 0,4);
+        i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // setup instructions
         theMemorySpace[0][0].ord = 0x8c20'3000;

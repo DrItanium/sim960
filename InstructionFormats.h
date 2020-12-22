@@ -13,7 +13,6 @@
 #include "Disassembly.h"
 #include "TraceControls.h"
 #include "PreviousFramePointer.h"
-#include "InternalPeripheralUnit.h"
 #include "BusInterfaceUnit.h"
 namespace i960 {
     class RegFormatInstruction {

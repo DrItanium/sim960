@@ -1307,7 +1307,6 @@ namespace i960 {
         // initialize instruction cache
         // configure local register cache
         // load control table
-        ipu_.begin();
     }
     PreviousFramePointer Core::getPFP() noexcept {
         return PreviousFramePointer{getRegister(PFP)};
@@ -1340,11 +1339,7 @@ namespace i960 {
         return loadOrdinal(getSystemProcedureTableBase() + 0xC);
     }
     InterfaceUnit &Core::getInterfaceUnit(Address address) noexcept {
-        if (ProcessorAddress pa(address); pa.isInIOSpace()) {
-            return ipu_;
-        } else {
-            return biu_;
-        }
+        return biu_;
     }
     Ordinal Core::loadOrdinal(Address address) noexcept {
         return getInterfaceUnit(address).load(address, TreatAsOrdinal{});

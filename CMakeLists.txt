@@ -24,7 +24,6 @@ add_library(core960
         ProcessorAddress.h
         TraceControls.cpp
         InterfaceUnit.h
-        InternalPeripheralUnit.h
         BusInterfaceUnit.h
         InstructionFormats.cpp
         InstructionFormats.h)
