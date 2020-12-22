@@ -17,25 +17,17 @@
 #include "ProcessorMappingConfiguration.h"
 #include "ProcessorAddress.h"
 
-constexpr bool doCPUComputation = false;
+constexpr bool doCPUComputation = true;
 constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 Adafruit_FlashTransport_QSPI flashTransport;
 Adafruit_SPIFlash flash(&flashTransport);
 FatFileSystem fatfs;
 SdFat sdCard; // use SDCARD_SS_PIN for this one
-union MemoryCell {
-    constexpr explicit MemoryCell(Ordinal value = 0) : oval(value) { }
-    Ordinal oval = 0;
-    Integer ival;
-    ByteOrdinal bo[4];
-    ByteInteger bi[4];
-    ShortOrdinal so[2];
-    ShortInteger si[2];
-
-};
+/// the base configuration
 const std::string filename = "/config.txt";
 i960::MappingConfiguration mapping;
+
 bool
 loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMapping) {
     /// @todo fix this
@@ -142,6 +134,15 @@ namespace i960 {
         somethingBadHappened();
     }
     class ZxInternalPeripheralUnit : public InternalPeripheralUnit {
+    public:
+        static constexpr Address ExternalIOSpaceStart = 0xFF00'0000;
+        static constexpr Address ExternalIOSpaceEnd = 0xFFFE'FFFF;
+        static constexpr Address InternalIORegisterSpaceStart = 0xFFFF'0000;
+        static constexpr Address InternalIORegisterSpaceEnd = 0xFFFF'FFFF;
+        static constexpr Address InternalIOUserSpaceRegistersStart = InternalIORegisterSpaceStart;
+        static constexpr Address InternalIOUserSpaceRegistersEnd = InternalIOUserSpaceRegistersStart | 0x7FFF;
+        static constexpr Address InternalIOSupervisorSpaceRegistersStart = InternalIOUserSpaceRegistersEnd + 1;
+        static constexpr Address InternalIOSupervisorSpaceRegistersEnd = InternalIORegisterSpaceEnd;
         /*
          * PA - PA31,PA30,PA27,PA25-PA00 (NO PA29, PA28, PA26)
          * PB - PB00-PB31
@@ -280,7 +281,8 @@ namespace i960 {
 }
 i960::ZxBusInterfaceUnit zxBXU;
 i960::ZxInternalPeripheralUnit zxIPU;
-i960::Core cpuCore(zxBXU, zxIPU, 0, i960Zx_SALIGN);
+constexpr Address zxBootBase = 0xFEFF'FF00;
+i960::Core cpuCore(zxBXU, zxIPU, zxBootBase, i960Zx_SALIGN);
 void setupSerial() {
     Serial.begin(9600);
     while (!Serial) {
