@@ -4,7 +4,10 @@
 
 #include "Firmware.h"
 #include <errno.h>
-
+void doIt();
+extern "C" volatile void start() {
+    doIt();
+}
 namespace firmware
 {
     volatile uint32_t&
@@ -30,16 +33,6 @@ volatile void delay() { delay(firmware::internalRegister(0x104)) ; }
 volatile void
 setLED(bool value) {
     firmware::internalRegister(0x100) = value ? 0xFFFFFFFF : 0;
-}
-int
-__main(int, char**) {
-    while (true) {
-        setLED(true);
-        delay();
-        setLED(false);
-        delay();
-    }
-    return 0;
 }
 extern "C" {
 void
@@ -71,11 +64,15 @@ sbrk(intptr_t increment) {
     }
 }
 
+
+}
+
 void
-start() {
-    __main(0, 0);
-    while (true);
+doIt() {
+    while (true) {
+        setLED(true);
+        delay();
+        setLED(false);
+        delay();
+    }
 }
-
-}
-
