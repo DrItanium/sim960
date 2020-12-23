@@ -3,6 +3,7 @@
 //
 
 #include "Firmware.h"
+#include <errno.h>
 
 namespace firmware
 {
@@ -45,13 +46,29 @@ void
 _exit(void) {
 
 }
+intptr_t brkSize = 0;
+const intptr_t maximumDataAddress = 0x03FFFFFF;
+
 int
 brk(void* addr) {
-    return 0;
+    if (reinterpret_cast<intptr_t>(addr) <= maximumDataAddress) {
+        brkSize = reinterpret_cast<intptr_t>(addr);
+        return 0;
+    } else {
+        errno = ENOMEM;
+        return -1;
+    }
 }
 void*
 sbrk(intptr_t increment) {
-    return 0;
+    void* oldBrkSize = reinterpret_cast<void*>(brkSize);
+    intptr_t addr = increment + brkSize;
+    if (addr <= maximumDataAddress) {
+        return oldBrkSize;
+    } else {
+        errno = ENOMEM;
+        return reinterpret_cast<void *>(-1);
+    }
 }
 
 void
