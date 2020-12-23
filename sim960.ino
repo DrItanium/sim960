@@ -65,10 +65,8 @@ loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMa
 [[noreturn]]
 void
 somethingBadHappened() {
+    digitalWrite(LED_BUILTIN, HIGH);
     while (true) {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(1000);
-        digitalWrite(LED_BUILTIN, LOW);
         delay(1000);
     }
 }
@@ -76,44 +74,37 @@ somethingBadHappened() {
 // directly
 constexpr Address zxBootBase = 0xFFFF'0000;
 constexpr Address codeStartsAt = 0xFE00'0000;
+constexpr Address ledAddress = 0xFF00'0100;
+constexpr Address sleepConstantAddress = 0xFF00'0104;
 namespace i960 {
     class ZxBusInterfaceUnit : public BusInterfaceUnit {
     public:
         using BusInterfaceUnit::BusInterfaceUnit;
         ~ZxBusInterfaceUnit() override = default;
-        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
-            if (address == (zxBootBase + 16)) {
-                return codeStartsAt;
-            }
-            return 0;
-        }
-        ByteInteger load(Address address, TreatAsByteInteger integer) override {
-            return 0;
-        }
-        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
-            return 0;
-        }
-        ShortInteger load(Address address, TreatAsShortInteger integer) override {
-            return 0;
-        }
+        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override { return 0; }
+        ByteInteger load(Address address, TreatAsByteInteger integer) override { return 0; }
+        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override { return 0; }
+        ShortInteger load(Address address, TreatAsShortInteger integer) override { return 0; }
         Ordinal load(Address address, TreatAsOrdinal ordinal) override {
-            return 0;
+            switch (address) {
+                case zxBootBase + 16: return codeStartsAt;
+                case sleepConstantAddress: return 0xFDED;
+                default: return 0;
+            }
         }
-        Integer load(Address address, TreatAsInteger integer) override {
-            return 0;
-        }
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
-        }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
-        }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
-        }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
-        }
+        Integer load(Address address, TreatAsInteger integer) override { return 0; }
+        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override { }
+        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override { }
+        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override { }
+        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override { }
         void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+            switch (address) {
+                case ledAddress:
+                    digitalWrite(LED_BUILTIN, value != 0 ? HIGH : LOW);
+                    break;
+            }
         }
-        void store(Address address, Integer value, TreatAsInteger integer) override {
-        }
+        void store(Address address, Integer value, TreatAsInteger integer) override { }
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
     void
