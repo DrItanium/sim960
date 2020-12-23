@@ -74,12 +74,17 @@ somethingBadHappened() {
 }
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
 // directly
+constexpr Address zxBootBase = 0xFFFF'0000;
+constexpr Address codeStartsAt = 0xFE00'0000;
 namespace i960 {
     class ZxBusInterfaceUnit : public BusInterfaceUnit {
     public:
         using BusInterfaceUnit::BusInterfaceUnit;
         ~ZxBusInterfaceUnit() override = default;
         ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
+            if (address == (zxBootBase + 16)) {
+                return codeStartsAt;
+            }
             return 0;
         }
         ByteInteger load(Address address, TreatAsByteInteger integer) override {
@@ -135,7 +140,6 @@ namespace i960 {
     }
 }
 i960::ZxBusInterfaceUnit zxBXU;
-constexpr Address zxBootBase = 0xFEFF'FF00;
 i960::Core cpuCore(zxBXU, zxBootBase, i960Zx_SALIGN);
 void setupSerial() {
     Serial.begin(9600);

@@ -1275,9 +1275,12 @@ namespace i960 {
         if (bootChecksum() != 0) {
             busTestFailed();
         }
-        prcbBase_ = loadOrdinal(ibrBase_ + 0x14);
-        ctrlTableBase_ = loadOrdinal(prcbBase_ + 0x4);
-        processPRCB();
+        static constexpr auto shouldProcessPCRB = false;
+        if constexpr (shouldProcessPCRB) {
+            prcbBase_ = loadOrdinal(ibrBase_ + 0x14);
+            ctrlTableBase_ = loadOrdinal(prcbBase_ + 0x4);
+            processPRCB();
+        }
         ip.setOrdinal(loadOrdinal(ibrBase_+0x10));
         /// @todo set the device id correctly
         getRegister(g0).setOrdinal(0xFDEDABCD);
