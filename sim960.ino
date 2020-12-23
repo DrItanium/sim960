@@ -153,14 +153,14 @@ namespace i960 {
         ShortInteger load(Address address, TreatAsShortInteger integer) override { return 0; }
 
         Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+            Serial.print("load: 0x");
+            Serial.println(address, HEX);
             if (address < 0x128) {
-                Serial.print("Loading from 0x");
-                Serial.println(address >> 2, HEX);
                 return simpleProgram[address >> 2];
             }
             switch (address) {
                 case zxBootBase + 16: return codeStartsAt;
-                case sleepConstantAddress: return 0xFDED;
+                case sleepConstantAddress: return 0x100;
                 default: return 0;
             }
         }
@@ -258,9 +258,9 @@ void setup() {
     Serial.println("i960 Simulator Starting up");
     pinMode(LED_BUILTIN, OUTPUT);
     setupSPI();
-    setupSDCard();
+    //setupSDCard();
     setupNeoPixel();
-    setupMappingConfiguration();
+    //setupMappingConfiguration();
 
     // last thing to do is do the post
     if constexpr (doCPUComputation) {
