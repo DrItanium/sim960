@@ -70,10 +70,76 @@ somethingBadHappened() {
         delay(1000);
     }
 }
+constexpr Ordinal simpleProgram[] {
+    0x8cf03000, 0x00000010, // lda 10 <Li960R1>, g14
+    0x5c88161e,  // mov g14, g1
+    0x5cf01e00,  // mov 0, g14
+    0x0a000000,  // ret
+    0x00000000, 0x00000000, 0x00000000,
+//
+    0x8ca03000, 0x00ffffff, // lda ffffff, g4
+    0x58a50090, // and g0, g4, g4
+    0x8c803000, 0xff000000, // lda ff000000, g0
+    0x58840394, // or g4, g0, g0
+    0x86003000, 0x00000000, // callx 0
+    0x0a000000,  // ret
+    0x00000000, 0x00000000, 0x00000000,
+//
+    0x59840e10, // shlo 16, g0, g0
+    0x8ca03000, 0x00ff0000, // lda ff0000, g4
+    0x59840c10, // shro 16, g0, g0
+    0x58840394, // or g4, g0, g0
+    0x86003000, 0x00000020, // callx 20
+    0x0a000000,  // ret
+//
+    0x8cf03000, 0x00000094, // lda 94, g14
+    0x5c88161e, // mov g14, g1
+    0x5cf01e00, // mov 0, g14
+    0x5ca01e00, // mov 0, g4
+    0x3685000c, // cmpoble g0,g4,90
+    0x59a05014, // addo g4,1,g4
+    0x08fffff8, // b 84
+    0x84045000, // bx (g1)
+    0x0a000000,  // ret
+    0x00000000, 0x00000000,
+//
+    0x8c800104, // lda 0x104, g0
+    0x86003000, 0x00000050, // callx 50
+    0x90841000, // ld (g0), g0
+    0x84003000, 0x00000070, // bx 70
+    0x0a000000,  // ret
+    0x00000000,  // .word 0
+    //
+    0x5c201610, // mov g0, r4
+    0x59210e18, // shlo 24, r4, r4
+    0x58801988, // setbit 8,0,g0
+    0x59205404, // shro r4,1,r4
+    0x86003000, 0x00000050, // callx 50
+    0x59210901, // subo 1, r4, r4
+    0x92241000, // st r4, (g0)
+    0x0a000000,  // ret
+    0x00000000, 0x00000000, 0x00000000,
+    //
+    0x5c801e01, // mov 1, g0
+    0x86003000, 0x000000c0, // callx c0
+    0x86003000, 0x000000a0, // callx a0
+    0x5c801e00, // mov 0, g0
+    0x86003000, 0x000000c0, // callx c0
+    0x86003000, 0x000000a0, // callx a0
+    0x08ffffd8, // b f0
+    0x00000000, // .word 0
+    // start point
+    0x84003000, 0x000000f0, // bx f0
+    0x0a000000,  // ret
+    0x00000000,  // .word 0
+};
+static_assert(simpleProgram[0x8>>2] == 0x5c88161e);
+static_assert(simpleProgram[0x20>>2] == 0x8ca03000);
+static_assert(simpleProgram[0xa0>>2] == 0x8c800104);
 // the i960 has other registers and tables we need to be aware of so onboard sram will most likely _not_ be exposed to the i960 processor
 // directly
 constexpr Address zxBootBase = 0xFFFF'0000;
-constexpr Address codeStartsAt = 0xFE00'0000;
+constexpr Address codeStartsAt = 0x0000'0120;
 constexpr Address ledAddress = 0xFF00'0100;
 constexpr Address sleepConstantAddress = 0xFF00'0104;
 namespace i960 {
@@ -85,7 +151,13 @@ namespace i960 {
         ByteInteger load(Address address, TreatAsByteInteger integer) override { return 0; }
         ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override { return 0; }
         ShortInteger load(Address address, TreatAsShortInteger integer) override { return 0; }
+
         Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+            if (address < 0x128) {
+                Serial.print("Loading from 0x");
+                Serial.println(address >> 2, HEX);
+                return simpleProgram[address >> 2];
+            }
             switch (address) {
                 case zxBootBase + 16: return codeStartsAt;
                 case sleepConstantAddress: return 0xFDED;
@@ -124,6 +196,7 @@ namespace i960 {
             }
         }, inst);
         raiseFault();
+        somethingBadHappened();
     }
     void
     Core::busTestFailed() noexcept {
