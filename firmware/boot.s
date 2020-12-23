@@ -1,6 +1,6 @@
 .data
 IBR_BASE:
-.long bootup
+.long __start
 .long thePCRB
 
 

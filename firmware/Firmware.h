@@ -17,7 +17,9 @@ namespace firmware {
     }
     volatile uint32_t& ioSpaceRegister(Address offset);
     volatile uint32_t& internalRegister(uint16_t offset);
+
 } // end namespace firmware
+void runApplication();
 extern "C" {
     void bootup(void);
 }
