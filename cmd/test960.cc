@@ -64,9 +64,13 @@ namespace i960 {
     public:
         using BusInterfaceUnit::BusInterfaceUnit;
         ~TestBusInterfaceUnit() override = default;
+        Cell& loadCell(Address address) noexcept {
+            CellTarget cell(address);
+            return theMemorySpace[cell.getSectionId()][cell.getCellId()];
+        }
         ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
             CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()];
+            return loadCell(address).bo[cell.getByteOffset()];
         }
         ByteInteger load(Address address, TreatAsByteInteger integer) override {
             CellTarget cell(address);
@@ -81,8 +85,11 @@ namespace i960 {
             return theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()];
         }
         Ordinal load(Address address, TreatAsOrdinal ordinal) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].ord;
+            if (address == 0xFFFF0104) {
+                return 2;
+            } else {
+                return loadCell(address).ord;
+            }
         }
         Integer load(Address address, TreatAsInteger integer) override {
             CellTarget cell(address);

@@ -202,8 +202,8 @@ namespace i960
             compareBase<Tag>(src1, src2);
             getRegister(dest).set(extractValue(src2, Tag{}) - 1, Tag{});
         }
-        inline void cmpo(RegLit src1, RegLit src2) { compareBase<TreatAsOrdinal>(src1, src2); }
-        inline void cmpi(RegLit src1, RegLit src2) { compareBase<TreatAsInteger>(src1, src2); }
+        void cmpo(RegLit src1, RegLit src2);
+        void cmpi(RegLit src1, RegLit src2);
         void concmpo(RegLit src1, RegLit src2);
         void concmpi(RegLit src1, RegLit src2);
         void cmpinco(RegLit src1, RegLit src2, RegisterIndex dest);
@@ -328,6 +328,21 @@ namespace i960
         Ordinal bootChecksum() noexcept;
     private:
         void processPRCB() noexcept;
+    private:
+        void cmpobg(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibg(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobge(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibge(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobe(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibe(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobne(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibne(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpobl(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibl(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpoble(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibno(RegLit src1, RegisterIndex src2, ShortInteger targ);
+        void cmpibo(RegLit src1, RegisterIndex src2, ShortInteger targ);
     private:
         BusInterfaceUnit& biu_;
         RegisterFile globals, locals;
