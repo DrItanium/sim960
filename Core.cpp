@@ -385,13 +385,16 @@ namespace i960 {
     Core::raiseFault() {
         /// @todo implement
     }
+    constexpr bool isGlobalRegister(uint8_t value) noexcept {
+        return (value & 0b10000) != 0;
+    }
     Register &
     Core::getRegister(RegisterIndex index) noexcept {
         auto ival = toInteger(index);
-        if (auto offset = ival & 0b1111, maskedValue = ival & 0b10000; maskedValue != 0) {
-            return locals[offset];
-        } else {
+        if (auto offset = ival & 0b1111; isGlobalRegister(ival)) {
             return globals[offset];
+        } else {
+            return locals[offset];
         }
     }
     const Register &
