@@ -6,8 +6,13 @@
 #include "PreviousFramePointer.h"
 #include "ProcessorAddress.h"
 #include "InstructionFormats.h"
-
+#include <iostream>
+#include <string>
 namespace i960 {
+    void displayInstruction(Ordinal address, const std::string& name) {
+        std::cout << "Executing: " << name << " @ 0x" << std::hex << address << std::endl;
+    }
+#define AnInstruction displayInstruction(ip.getOrdinal(), __PRETTY_FUNCTION__)
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
     constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
     constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
@@ -83,6 +88,7 @@ namespace i960 {
     }
     void
     Core::ediv(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         // a total copy and paste hack job but it will work
         if (std::holds_alternative<Literal>(src2)) {
             // this is a little different than normal
@@ -128,6 +134,7 @@ namespace i960 {
 
     void
     Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         if (!divisibleByTwo(dest)) {
             getRegister(dest).setOrdinal(-1);
             getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
@@ -418,6 +425,7 @@ namespace i960 {
 
     void
     Core::dsubc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+        AnInstruction;
         const auto &s1 = getRegister(src1);
         const auto &s2 = getRegister(src2);
         // transfer bits over
@@ -427,6 +435,7 @@ namespace i960 {
     }
     void
     Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
+        AnInstruction;
         auto srcValue = extractValue(src1, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(srcValue);
         auto lowest8 = static_cast<ByteOrdinal>(srcValue);
@@ -434,6 +443,7 @@ namespace i960 {
     }
     void
     Core::daddc(RegisterIndex src1, RegisterIndex src2, RegisterIndex dest) {
+        AnInstruction;
         const auto &s1 = getRegister(src1);
         const auto &s2 = getRegister(src2);
         auto &dst = getRegister(dest);
@@ -445,18 +455,21 @@ namespace i960 {
     }
     void
     Core::fmark() {
+        AnInstruction;
         if (pc.getTraceEnableBit()) {
             raiseFault(); // TRACE BREAKPOINT FAULT
         }
     }
     void
     Core::mark() {
+        AnInstruction;
         if (pc.getTraceEnableBit() && tc.getMarkTraceMode()) {
             raiseFault(); // TRACE.MARK
         }
     }
     void
     Core::syncf() {
+        AnInstruction;
         if (ac.getNoImpreciseFaults()) {
             return;
         }
@@ -464,6 +477,7 @@ namespace i960 {
     }
     void
     Core::flushreg() {
+        AnInstruction;
         // noop right now
     }
     RegisterIndex
@@ -481,6 +495,7 @@ namespace i960 {
     }
     void
     Core::modtc(const RegFormatInstruction &inst) {
+        AnInstruction;
         auto dest = forceIntoRegisterIndex(inst.getSrc1());
         auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
         auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
@@ -488,6 +503,7 @@ namespace i960 {
     }
     void
     Core::modpc(const RegFormatInstruction &inst) {
+        AnInstruction;
         auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
         auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
         auto dest = forceIntoRegisterIndex(inst.getSrc1());
@@ -497,6 +513,7 @@ namespace i960 {
     }
     void
     Core::modac(const RegFormatInstruction &inst) {
+        AnInstruction;
         // in this case, mask is src/dst
         // src is src2
         // dest is src1
@@ -524,6 +541,7 @@ namespace i960 {
     }
     void
     Core::calls(RegLit targ) {
+        AnInstruction;
         syncf();
         auto index = extractValue(targ, TreatAsOrdinal{});
         if (index > 259) {
@@ -563,6 +581,7 @@ namespace i960 {
     }
     void
     Core::ret() {
+        AnInstruction;
         syncf();
         auto pfp = getPFP();
         if (pfp.getPreReturnTraceFlag() && pc.getTraceEnableBit() && tc.getPrereturnTraceMode()) {
@@ -635,7 +654,7 @@ namespace i960 {
     }
     void
     Core::callx(Ordinal targ) {
-
+        AnInstruction;
         auto& sp = getStackPointer();
         auto& rip = getReturnInstructionPointer();
         auto& fp = getFramePointer();
@@ -658,6 +677,7 @@ namespace i960 {
     }
     void
     Core::call(Displacement22 targ) {
+        AnInstruction;
         auto& sp = getStackPointer();
         auto& rip = getReturnInstructionPointer();
         auto& fp = getFramePointer();
@@ -679,6 +699,7 @@ namespace i960 {
 
     void
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
+        AnInstruction;
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
         auto theSrc = getRegister(src).getOrdinal();
         auto theMask = computeSingleBitShiftMask(bpos);
@@ -693,6 +714,7 @@ namespace i960 {
     }
     void
     Core::bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
+        AnInstruction;
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
         auto theSrc = getRegister(src).getOrdinal();
         auto theMask = computeSingleBitShiftMask(bpos);
@@ -707,39 +729,47 @@ namespace i960 {
     }
     void
     Core::concmpo(RegLit src1, RegLit src2) {
+        AnInstruction;
         conditionalCompareBase<TreatAsOrdinal>(src1, src2);
     }
     void
     Core::concmpi(RegLit src1, RegLit src2) {
+        AnInstruction;
         conditionalCompareBase<TreatAsInteger>(src1, src2);
     }
     void
     Core::cmpinco(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         compareAndIncrementBase<TreatAsOrdinal>(src1, src2, dest);
     }
     void
     Core::cmpinci(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         // overflow detection suppressed
         compareAndIncrementBase<TreatAsInteger>(src1, src2, dest);
     }
     void
     Core::cmpdeco(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         compareAndDecrementBase<TreatAsOrdinal>(src1, src2, dest);
     }
     void
     Core::cmpdeci(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         // overflow detection suppressed
         compareAndDecrementBase<TreatAsInteger>(src1, src2, dest);
     }
 
     void
     Core::setbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
     }
     void
     Core::clrbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         auto bitposModified = ~(computeSingleBitShiftMask(bitpos));
@@ -747,6 +777,7 @@ namespace i960 {
     }
     void
     Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(src ^ (1 << (bitpos & 0b11111)));
@@ -754,6 +785,7 @@ namespace i960 {
 
     void
     Core::alterbit(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         if ((ac.getConditionCode() & 0b010) == 0) {
@@ -764,12 +796,14 @@ namespace i960 {
     }
     void
     Core::chkbit(RegLit src1, RegLit src2) {
+        AnInstruction;
         ac.setConditionCode(
                 ((extractValue(src2, TreatAsOrdinal{}) & computeSingleBitShiftMask(extractValue(src1, TreatAsOrdinal{}))) == 0) ? 0b000
                                                                                                                                 : 0b010);
     }
     void
     Core::spanbit(RegLit src1, RegisterIndex dest) {
+        AnInstruction;
         /**
          * Find the most significant clear bit
          */
@@ -788,6 +822,7 @@ namespace i960 {
     }
     void
     Core::scanbit(RegLit src, RegisterIndex dest) {
+        AnInstruction;
         // find the most significant set bit
         auto result = largestOrdinal;
         ac.clearConditionCode();
@@ -808,6 +843,7 @@ namespace i960 {
     }
     void
     Core::extract(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         // taken from the i960Hx manual
         getRegister(dest).setOrdinal(
                 (extractValue(dest, TreatAsOrdinal{}) >> std::min(extractValue(src1, TreatAsOrdinal{}), static_cast<Ordinal>(32))) &
@@ -815,6 +851,7 @@ namespace i960 {
     }
     void
     Core::modify(RegLit mask, RegLit src, RegisterIndex srcDest) {
+        AnInstruction;
         auto &sd = getRegister(srcDest);
         auto theMask = extractValue(mask, TreatAsOrdinal{});
         sd.setOrdinal((extractValue(src, TreatAsOrdinal{}) & theMask) | (sd.getOrdinal() & (~theMask)));
@@ -822,6 +859,7 @@ namespace i960 {
 
     void
     Core::scanbyte(RegLit src1, RegLit src2) {
+        AnInstruction;
         ac.clearConditionCode();
         if (auto s1 = extractValue(src1, TreatAsOrdinal{}), s2 = extractValue(src2, TreatAsOrdinal{});
                 ((s1 & 0x0000'00FF) == (s2 & 0x0000'00FF)) ||
@@ -843,25 +881,30 @@ namespace i960 {
     }
     void
     Core::b(Displacement22 targ) {
+        AnInstruction;
         ip.setInteger(ip.getInteger() + targ.getValue());
     }
     void
     Core::bal(Displacement22 targ) {
+        AnInstruction;
         globals[14].setOrdinal(ip.getOrdinal() + 4);
         // make sure that the code is consistent
         b(targ);
     }
     void
     Core::bx(Ordinal targ) {
+        AnInstruction;
         ip.setOrdinal(targ);
     }
     void
     Core::balx(Ordinal targ, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(ip.getOrdinal());
         ip.setOrdinal(targ);
     }
     void
     Core::addc(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
         auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
         auto c = getCarryFlag() ? 1 : 0;
@@ -873,6 +916,7 @@ namespace i960 {
     }
     void
     Core::addi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsInteger{});
         auto s2 = extractValue(src2, TreatAsInteger{});
         getRegister(dest).setInteger(s2 + s1);
@@ -881,6 +925,7 @@ namespace i960 {
 
     void
     Core::addo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         auto s2 = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(s2 + s1);
@@ -888,6 +933,7 @@ namespace i960 {
     }
     void
     Core::subi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsInteger{});
         auto s2 = extractValue(src2, TreatAsInteger{});
         getRegister(dest).setInteger(s2 - s1);
@@ -895,6 +941,7 @@ namespace i960 {
     }
     void
     Core::subo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         auto s2 = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(s2 - s1);
@@ -902,6 +949,7 @@ namespace i960 {
     }
     void
     Core::subc(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
         auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
         auto c = getCarryFlag() ? 1 : 0;
@@ -913,6 +961,7 @@ namespace i960 {
     }
     void
     Core::muli(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsInteger{});
         auto s2 = extractValue(src2, TreatAsInteger{});
         getRegister(dest).setInteger(s2 * s1);
@@ -920,6 +969,7 @@ namespace i960 {
     }
     void
     Core::mulo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         auto s2 = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(s2 * s1);
@@ -927,6 +977,7 @@ namespace i960 {
     }
     void
     Core::divi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsInteger{});
         auto s2 = extractValue(src2, TreatAsInteger{});
         getRegister(dest).setInteger(s2 / s1);
@@ -934,6 +985,7 @@ namespace i960 {
     }
     void
     Core::divo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         auto s2 = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(s2 / s1);
@@ -941,18 +993,21 @@ namespace i960 {
     }
     void
     Core::remi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s2 = extractValue(src2, TreatAsInteger{});
         auto s1 = extractValue(src1, TreatAsInteger{});
         getRegister(dest).setInteger(((s2 / s1) * s1));
     }
     void
     Core::remo(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto s2 = extractValue(src2, TreatAsOrdinal{});
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(((s2 / s1) * s1));
     }
     void
     Core::modi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         // taken from the manual
         auto denominator = extractValue(src1, TreatAsInteger{});
         auto numerator = extractValue(src2, TreatAsInteger{});
@@ -970,6 +1025,7 @@ namespace i960 {
     }
     void
     Core::shlo(RegLit len, RegLit src, RegisterIndex dest) {
+        AnInstruction;
         auto theLength = extractValue(len, TreatAsOrdinal{});
         auto theSrc = extractValue(src, TreatAsOrdinal{});
         if (theLength < 32) {
@@ -980,6 +1036,7 @@ namespace i960 {
     }
     void
     Core::shro(RegLit len, RegLit src, RegisterIndex dest) {
+        AnInstruction;
         auto theLength = extractValue(len, TreatAsOrdinal{});
         auto theSrc = extractValue(src, TreatAsOrdinal{});
         if (theLength < 32) {
@@ -997,6 +1054,7 @@ namespace i960 {
     /// @todo correctly implement shri and shrdi
     void
     Core::shri(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto src = extractValue(src2, TreatAsInteger{});
         auto len = abs(extractValue(src1, TreatAsInteger{}));
         if (len > 32) {
@@ -1007,6 +1065,7 @@ namespace i960 {
 
     void
     Core::shrdi(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto src = extractValue(src2, TreatAsInteger{});
         auto len = abs(extractValue(src1, TreatAsInteger{}));
         auto result = src >> len;
@@ -1017,115 +1076,139 @@ namespace i960 {
     }
     void
     Core::rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         auto len = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         getRegister(dest).setOrdinal(rotateOperation(src, len));
     }
     void
     Core::logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(
                 extractValue(src2, TreatAsOrdinal{}) &
                 extractValue(src1, TreatAsOrdinal{}));
     }
     void
     Core::andnot(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(
                 (extractValue(src2, TreatAsOrdinal{})) &
                 (~extractValue(src1, TreatAsOrdinal{})));
     }
     void
     Core::logicalNand(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | (~extractValue(src1, TreatAsOrdinal{})));
     }
 
     void
     Core::logicalNor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{})));
     }
 
     void
     Core::logicalNot(RegLit src, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(~extractValue(src, TreatAsOrdinal{}));
     }
     void
     Core::notand(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & extractValue(src1, TreatAsOrdinal{}));
     }
     void
     Core::notor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | extractValue(src1, TreatAsOrdinal{}));
     }
     void
     Core::logicalOr(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | extractValue(src1, TreatAsOrdinal{}));
     }
     void
     Core::ornot(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) | (~extractValue(src1, TreatAsOrdinal{})));
     }
     void
     Core::logicalXor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{}));
     }
     void
     Core::logicalXnor(RegLit src1, RegLit src2, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(~(extractValue(src2, TreatAsOrdinal{}) ^ extractValue(src1, TreatAsOrdinal{})));
     }
     void
     Core::lda(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(mem);
     }
     void
     Core::ld(Ordinal address, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(loadOrdinal(address));
     }
     void
     Core::ldob(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setByteOrdinal(loadByteOrdinal(mem));
     }
 
     void
     Core::ldos(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setShortOrdinal(loadShortOrdinal(mem));
     }
 
     void
     Core::ldib(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setByteInteger(loadByteInteger(mem));
     }
 
     void
     Core::ldis(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setShortInteger(loadShortInteger(mem));
     }
 
     void
     Core::st(RegisterIndex src, Ordinal dest) {
+        AnInstruction;
         storeOrdinal(dest, getRegister(src).getOrdinal());
     }
 
     void
     Core::stob(RegisterIndex src, Ordinal dest) {
+        AnInstruction;
         storeByteOrdinal(dest, getRegister(src).getByteOrdinal());
     }
 
     void
     Core::stib(RegisterIndex src, Ordinal dest) {
+        AnInstruction;
         storeByteInteger(dest, getRegister(src).getByteInteger());
     }
 
     void
     Core::stis(RegisterIndex src, Ordinal dest) {
+        AnInstruction;
         storeShortInteger(dest, getRegister(src).getShortInteger());
     }
 
     void
     Core::stos(RegisterIndex src, Ordinal dest) {
+        AnInstruction;
         storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
     }
 
     void
     Core::stl(RegisterIndex src, Ordinal address) {
+        AnInstruction;
         if (!divisibleByTwo(src)) {
             /// @todo raise a operation.invalid_operand fault
             raiseFault();
@@ -1140,6 +1223,7 @@ namespace i960 {
     }
     void
     Core::stt(RegisterIndex src, Ordinal address) {
+        AnInstruction;
         if (!divisibleByFour(src)) {
             /// @todo raise a operation.invalid_operand fault
             raiseFault();
@@ -1156,6 +1240,7 @@ namespace i960 {
 
     void
     Core::stq(RegisterIndex src, Ordinal address) {
+        AnInstruction;
         if (!divisibleByFour(src)) {
             raiseFault();
             /// @todo raise a operation.invalid_operand fault
@@ -1173,6 +1258,7 @@ namespace i960 {
 
     void
     Core::ldl(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         if (!divisibleByTwo(dest)) {
             /// @todo raise invalid_operand fault
             // the Hx docs state that dest is modified
@@ -1189,6 +1275,7 @@ namespace i960 {
     }
     void
     Core::ldt(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         if (!divisibleByFour(dest)) {
             /// @todo raise invalid_operand fault
             // the Hx docs state that dest is modified
@@ -1206,6 +1293,7 @@ namespace i960 {
     }
     void
     Core::ldq(Ordinal mem, RegisterIndex dest) {
+        AnInstruction;
         if (!divisibleByFour(dest)) {
             /// @todo raise invalid_operand fault
             // the Hx docs state that dest is modified
@@ -1225,10 +1313,12 @@ namespace i960 {
 
     void
     Core::mov(RegLit src, RegisterIndex dest) {
+        AnInstruction;
         getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
     }
     void
     Core::movl(RegLit src, RegisterIndex dest) {
+        AnInstruction;
         // so this is a bit of a hack but according to the i960Hx manual only the least significant register gets the literal
         if (!divisibleByTwo(dest) || (isRegisterIndex(src) && !divisibleByTwo(std::get<RegisterIndex>(src)))) {
             getRegister(dest).setInteger(-1);
@@ -1242,6 +1332,7 @@ namespace i960 {
     }
     void
     Core::movt(RegLit src, RegisterIndex dest) {
+        AnInstruction;
         if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
             getRegister(dest).setInteger(-1);
             getRegister(nextRegisterIndex(dest)).setInteger(-1);
@@ -1256,6 +1347,7 @@ namespace i960 {
     }
     void
     Core::movq(RegLit src, RegisterIndex dest) {
+        AnInstruction;
         if (!divisibleByFour(dest) || (isRegisterIndex(src) && !divisibleByFour(std::get<RegisterIndex>(src)))) {
             getRegister(dest).setInteger(-1);
             getRegister(nextRegisterIndex(dest)).setInteger(-1);

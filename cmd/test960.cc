@@ -107,7 +107,6 @@ namespace i960 {
         void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
             CellTarget cell(address);
             theMemorySpace[cell.getSectionId()][cell.getCellId()].ord = value;
-            std::cout << "Storing to: " << std::hex << address << std::endl;
             if (address == 0xFFFF0100) {
                 if (value != 0) {
                     std::cout << "LED ON" << std::endl;
@@ -554,7 +553,7 @@ namespace i960 {
         if (r6.getOrdinal() != 0) {
             std::cout << "\tAssertion Failed on r6!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
         }
-        for (int i = 0; i < 32768; ++i) {
+        for (int i = 0; i < 256; ++i) {
             // run 256 cycles
             testCore.cycle();
         }
