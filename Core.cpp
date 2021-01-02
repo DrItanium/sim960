@@ -9,8 +9,9 @@
 #include <iostream>
 #include <string>
 namespace i960 {
-    void displayInstruction(Ordinal address, const std::string& name) {
-        std::cout << "Executing: " << name << " @ 0x" << std::hex << address << std::endl;
+    void
+    displayInstruction(Ordinal address, const std::string& name) {
+        std::cout << "\t\tExecuting: " << name << " @ 0x" << std::hex << address << std::endl;
     }
 #define AnInstruction displayInstruction(ip.getOrdinal(), __PRETTY_FUNCTION__)
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
@@ -297,6 +298,7 @@ namespace i960 {
             case 0x900: ld(address, inst.getSrcDest()); break;
             case 0x920: st(inst.getSrcDest(), address); break;
             case 0x980: ldl(address, inst.getSrcDest()); break;
+            case 0x9A0: stl(inst.getSrcDest(), address); break;
             case 0xA00: ldt(address, inst.getSrcDest()); break;
             case 0xA20: stt(inst.getSrcDest(), address); break;
             case 0xB00: ldq(address, inst.getSrcDest()); break;
@@ -1488,3 +1490,4 @@ namespace i960 {
         getInterfaceUnit(address).store(address, value, TreatAsShortInteger{});
     }
 }
+#undef AnInstruction
