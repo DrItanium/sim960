@@ -309,6 +309,12 @@ namespace i960
 
     public:
         void nextInstruction();
+        /**
+         * @brief Set ip to the nearest word aligned address
+         * @param address Where ip should be, it is word aligned internally
+         */
+        void setIP(Address address) noexcept { ip.setOrdinal(address & (~0b11)); }
+        void setSP(Address address) noexcept;
     private:
         void badInstruction(DecodedInstruction inst);
         [[nodiscard]] Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;

@@ -399,12 +399,21 @@ namespace i960 {
         auto address = getFramePointer().getOrdinal();
         // okay, we have to save all of the registers to the stack or the on board
         // register cache (however, I'm not implementing that yet)
+        for (const auto& c : locals) {
+            storeOrdinal(address, c.getOrdinal());
+            address +=4;
+        }
+
     }
     void
     Core::restoreRegisterSet() noexcept {
         auto address = getFramePointer().getOrdinal();
         // restore the local register frame, generally done when you return from a
         // previous function
+        for (auto & r : locals) {
+            r.setOrdinal(loadOrdinal(address));
+            address += 4;
+        }
     }
 
     void
@@ -642,6 +651,10 @@ namespace i960 {
         pfp.setRawValue(fp.getOrdinal());
         fp.setOrdinal(tmp);
         sp.setOrdinal(tmp + 64);
+    }
+    void
+    Core::setSP(Address address) noexcept {
+        getStackPointer().setOrdinal(address);
     }
     void
     Core::call(Displacement22 targ) {
