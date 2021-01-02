@@ -372,6 +372,27 @@ namespace i960 {
         std::cout << std::endl;
         /// @todo check the frame pointers and such at some point in the future
     }
+    void installOrdinal(Address at, Ordinal value) {
+        auto outerId = (at & 0xFF000000) >> 24;
+        auto innerId = at & 0x00FF'FFFF;
+        theMemorySpace[outerId][innerId].ord = value;
+    }
+    void installProgram(Address startingAddress, const std::vector<Ordinal>& instructions) {
+        auto index = startingAddress;
+        for (auto i : instructions) {
+            installOrdinal(index, i);
+            ++index;
+        }
+    }
+    template<typename First>
+    void installProgramFragments(Address startingAddress, First value) noexcept {
+        installOrdinal(startingAddress, value);
+    }
+    template<typename First, typename ... Args>
+    void installProgramFragments(Address startingAddress, First value, Args... values) noexcept {
+        installOrdinal(startingAddress, value);
+        installProgramFragments(startingAddress+1, values...);
+    }
     void
     testProperCycle() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
@@ -380,10 +401,12 @@ namespace i960 {
         i960::Core testCore(tbiu, 0,4);
         testCore.post();
         // setup instructions
-        theMemorySpace[0][0].ord = 0x8c20'3000;
-        theMemorySpace[0][1].ord = 0x0000'fded;
-        theMemorySpace[0][2].ord = 0x5c28'1e02;
-        theMemorySpace[0][3].ord = 0x5931'4004; // addo r4,r5,r6
+        installProgramFragments(0, 0x8c20'3000,
+                       0x0000'fded,
+                       0x5c28'1e02,
+                       0x5931'4004 // addo r4,r5,r6
+        );
+
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
         auto l5 = static_cast<i960::RegisterIndex>(5);
