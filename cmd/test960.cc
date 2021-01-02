@@ -107,14 +107,54 @@ namespace i960 {
         void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
             CellTarget cell(address);
             theMemorySpace[cell.getSectionId()][cell.getCellId()].ord = value;
+            std::cout << "Storing to: " << std::hex << address << std::endl;
+            if (address == 0xFFFF0100) {
+                if (value != 0) {
+                    std::cout << "LED ON" << std::endl;
+                } else {
+                    std::cout << "LED OFF" << std::endl;
+                }
+            }
         }
         void store(Address address, Integer value, TreatAsInteger integer) override {
             CellTarget cell(address);
             theMemorySpace[cell.getSectionId()][cell.getCellId()].ival = value;
+            if (address == 0xFFFF0100) {
+                if (value != 0) {
+                    std::cout << "LED ON" << std::endl;
+                } else {
+                    std::cout << "LED OFF" << std::endl;
+                }
+            }
         }
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
 
+    void
+    installOrdinal(Address at, Ordinal value) {
+        auto outerId = (at & 0xFF000000) >> 24;
+        auto innerId = at & 0x00FF'FFFF;
+        theMemorySpace[outerId][innerId].ord = value;
+    }
+    void
+    installProgram(Address startingAddress, const std::vector<Ordinal>& instructions) {
+        auto index = startingAddress;
+        for (auto i : instructions) {
+            installOrdinal(index, i);
+            ++index;
+        }
+    }
+    template<typename First>
+    void
+    installProgramFragments(Address startingAddress, First value) noexcept {
+        installOrdinal(startingAddress, value);
+    }
+    template<typename First, typename ... Args>
+    void
+    installProgramFragments(Address startingAddress, First value, Args... values) noexcept {
+        installOrdinal(startingAddress, value);
+        installProgramFragments(startingAddress+1, values...);
+    }
 
     void
     Core::badInstruction(DecodedInstruction inst) {
@@ -372,27 +412,6 @@ namespace i960 {
         std::cout << std::endl;
         /// @todo check the frame pointers and such at some point in the future
     }
-    void installOrdinal(Address at, Ordinal value) {
-        auto outerId = (at & 0xFF000000) >> 24;
-        auto innerId = at & 0x00FF'FFFF;
-        theMemorySpace[outerId][innerId].ord = value;
-    }
-    void installProgram(Address startingAddress, const std::vector<Ordinal>& instructions) {
-        auto index = startingAddress;
-        for (auto i : instructions) {
-            installOrdinal(index, i);
-            ++index;
-        }
-    }
-    template<typename First>
-    void installProgramFragments(Address startingAddress, First value) noexcept {
-        installOrdinal(startingAddress, value);
-    }
-    template<typename First, typename ... Args>
-    void installProgramFragments(Address startingAddress, First value, Args... values) noexcept {
-        installOrdinal(startingAddress, value);
-        installProgramFragments(startingAddress+1, values...);
-    }
     void
     testProperCycle() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
@@ -445,69 +464,101 @@ namespace i960 {
         }
         std::cout << std::endl;
     }
-    constexpr Ordinal simpleProgram[] {
-            0x8cf03000, 0x00000010, // lda 10 <Li960R1>, g14
-            0x5c88161e,  // mov g14, g1
-            0x5cf01e00,  // mov 0, g14
-            0x0a000000,  // ret
-            0x00000000, 0x00000000, 0x00000000,
+    void
+    testSimpleProgram() {
+        std::cout << __PRETTY_FUNCTION__  << std::endl;
+        // make sure that each instruction operates as expected
+        TestBusInterfaceUnit tbiu;
+        i960::Core testCore(tbiu, 0,4);
+        testCore.post();
+        // setup instructions
+        installProgramFragments(0,
+                0x8cf03000, 0x00000010, // lda 10 <Li960R1>, g14
+                0x5c88161e,  // mov g14, g1
+                0x5cf01e00,  // mov 0, g14
+                0x0a000000,  // ret
+                0x00000000, 0x00000000, 0x00000000,
 //
-            0x8ca03000, 0x00ffffff, // lda ffffff, g4
-            0x58a50090, // and g0, g4, g4
-            0x8c803000, 0xff000000, // lda ff000000, g0
-            0x58840394, // or g4, g0, g0
-            0x86003000, 0x00000000, // callx 0
-            0x0a000000,  // ret
-            0x00000000, 0x00000000, 0x00000000,
+                0x8ca03000, 0x00ffffff, // lda ffffff, g4
+                0x58a50090, // and g0, g4, g4
+                0x8c803000, 0xff000000, // lda ff000000, g0
+                0x58840394, // or g4, g0, g0
+                0x86003000, 0x00000000, // callx 0
+                0x0a000000,  // ret
+                0x00000000, 0x00000000, 0x00000000,
 //
-            0x59840e10, // shlo 16, g0, g0
-            0x8ca03000, 0x00ff0000, // lda ff0000, g4
-            0x59840c10, // shro 16, g0, g0
-            0x58840394, // or g4, g0, g0
-            0x86003000, 0x00000020, // callx 20
-            0x0a000000,  // ret
+                0x59840e10, // shlo 16, g0, g0
+                0x8ca03000, 0x00ff0000, // lda ff0000, g4
+                0x59840c10, // shro 16, g0, g0
+                0x58840394, // or g4, g0, g0
+                0x86003000, 0x00000020, // callx 20
+                0x0a000000,  // ret
 //
-            0x8cf03000, 0x00000094, // lda 94, g14
-            0x5c88161e, // mov g14, g1
-            0x5cf01e00, // mov 0, g14
-            0x5ca01e00, // mov 0, g4
-            0x3685000c, // cmpoble g0,g4,90
-            0x59a05014, // addo g4,1,g4
-            0x08fffff8, // b 84
-            0x84045000, // bx (g1)
-            0x0a000000,  // ret
-            0x00000000, 0x00000000,
+                0x8cf03000, 0x00000094, // lda 94, g14
+                0x5c88161e, // mov g14, g1
+                0x5cf01e00, // mov 0, g14
+                0x5ca01e00, // mov 0, g4
+                0x3685000c, // cmpoble g0,g4,90
+                0x59a05014, // addo g4,1,g4
+                0x08fffff8, // b 84
+                0x84045000, // bx (g1)
+                0x0a000000,  // ret
+                0x00000000, 0x00000000,
 //
-            0x8c800104, // lda 0x104, g0
-            0x86003000, 0x00000050, // callx 50
-            0x90841000, // ld (g0), g0
-            0x84003000, 0x00000070, // bx 70
-            0x0a000000,  // ret
-            0x00000000,  // .word 0
-            //
-            0x5c201610, // mov g0, r4
-            0x59210e18, // shlo 24, r4, r4
-            0x58801988, // setbit 8,0,g0
-            0x59205404, // shro r4,1,r4
-            0x86003000, 0x00000050, // callx 50
-            0x59210901, // subo 1, r4, r4
-            0x92241000, // st r4, (g0)
-            0x0a000000,  // ret
-            0x00000000, 0x00000000, 0x00000000,
-            //
-            0x5c801e01, // mov 1, g0
-            0x86003000, 0x000000c0, // callx c0
-            0x86003000, 0x000000a0, // callx a0
-            0x5c801e00, // mov 0, g0
-            0x86003000, 0x000000c0, // callx c0
-            0x86003000, 0x000000a0, // callx a0
-            0x08ffffd8, // b f0
-            0x00000000, // .word 0
-            // start point
-            0x84003000, 0x000000f0, // bx f0
-            0x0a000000,  // ret
-            0x00000000,  // .word 0
-    };
+                0x8c800104, // lda 0x104, g0
+                0x86003000, 0x00000050, // callx 50
+                0x90841000, // ld (g0), g0
+                0x84003000, 0x00000070, // bx 70
+                0x0a000000,  // ret
+                0x00000000,  // .word 0
+                //
+                0x5c201610, // mov g0, r4
+                0x59210e18, // shlo 24, r4, r4
+                0x58801988, // setbit 8,0,g0
+                0x59205404, // shro r4,1,r4
+                0x86003000, 0x00000050, // callx 50
+                0x59210901, // subo 1, r4, r4
+                0x92241000, // st r4, (g0)
+                0x0a000000,  // ret
+                0x00000000, 0x00000000, 0x00000000,
+                //
+                0x5c801e01, // mov 1, g0
+                0x86003000, 0x000000c0, // callx c0
+                0x86003000, 0x000000a0, // callx a0
+                0x5c801e00, // mov 0, g0
+                0x86003000, 0x000000c0, // callx c0
+                0x86003000, 0x000000a0, // callx a0
+                0x08ffffd8, // b f0
+                0x00000000, // .word 0
+                // start point
+                0x84003000, 0x000000f0, // bx f0
+                0x0a000000,  // ret
+                0x00000000  // .word 0
+        );
+        // this simple program assumes that we start at 0x120
+        testCore.setIP(0x120);
+        testCore.setSP(0x0100'0000); // hack the stack pointer to another location in memory
+        // double check that registers are clear at this point
+        auto l4 = static_cast<i960::RegisterIndex>(4);
+        auto l5 = static_cast<i960::RegisterIndex>(5);
+        auto l6 = static_cast<i960::RegisterIndex>(6);
+        auto& r4 = testCore.getRegister(l4);
+        if (r4.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r4!, got " << std::hex << r4.getOrdinal() << " instead!" << std::endl;
+        }
+        auto& r5 = testCore.getRegister(l5);
+        if (r5.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r5!, got " << std::hex << r5.getOrdinal() << " instead!" << std::endl;
+        }
+        auto& r6 = testCore.getRegister(l6);
+        if (r6.getOrdinal() != 0) {
+            std::cout << "\tAssertion Failed on r6!, got " << std::hex << r6.getOrdinal() << " instead!" << std::endl;
+        }
+        for (int i = 0; i < 32768; ++i) {
+            // run 256 cycles
+            testCore.cycle();
+        }
+    }
 }
 
 
@@ -525,5 +576,6 @@ int main() {
     i960::testCall();
     i960::testBal();
     i960::testProperCycle();
+    i960::testSimpleProgram();
     return 0;
 }
