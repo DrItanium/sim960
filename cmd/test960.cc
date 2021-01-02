@@ -157,16 +157,16 @@ namespace i960 {
 
     void
     Core::badInstruction(DecodedInstruction inst) {
-        std::cerr << "BAD INSTRUCTION!" << std::endl;
+        std::cerr << "BAD INSTRUCTION @ 0x" << ip.getOrdinal()  << std::endl;
         std::visit([](auto &&value) {
             using K = std::decay_t<decltype(value)>;
-            std::cerr << "Instruction opcode: 0x";
+            std::cerr << "\tInstruction opcode: 0x";
             if constexpr (std::is_same_v<K, MEMFormatInstruction>) {
                 std::cerr << std::hex << value.upperHalf();
             }
             std::cerr << std::hex << value.lowerHalf() << std::endl;
             if (auto name = value.decodeName(); !name.empty()) {
-                std::cerr << "Name: " << name << std::endl;
+                std::cerr << "\tName: " << name << std::endl;
             }
         }, inst);
         raiseFault();
@@ -536,7 +536,7 @@ namespace i960 {
         );
         // this simple program assumes that we start at 0x120
         testCore.setIP(0x120);
-        testCore.setSP(0x0100'0000); // hack the stack pointer to another location in memory
+        testCore.setFrameStart(0x0100'0000);
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
         auto l5 = static_cast<i960::RegisterIndex>(5);

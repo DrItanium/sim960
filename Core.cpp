@@ -669,13 +669,10 @@ namespace i960 {
         saveRegisterSet();
         allocateNewLocalRegisterSet();
         ip.setOrdinal(targ);
+        std::cout << "\t\t\tJumping to: 0x" << std::hex << targ << std::endl;
         pfp.setRawValue(fp.getOrdinal());
         fp.setOrdinal(tmp);
         sp.setOrdinal(tmp + 64);
-    }
-    void
-    Core::setSP(Address address) noexcept {
-        getStackPointer().setOrdinal(address);
     }
     void
     Core::call(Displacement22 targ) {

@@ -314,7 +314,9 @@ namespace i960
          * @param address Where ip should be, it is word aligned internally
          */
         void setIP(Address address) noexcept { ip.setOrdinal(address & (~0b11)); }
-        void setSP(Address address) noexcept;
+        void setSP(Address address) noexcept { getStackPointer().setOrdinal(address); }
+        void setFP(Address address) noexcept { getFramePointer().setOrdinal(address); }
+        void setFrameStart(Address address) noexcept { setFP(address); setSP(address + 64); }
     private:
         void badInstruction(DecodedInstruction inst);
         [[nodiscard]] Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
