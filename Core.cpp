@@ -15,11 +15,11 @@ namespace i960 {
     }
 #define AnInstruction displayInstruction(ip.getOrdinal(), __PRETTY_FUNCTION__)
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
-    constexpr RegisterIndex PFP = static_cast<RegisterIndex>(0b00000);
-    constexpr RegisterIndex SP = static_cast<RegisterIndex>(0b00001);
-    constexpr RegisterIndex RIP = static_cast<RegisterIndex>(0b00010);
-    constexpr RegisterIndex g0 = static_cast<RegisterIndex>(0b10000);
-    constexpr RegisterIndex FP = static_cast<RegisterIndex>(0b11111);
+    constexpr RegisterIndex PFP = LocalRegister[0];
+    constexpr RegisterIndex SP = LocalRegister[1];
+    constexpr RegisterIndex RIP = LocalRegister[2];
+    constexpr RegisterIndex g0 = GlobalRegister[0];
+    constexpr RegisterIndex FP = GlobalRegister[15];
     Core::DecodedInstruction
     Core::decode(Ordinal lower, Ordinal upper) noexcept {
         if (auto opcode = static_cast<ByteOrdinal>(lower >> 24); opcode < 0x20) {
@@ -440,13 +440,9 @@ namespace i960 {
     Core::raiseFault() {
         /// @todo implement
     }
-    constexpr bool isGlobalRegister(uint8_t value) noexcept {
-        return (value & 0b10000) != 0;
-    }
     Register &
     Core::getRegister(RegisterIndex index) noexcept {
-        auto ival = toInteger(index);
-        if (auto offset = ival & 0b1111; isGlobalRegister(ival)) {
+        if (auto offset = getOffset(index); isGlobalRegister(index)) {
             return globals[offset];
         } else {
             return locals[offset];
@@ -454,8 +450,7 @@ namespace i960 {
     }
     const Register &
     Core::getRegister(RegisterIndex index) const noexcept {
-        auto ival = toInteger(index);
-        if (auto offset = ival & 0b1111; isGlobalRegister(ival)) {
+        if (auto offset = getOffset(index); isGlobalRegister(index)) {
             return globals[offset];
         } else {
             return locals[offset];

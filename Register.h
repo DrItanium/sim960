@@ -27,6 +27,42 @@ namespace i960 {
      * @brief A register index
      */
     enum class RegisterIndex : uint8_t { };
+    constexpr RegisterIndex GlobalRegister[] {
+        static_cast<RegisterIndex>(0b10000),
+        static_cast<RegisterIndex>(0b10001),
+        static_cast<RegisterIndex>(0b10010),
+        static_cast<RegisterIndex>(0b10011),
+        static_cast<RegisterIndex>(0b10100),
+        static_cast<RegisterIndex>(0b10101),
+        static_cast<RegisterIndex>(0b10110),
+        static_cast<RegisterIndex>(0b10111),
+        static_cast<RegisterIndex>(0b11000),
+        static_cast<RegisterIndex>(0b11001),
+        static_cast<RegisterIndex>(0b11010),
+        static_cast<RegisterIndex>(0b11011),
+        static_cast<RegisterIndex>(0b11100),
+        static_cast<RegisterIndex>(0b11101),
+        static_cast<RegisterIndex>(0b11110),
+        static_cast<RegisterIndex>(0b11111),
+    };
+    constexpr RegisterIndex LocalRegister[] {
+            static_cast<RegisterIndex>(0b00000),
+            static_cast<RegisterIndex>(0b00001),
+            static_cast<RegisterIndex>(0b00010),
+            static_cast<RegisterIndex>(0b00011),
+            static_cast<RegisterIndex>(0b00100),
+            static_cast<RegisterIndex>(0b00101),
+            static_cast<RegisterIndex>(0b00110),
+            static_cast<RegisterIndex>(0b00111),
+            static_cast<RegisterIndex>(0b01000),
+            static_cast<RegisterIndex>(0b01001),
+            static_cast<RegisterIndex>(0b01010),
+            static_cast<RegisterIndex>(0b01011),
+            static_cast<RegisterIndex>(0b01100),
+            static_cast<RegisterIndex>(0b01101),
+            static_cast<RegisterIndex>(0b01110),
+            static_cast<RegisterIndex>(0b01111),
+    };
     constexpr std::underlying_type_t<RegisterIndex> toInteger(RegisterIndex value) noexcept {
         auto converted = static_cast<std::underlying_type_t<RegisterIndex>>(value);
         // from 0..31 so chop the values
@@ -42,6 +78,14 @@ namespace i960 {
     }
     constexpr bool divisibleByTwo(RegisterIndex value) noexcept { return (toInteger(value) & 0b1) == 0; }
     constexpr bool divisibleByFour(RegisterIndex value) noexcept { return (toInteger(value) & 0b11) == 0; }
+    constexpr bool isGlobalRegister(RegisterIndex value) noexcept { return (toInteger(value) & 0b10000) != 0; }
+    constexpr bool isLocalRegister(RegisterIndex value) noexcept { return (toInteger(value) & 0b10000) == 0; }
+    /**
+     * @brief Return the lower four bits as an offset into the register group
+     * @param value The register index unmodified
+     * @return The offset into the local or global set
+     */
+    constexpr std::underlying_type_t<RegisterIndex> getOffset(RegisterIndex value)  noexcept { return toInteger(value) & 0b1111; }
 
     class Displacement22 {
     public:
