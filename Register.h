@@ -94,20 +94,6 @@ namespace i960 {
     private:
         int32_t value : 22;
     };
-    class AbsoluteOffset {
-    public:
-        constexpr AbsoluteOffset(int32_t offset) noexcept : value(offset) { }
-        constexpr auto getValue() const noexcept { return value; }
-    private:
-        int32_t value;
-    };
-    class RegisterIndirect {
-    public:
-        constexpr RegisterIndirect(RegisterIndex abase) noexcept : idx(abase) { }
-        constexpr auto getAbase() const noexcept { return idx; }
-    private:
-        RegisterIndex idx;
-    };
     /// @todo add classes to describe the other memory modes
     using RegLit = std::variant<RegisterIndex, Literal>;
     constexpr bool isRegisterIndex(RegLit value) noexcept { return std::holds_alternative<RegisterIndex>(value); }
