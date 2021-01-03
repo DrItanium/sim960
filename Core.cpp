@@ -82,31 +82,31 @@ namespace i960 {
             // this is a little different than normal
             auto denominator = extractValue(src1, TreatAsOrdinal{});
             if (!divisibleByTwo(dest)) {
-                getRegister(dest).setOrdinal(-1);
-                getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
+                setRegister(dest, -1, TreatAsOrdinal{});
+                setRegister(nextRegisterIndex(dest), -1, TreatAsOrdinal{});
                 raiseFault(); // OPERATION.INVALID_OPERAND
             } else if (denominator == 0) {
-                getRegister(dest).setOrdinal(-1);
-                getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
+                setRegister(dest, -1, TreatAsOrdinal{});
+                setRegister(nextRegisterIndex(dest), -1, TreatAsOrdinal{});
                 raiseFault(); // ARITHMETIC.DIVIDE_ZERO
             } else {
                 auto numerator = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
                 auto quotient = numerator / denominator;
                 auto remainder = numerator - (numerator / denominator) * denominator;
-                getRegister(nextRegisterIndex(dest)).setOrdinal(quotient);
-                getRegister(dest).setOrdinal(remainder);
+                setRegister(nextRegisterIndex(dest), quotient, TreatAsOrdinal{});
+                setRegister(dest, remainder, TreatAsOrdinal{});
             }
         } else {
             // okay we are holding onto a RegisterIndex in src2
             auto s2ri = std::get<RegisterIndex>(src2);
             auto denominator = extractValue(src1, TreatAsOrdinal{});
             if (!divisibleByTwo(s2ri) || !divisibleByTwo(dest)) {
-                getRegister(dest).setOrdinal(-1);
-                getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
+                setRegister(dest, -1, TreatAsOrdinal{});
+                setRegister(nextRegisterIndex(dest), -1, TreatAsOrdinal{});
                 raiseFault(); // OPERATION.INVALID_OPERAND
             } else if (denominator == 0) {
-                getRegister(dest).setOrdinal(-1);
-                getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
+                setRegister(dest, -1, TreatAsOrdinal{});
+                setRegister(nextRegisterIndex(dest), -1, TreatAsOrdinal{});
                 raiseFault(); // ARITHMETIC.DIVIDE_ZERO
             } else {
                 LongRegister tmp(getRegister(s2ri),
@@ -114,8 +114,8 @@ namespace i960 {
                 auto numerator = tmp.getOrdinal();
                 auto quotient = numerator / denominator;
                 auto remainder = numerator - (numerator / denominator) * denominator;
-                getRegister(nextRegisterIndex(dest)).setOrdinal(quotient);
-                getRegister(dest).setOrdinal(remainder);
+                setRegister(nextRegisterIndex(dest), quotient, TreatAsOrdinal{});
+                setRegister(dest, remainder, TreatAsOrdinal{});
             }
         }
     }
@@ -124,15 +124,15 @@ namespace i960 {
     Core::emul(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
         if (!divisibleByTwo(dest)) {
-            getRegister(dest).setOrdinal(-1);
-            getRegister(nextRegisterIndex(dest)).setOrdinal(-1);
+            setRegister(dest, -1, TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), -1, TreatAsOrdinal{});
             raiseFault(); // OPERATION.INVALID_OPERAND
         } else {
             auto s1 = static_cast<LongOrdinal>(extractValue(src1, TreatAsOrdinal{}));
             auto s2 = static_cast<LongOrdinal>(extractValue(src2, TreatAsOrdinal{}));
             auto result = s1 * s2;
-            getRegister(dest).setOrdinal(result);
-            getRegister(nextRegisterIndex(dest)).setOrdinal(static_cast<Ordinal>(result >> 32));
+            setRegister(dest, result, TreatAsOrdinal {});
+            setRegister(nextRegisterIndex(dest), static_cast<Ordinal>(result >> 32), TreatAsOrdinal {});
         }
     }
     void
@@ -486,7 +486,7 @@ namespace i960 {
         // transfer bits over
         auto outcome = (s2.getOrdinal() - s1.getOrdinal() - 1 + (getCarryFlag() ? 1 : 0)) & 0xF;
         setCarryFlag(outcome != 0);
-        getRegister(dest).setOrdinal((s2.getOrdinal() & (~0xF)) | (outcome & 0xF));
+        setRegister(dest, (s2.getOrdinal() & (~0xF)) | (outcome & 0xF), TreatAsOrdinal {});
     }
     void
     Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
@@ -554,7 +554,7 @@ namespace i960 {
         auto dest = forceIntoRegisterIndex(inst.getSrc1());
         auto mask = extractValue(inst.getSrcDest(), TreatAsOrdinal{});
         auto src = extractValue(inst.getSrc2(), TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(tc.modify(mask, src));
+        setRegister(dest, tc.modify(mask, src), TreatAsOrdinal{});
     }
     void
     Core::modpc(const RegFormatInstruction &inst) {
@@ -564,7 +564,7 @@ namespace i960 {
         auto dest = forceIntoRegisterIndex(inst.getSrc1());
         auto tmp = pc.getRawValue();
         pc.setRawValue((src & mask) | (tmp & (~mask)));
-        getRegister(dest).setOrdinal(tmp);
+        setRegister(dest, tmp, TreatAsOrdinal{});
     }
     void
     Core::modac(const RegFormatInstruction &inst) {
@@ -577,7 +577,7 @@ namespace i960 {
         auto dest = forceIntoRegisterIndex(inst.getSrc1());
         auto tmp = ac.getRawValue();
         ac.setRawValue((src & mask) | (tmp & (~mask)));
-        getRegister(dest).setOrdinal(tmp);
+        setRegister(dest, tmp, TreatAsOrdinal{});
     }
     Ordinal
     Core::getSystemProcedureEntry(Ordinal targ) noexcept {
@@ -823,7 +823,7 @@ namespace i960 {
         AnInstruction;
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
+        setRegister(dest, src | (1 << (bitpos & 0b11111)), TreatAsOrdinal{});
     }
     void
     Core::clrbit(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -831,14 +831,14 @@ namespace i960 {
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         auto bitposModified = ~(computeSingleBitShiftMask(bitpos));
-        getRegister(dest).setOrdinal(src & bitposModified);
+        setRegister(dest, src & bitposModified, TreatAsOrdinal {});
     }
     void
     Core::notbit(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(src ^ (1 << (bitpos & 0b11111)));
+        setRegister(dest,src ^ (1 << (bitpos & 0b11111)), TreatAsOrdinal {});
     }
 
     void
@@ -847,9 +847,9 @@ namespace i960 {
         auto bitpos = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
         if ((ac.getConditionCode() & 0b010) == 0) {
-            getRegister(dest).setOrdinal(src & (~(1 << (bitpos & 0b11111))));
+            setRegister(dest, src & (~(1 << (bitpos & 0b11111))), TreatAsOrdinal{});
         } else {
-            getRegister(dest).setOrdinal(src | (1 << (bitpos & 0b11111)));
+            setRegister(dest, src | (1 << (bitpos & 0b11111)), TreatAsOrdinal{});
         }
     }
     void
@@ -876,7 +876,7 @@ namespace i960 {
                 }
             }
         }
-        getRegister(dest).setOrdinal(result);
+        setRegister(dest, result, TreatAsOrdinal{});
     }
     void
     Core::scanbit(RegLit src, RegisterIndex dest) {
@@ -897,15 +897,15 @@ namespace i960 {
                 }
             }
         }
-        getRegister(dest).setOrdinal(result);
+        setRegister(dest, result, TreatAsOrdinal{});
     }
     void
     Core::extract(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
         // taken from the i960Hx manual
-        getRegister(dest).setOrdinal(
+        setRegister(dest,
                 (extractValue(dest, TreatAsOrdinal{}) >> std::min(extractValue(src1, TreatAsOrdinal{}), static_cast<Ordinal>(32))) &
-                (~(0xFFFF'FFFF << extractValue(src2, TreatAsOrdinal{}))));
+                (~(0xFFFF'FFFF << extractValue(src2, TreatAsOrdinal{}))), TreatAsOrdinal {});
     }
     void
     Core::modify(RegLit mask, RegLit src, RegisterIndex srcDest) {
@@ -962,7 +962,7 @@ namespace i960 {
     void
     Core::balx(Ordinal targ, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(ip.getOrdinal() + ipIncrement_);
+        setRegister(dest, ip.getOrdinal() + ipIncrement_, TreatAsOrdinal {});
         ip.setOrdinal(targ);
         doNotAdvanceIp();
     }
@@ -975,41 +975,31 @@ namespace i960 {
         auto result = s2 + s1 + c;
         auto upperHalf = static_cast<Ordinal>(result >> 32);
         setCarryFlag(upperHalf != 0);
-        getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
+        setRegister(dest, static_cast<Ordinal>(result), TreatAsOrdinal{});
         /// @todo check for integer overflow condition
     }
     void
     Core::addi(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsInteger{});
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        getRegister(dest).setInteger(s2 + s1);
-        /// @todo implement fault detection
+        addGeneric(src1, src2, dest, TreatAsInteger{});
     }
 
     void
     Core::addo(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        auto& theDest = getRegister(dest);
-        theDest.setOrdinal(s2+s1) ;
+        addGeneric(src1, src2, dest, TreatAsOrdinal{});
         /// @todo implement fault detection
     }
     void
     Core::subi(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsInteger{});
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        getRegister(dest).setInteger(s2 - s1);
+        subGeneric(src1, src2, dest, TreatAsInteger{});
         /// @todo implement fault detection
     }
     void
     Core::subo(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(s2 - s1);
+        subGeneric(src1, src2, dest, TreatAsOrdinal{});
         /// @todo implement fault detection
     }
     void
@@ -1027,48 +1017,36 @@ namespace i960 {
     void
     Core::muli(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsInteger{});
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        getRegister(dest).setInteger(s2 * s1);
+        mulGeneric(src1, src2, dest, TreatAsInteger{});
         /// @todo implement fault detection
     }
     void
     Core::mulo(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(s2 * s1);
+        mulGeneric(src1, src2, dest, TreatAsOrdinal{});
         /// @todo implement fault detection
     }
     void
     Core::divi(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsInteger{});
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        getRegister(dest).setInteger(s2 / s1);
+        divGeneric(src1, src2, dest, TreatAsInteger{});
         /// @todo implement fault detection
     }
     void
     Core::divo(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(s2 / s1);
+        divGeneric(src1, src2, dest, TreatAsOrdinal{});
         /// @todo implement fault detection
     }
     void
     Core::remi(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s2 = extractValue(src2, TreatAsInteger{});
-        auto s1 = extractValue(src1, TreatAsInteger{});
-        getRegister(dest).setInteger(((s2 / s1) * s1));
+        remGeneric(src1, src2, dest, TreatAsInteger{});
     }
     void
     Core::remo(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        auto s2 = extractValue(src2, TreatAsOrdinal{});
-        auto s1 = extractValue(src1, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(((s2 / s1) * s1));
+        remGeneric(src1, src2, dest, TreatAsOrdinal{});
     }
     void
     Core::modi(RegLit src1, RegLit src2, RegisterIndex dest) {

@@ -57,6 +57,10 @@ namespace i960
         [[nodiscard]] const Register& getRegister(RegisterIndex index) const noexcept;
         [[nodiscard]] const Register& getIP() const noexcept { return ip; }
         [[noreturn]] void busTestFailed() noexcept;
+        template<typename Tag>
+        void setRegister(RegisterIndex index, typename Tag::ReturnType rt, Tag) noexcept {
+            getRegister(index).set(rt, Tag{});
+        }
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
         InterfaceUnit& getInterfaceUnit(Address address) noexcept;
         Ordinal loadOrdinal(Address address) noexcept;
@@ -116,6 +120,47 @@ namespace i960
         Integer extractValue(RegLit value, TreatAsInteger) const noexcept;
         RegLit nextValue(RegLit value) const noexcept;
     private: // arithmetic
+        template<typename Tag>
+        void addGeneric(RegLit src1, RegLit src2, RegisterIndex dest, Tag) {
+            auto s1 = extractValue(src1, Tag{});
+            auto s2 = extractValue(src2, Tag{});
+            setRegister(dest, s2 + s1, Tag{});
+            /// @todo implement fault detection
+        }
+        template<typename Tag>
+        void subGeneric(RegLit src1, RegLit src2, RegisterIndex dest, Tag) {
+            auto s1 = extractValue(src1, Tag{});
+            auto s2 = extractValue(src2, Tag{});
+            setRegister(dest, s2 - s1, Tag{});
+            /// @todo implement fault detection
+        }
+        template<typename Tag>
+        void mulGeneric(RegLit src1, RegLit src2, RegisterIndex dest, Tag) {
+            auto s1 = extractValue(src1, Tag{});
+            auto s2 = extractValue(src2, Tag{});
+            setRegister(dest, s2 * s1, Tag{});
+            /// @todo implement fault detection
+        }
+        template<typename Tag>
+        void divGeneric(RegLit src1, RegLit src2, RegisterIndex dest, Tag) {
+            if (auto s1 = extractValue(src1, Tag{}); s1 == 0) {
+                raiseFault(); // Divide by zero
+            } else {
+                auto s2 = extractValue(src2, Tag{});
+                setRegister(dest, s2 / s1, Tag{});
+            }
+            /// @todo implement fault detection
+        }
+        template<typename Tag>
+        void remGeneric(RegLit src1, RegLit src2, RegisterIndex dest, Tag) {
+            if (auto s1 = extractValue(src1, Tag{}); s1 == 0) {
+                raiseFault(); // Divide by zero
+            } else {
+                auto s2 = extractValue(src2, Tag{});
+                setRegister(dest, s2 - ((s2/s1) * s1), Tag{});
+            }
+            /// @todo implement fault detection
+        }
         void addc(RegLit src1, RegLit src2, RegisterIndex dest);
         void addi(RegLit src1, RegLit src2, RegisterIndex dest);
         void addo(RegLit src1, RegLit src2, RegisterIndex dest);
@@ -189,13 +234,13 @@ namespace i960
         void
         compareAndIncrementBase(RegLit src1, RegLit src2, RegisterIndex dest) {
             compareBase<Tag>(src1, src2);
-            getRegister(dest).set(extractValue(src2, Tag{}) + 1, Tag{});
+            setRegister<Tag>(dest, extractValue(src2, Tag{}) + 1, Tag{});
         }
         template<typename Tag>
         void
         compareAndDecrementBase(RegLit src1, RegLit src2, RegisterIndex dest) {
             compareBase<Tag>(src1, src2);
-            getRegister(dest).set(extractValue(src2, Tag{}) - 1, Tag{});
+            setRegister<Tag>(dest, extractValue(src2, Tag{}) - 1, Tag{});
         }
         void cmpo(RegLit src1, RegLit src2);
         void cmpi(RegLit src1, RegLit src2);
@@ -249,7 +294,7 @@ namespace i960
         template<ConditionCodeKind cck>
         void
         testBase(RegisterIndex dest) {
-            getRegister(dest).setOrdinal(ac.conditionIs<cck>() ? 1 : 0);
+            setRegister<TreatAsOrdinal>(dest, ac.conditionIs<cck>() ? 1 : 0, TreatAsOrdinal {});
         }
     private:
         [[nodiscard]] PreviousFramePointer getPFP() noexcept;
@@ -291,10 +336,11 @@ namespace i960
     private: // i960 Hx,Jx extended instructions (partial set)
         template<ConditionCodeKind cck>
         void selectGeneral(RegLit src1, RegLit src2, RegisterIndex dest) noexcept {
+            using T = TreatAsOrdinal;
             if ((ac.conditionIs<cck>()) || (static_cast<ByteOrdinal>(cck) == ac.getConditionCode())) {
-                getRegister(dest).setOrdinal(extractValue(src2, TreatAsOrdinal{}));
+                setRegister<T>(dest, extractValue(src2, T{}), T{});
             } else {
-                getRegister(dest).setOrdinal(extractValue(src1, TreatAsOrdinal{}));
+                setRegister<T>(dest, extractValue(src1, T{}), T{});
             }
         }
         inline void selno(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::Unordered>(src1, src2, dest); }
