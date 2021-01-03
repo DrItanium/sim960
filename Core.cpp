@@ -1221,8 +1221,8 @@ namespace i960 {
             /// @todo raise a operation.invalid_operand fault
             raiseFault();
         } else {
-            storeOrdinal(address, getRegister(src).getOrdinal());
-            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
+            storeOrdinal(address, getRegisterValue(src, TreatAsOrdinal{}));
+            storeOrdinal(address + 4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal {}));
             if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED fault
                 raiseFault();
@@ -1236,9 +1236,9 @@ namespace i960 {
             /// @todo raise a operation.invalid_operand fault
             raiseFault();
         } else {
-            storeOrdinal(address, getRegister(src).getOrdinal());
-            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            storeOrdinal(address, getRegisterValue(src, TreatAsOrdinal{}));
+            storeOrdinal(address+4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
+            storeOrdinal(address+8, getRegisterValue(nextRegisterIndex(nextRegisterIndex(src)), TreatAsOrdinal{}));
             if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1253,10 +1253,10 @@ namespace i960 {
             raiseFault();
             /// @todo raise a operation.invalid_operand fault
         } else {
-            storeOrdinal(address, getRegister(src).getOrdinal());
-            storeOrdinal(address + 4, getRegister(nextRegisterIndex(src)).getOrdinal());
-            storeOrdinal(address + 8, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
-            storeOrdinal(address + 12, getRegister(nextRegisterIndex(nextRegisterIndex(src))).getOrdinal());
+            storeOrdinal(address, getRegisterValue(src, TreatAsOrdinal{}));
+            storeOrdinal(address+4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
+            storeOrdinal(address+8, getRegisterValue(nextRegisterIndex(nextRegisterIndex(src)), TreatAsOrdinal{}));
+            storeOrdinal(address+12, getRegisterValue(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(src))), TreatAsOrdinal{}));
             if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
                 raiseFault();
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
@@ -1270,11 +1270,11 @@ namespace i960 {
         if (!divisibleByTwo(dest)) {
             /// @todo raise invalid_operand fault
             // the Hx docs state that dest is modified
-            getRegister(dest).setOrdinal(-1);
+            setRegister(dest, -1, TreatAsOrdinal{});
             raiseFault();
         } else {
-            getRegister(dest).setOrdinal(loadOrdinal(mem));
-            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem + 4));
+            setRegister(dest, loadOrdinal(mem), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), loadOrdinal(mem+4), TreatAsOrdinal{});
             if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1287,12 +1287,12 @@ namespace i960 {
         if (!divisibleByFour(dest)) {
             /// @todo raise invalid_operand fault
             // the Hx docs state that dest is modified
-            getRegister(dest).setOrdinal(-1);
+            setRegister(dest, -1, TreatAsOrdinal{});
             raiseFault();
         } else {
-            getRegister(dest).setOrdinal(loadOrdinal(mem));
-            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem + 4));
-            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem + 8));
+            setRegister(dest, loadOrdinal(mem), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), loadOrdinal(mem+4), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(nextRegisterIndex(dest)), loadOrdinal(mem+8), TreatAsOrdinal{});
             if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1308,10 +1308,10 @@ namespace i960 {
             getRegister(dest).setOrdinal(-1);
             raiseFault();
         } else {
-            getRegister(dest).setOrdinal(loadOrdinal(mem));
-            getRegister(nextRegisterIndex(dest)).setOrdinal(loadOrdinal(mem + 4));
-            getRegister(nextRegisterIndex(nextRegisterIndex(dest))).setOrdinal(loadOrdinal(mem + 8));
-            getRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest)))).setOrdinal(loadOrdinal(mem + 12));
+            setRegister(dest, loadOrdinal(mem), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), loadOrdinal(mem+4), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(nextRegisterIndex(dest)), loadOrdinal(mem+8), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest))), loadOrdinal(mem+12), TreatAsOrdinal{});
             if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1322,7 +1322,7 @@ namespace i960 {
     void
     Core::mov(RegLit src, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(extractValue(src, TreatAsOrdinal{}));
+        setRegister(dest, extractValue(src, TreatAsOrdinal{}), TreatAsOrdinal{});
     }
     void
     Core::movl(RegLit src, RegisterIndex dest) {
