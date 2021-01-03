@@ -117,20 +117,24 @@ namespace i960 {
         constexpr Register() : ordValue(0) { }
         [[nodiscard]] constexpr Ordinal getOrdinal() const noexcept { return ordValue; }
         [[nodiscard]] constexpr Integer getInteger() const noexcept { return intValue; }
+        [[nodiscard]] constexpr auto getReal() const noexcept { return real; }
         [[nodiscard]] constexpr auto getShortOrdinal(bool upper = false) const noexcept { return shortOrds[upper ? 1 : 0 ]; }
         [[nodiscard]] constexpr auto getShortInteger(bool upper = false) const noexcept { return shortInts[upper ? 1 : 0 ]; }
         [[nodiscard]] constexpr auto getByteOrdinal(int index = 0) const noexcept { return byteOrds[index & 0b11]; }
         [[nodiscard]] constexpr auto getByteInteger(int index = 0) const noexcept { return byteInts[index & 0b11]; }
         void setOrdinal(Ordinal value) noexcept { ordValue = value; }
         void setInteger(Integer value) noexcept { intValue = value; }
+        void setReal(Real value) noexcept { real = value; }
         void setShortOrdinal(ShortOrdinal value, bool upper = false) noexcept { shortOrds[upper ? 1 : 0] = value; }
         void setShortInteger(ShortInteger value, bool upper = false) noexcept { shortInts[upper ? 1 : 0] = value; }
         void setByteOrdinal(ByteOrdinal value, int index = 0) noexcept { byteOrds[index & 0b11] = value; }
         void setByteInteger(ByteInteger value, int index = 0) noexcept { byteInts[index & 0b11] = value; }
         void set(Ordinal value, TreatAsOrdinal) noexcept { setOrdinal(value); }
         void set(Integer value, TreatAsInteger) noexcept { setInteger(value); }
+        void set(Real value, TreatAsReal) noexcept { setReal(value); }
         explicit operator Ordinal() const noexcept { return getOrdinal(); }
         explicit operator Integer() const noexcept { return getInteger(); }
+        explicit operator Real() const noexcept { return getReal(); }
         void increment(Ordinal value) noexcept { ordValue += value; }
     private:
         union {
@@ -140,6 +144,7 @@ namespace i960 {
             ShortInteger shortInts[2];
             ByteOrdinal byteOrds[4];
             ByteInteger byteInts[4];
+            Real real;
         };
     };
     class LongRegister {
