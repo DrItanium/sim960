@@ -984,7 +984,7 @@ namespace i960 {
         auto upperHalf = static_cast<Ordinal>(result >> 32);
         setCarryFlag(upperHalf != 0);
         /// @todo do integer overflow subtraction check
-        getRegister(dest).setOrdinal(static_cast<Ordinal>(result));
+        setRegister(dest, static_cast<Ordinal>(result), TreatAsOrdinal {});
     }
     void
     Core::muli(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -1042,29 +1042,19 @@ namespace i960 {
     Core::shlo(RegLit len, RegLit src, RegisterIndex dest) {
         AnInstruction;
         auto theLength = extractValue(len, TreatAsOrdinal{});
-        auto theSrc = extractValue(src, TreatAsOrdinal{});
-        if (theLength < 32) {
-            getRegister(dest).setOrdinal(theSrc << theLength);
-        } else {
-            getRegister(dest).setOrdinal(0);
-        }
+        setRegister(dest, theLength < 32 ? (extractValue(src, TreatAsOrdinal {})<< theLength) : 0, TreatAsOrdinal{});
     }
     void
     Core::shro(RegLit len, RegLit src, RegisterIndex dest) {
         AnInstruction;
         auto theLength = extractValue(len, TreatAsOrdinal{});
-        auto theSrc = extractValue(src, TreatAsOrdinal{});
-        if (theLength < 32) {
-            getRegister(dest).setOrdinal(theSrc >> theLength);
-        } else {
-            getRegister(dest).setOrdinal(0);
-        }
+        setRegister(dest, theLength < 32 ? (extractValue(src, TreatAsOrdinal {})>> theLength) : 0, TreatAsOrdinal{});
     }
     void
     Core::shli(RegLit len, RegLit src, RegisterIndex dest) {
         auto theLength = extractValue(len, TreatAsInteger{});
         auto theSrc = extractValue(src, TreatAsInteger{});
-        getRegister(dest).setInteger(theSrc << theLength);
+        setRegister(dest, theSrc << theLength, TreatAsInteger{});
     }
     /// @todo correctly implement shri and shrdi
     void
@@ -1075,7 +1065,7 @@ namespace i960 {
         if (len > 32) {
             len = 32;
         }
-        getRegister(dest).setInteger(src >> len);
+        setRegister(dest, src >> len, TreatAsInteger{});
     }
 
     void
@@ -1087,7 +1077,7 @@ namespace i960 {
         if (src < 0 && result < 0) {
             ++result;
         }
-        getRegister(dest).setInteger(result);
+        setRegister(dest, result, TreatAsInteger{});
     }
     void
     Core::rotate(RegLit src1, RegLit src2, RegisterIndex dest) {
