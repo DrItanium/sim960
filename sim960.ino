@@ -164,7 +164,6 @@ namespace i960 {
                 default: return 0;
             }
         }
-        Integer load(Address address, TreatAsInteger integer) override { return 0; }
         void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override { }
         void store(Address address, ByteInteger value, TreatAsByteInteger integer) override { }
         void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override { }
@@ -176,7 +175,6 @@ namespace i960 {
                     break;
             }
         }
-        void store(Address address, Integer value, TreatAsInteger integer) override { }
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
     void
