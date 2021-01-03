@@ -535,7 +535,7 @@ namespace i960 {
         AnInstruction;
         // noop right now
     }
-    RegisterIndex
+    constexpr RegisterIndex
     forceIntoRegisterIndex(RegLit value) noexcept {
         return std::visit([](auto &&value) -> RegisterIndex {
             using K = std::decay_t<decltype(value)>;
