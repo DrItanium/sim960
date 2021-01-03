@@ -470,10 +470,10 @@ namespace i960 {
     const Register &
     Core::getRegister(RegisterIndex index) const noexcept {
         auto ival = toInteger(index);
-        if (auto offset = ival & 0b1111, maskedValue = ival & 0b10000; maskedValue != 0) {
-            return locals[offset];
-        } else {
+        if (auto offset = ival & 0b1111; isGlobalRegister(ival)) {
             return globals[offset];
+        } else {
+            return locals[offset];
         }
     }
     void
@@ -955,7 +955,9 @@ namespace i960 {
     Core::b(Displacement22 targ) {
         AnInstruction;
         // force subtract 4 due to how I do things
-        auto total = ip.getInteger() + targ.getValue() - 4;
+        std::cout << "\t\t\t\tip (as integer): 0x" << std::hex << ip.getInteger() << ", offset: 0x" << targ.getValue() << std::endl;
+        std::cout << "\t\t\t\tip (as ordinal): 0x" << std::hex << ip.getOrdinal() << std::endl;
+        auto total = (ip.getInteger() + targ.getValue()) & (~0b11);
         std::cout << "\t\t\tjumping to 0x" << std::hex << total << std::endl;
         ip.setInteger(total);
     }
