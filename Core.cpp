@@ -730,7 +730,6 @@ namespace i960 {
         saveRegisterSet();
         allocateNewLocalRegisterSet();
         ip.setOrdinal(targ);
-        std::cout << "\t\t\tJumping to: 0x" << std::hex << targ << std::endl;
         pfp.setRawValue(fp.getOrdinal());
         fp.setOrdinal(tmp);
         sp.setOrdinal(tmp + 64);
@@ -947,11 +946,7 @@ namespace i960 {
     Core::b(Displacement22 targ) {
         AnInstruction;
         // force subtract 4 due to how I do things
-        std::cout << "\t\t\t\tip (as integer): 0x" << std::hex << ip.getInteger() << ", offset: 0x" << targ.getValue() << std::endl;
-        std::cout << "\t\t\t\tip (as ordinal): 0x" << std::hex << ip.getOrdinal() << std::endl;
         auto total = (ip.getInteger() + targ.getValue()) & (~0b11);
-        std::cout << "\t\t\tjumping to 0x" << std::hex << (ip.getInteger() + targ.getValue()) << " (partial)" << std::endl;
-        std::cout << "\t\t\tactually jumping to 0x" << std::hex << total << std::endl;
         ip.setInteger(total);
         doNotAdvanceIp();
     }
@@ -1226,7 +1221,6 @@ namespace i960 {
     Core::ld(Ordinal address, RegisterIndex dest) {
         AnInstruction;
         auto result = loadOrdinal(address);
-        std::cout << "Loaded 0x" << std::hex << result << " from address 0x" << std::hex << address << std::endl;
         getRegister(dest).setOrdinal(result);
     }
     void
