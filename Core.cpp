@@ -1003,7 +1003,8 @@ namespace i960 {
         AnInstruction;
         auto s1 = extractValue(src1, TreatAsOrdinal{});
         auto s2 = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(s2 + s1);
+        auto& theDest = getRegister(dest);
+        theDest.setOrdinal(s2+s1) ;
         /// @todo implement fault detection
     }
     void
@@ -1225,7 +1226,9 @@ namespace i960 {
     void
     Core::ld(Ordinal address, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(loadOrdinal(address));
+        auto result = loadOrdinal(address);
+        std::cout << "Loaded 0x" << std::hex << result << " from address 0x" << std::hex << address << std::endl;
+        getRegister(dest).setOrdinal(result);
     }
     void
     Core::ldob(Ordinal mem, RegisterIndex dest) {

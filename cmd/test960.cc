@@ -86,7 +86,8 @@ namespace i960 {
         }
         Ordinal load(Address address, TreatAsOrdinal ordinal) override {
             if (address == 0xFFFF0104) {
-                return 2;
+                std::cout << "Accessing io constant" << std::endl;
+                return 1;
             } else {
                 return loadCell(address).ord;
             }
