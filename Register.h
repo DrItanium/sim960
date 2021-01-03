@@ -7,6 +7,8 @@
 #include <variant>
 #include <string>
 #include "CoreTypes.h"
+#include "DependentFalse.h"
+
 namespace i960 {
     /**
      * @brief A value between 0..31
@@ -118,10 +120,36 @@ namespace i960 {
         void set(Ordinal value, TreatAsOrdinal) noexcept { setOrdinal(value); }
         void set(Integer value, TreatAsInteger) noexcept { setInteger(value); }
         void set(Real value, TreatAsReal) noexcept { setReal(value); }
+        void set(ByteOrdinal value, TreatAsByteOrdinal) noexcept { setByteOrdinal(value); }
+        void set(ByteInteger value, TreatAsByteInteger) noexcept { setByteInteger(value); }
+        void set(ShortOrdinal value, TreatAsShortOrdinal) noexcept { setShortOrdinal(value); }
+        void set(ShortInteger value, TreatAsShortInteger) noexcept { setShortInteger(value); }
         explicit operator Ordinal() const noexcept { return getOrdinal(); }
         explicit operator Integer() const noexcept { return getInteger(); }
         explicit operator Real() const noexcept { return getReal(); }
         void increment(Ordinal value) noexcept { ordValue += value; }
+        template<typename Tag>
+        constexpr typename Tag::ReturnType get(Tag) const noexcept {
+            using K = std::decay_t<Tag>;
+            if constexpr (std::is_same_v<K, TreatAsOrdinal>) {
+                return getOrdinal();
+            } else if constexpr (std::is_same_v<K, TreatAsInteger>) {
+                return getInteger();
+            } else if constexpr (std::is_same_v<K, TreatAsShortInteger>) {
+                return getShortInteger();
+            } else if constexpr (std::is_same_v<K, TreatAsShortOrdinal>) {
+                return getShortOrdinal();
+            } else if constexpr (std::is_same_v<K, TreatAsByteInteger>) {
+                return getByteInteger();
+            } else if constexpr (std::is_same_v<K, TreatAsByteOrdinal>) {
+                return getByteOrdinal();
+            } else if constexpr (std::is_same_v<K, TreatAsReal>)  {
+                return getReal();
+            } else {
+                static_assert(DependentFalse<K>, "Unimplemented type!");
+                return 0;
+            }
+        }
     private:
         union {
             Ordinal ordValue;

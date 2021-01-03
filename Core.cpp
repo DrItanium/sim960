@@ -492,7 +492,7 @@ namespace i960 {
     Core::dmovt(RegisterIndex src1, RegisterIndex dest) {
         AnInstruction;
         auto srcValue = extractValue(src1, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(srcValue);
+        setRegister(dest, srcValue, TreatAsOrdinal{});
         auto lowest8 = static_cast<ByteOrdinal>(srcValue);
         ac.setConditionCode(((lowest8 >= 0b0011'0000) && (lowest8 <= 0b0011'1001)) ? 0b000 : 0b010);
     }
@@ -757,7 +757,7 @@ namespace i960 {
     Core::bbc(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
         AnInstruction;
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
-        auto theSrc = getRegister(src).getOrdinal();
+        auto theSrc = getRegisterValue(src, TreatAsOrdinal{});
         auto theMask = computeSingleBitShiftMask(bpos);
         constexpr Ordinal startingConditionCode = 0b010;
         constexpr Ordinal onConditionMet = 0b000;
@@ -773,7 +773,7 @@ namespace i960 {
     Core::bbs(RegLit bitpos, RegisterIndex src, ShortInteger targ) {
         AnInstruction;
         auto bpos = extractValue(bitpos, TreatAsOrdinal{});
-        auto theSrc = getRegister(src).getOrdinal();
+        auto theSrc = getRegisterValue(src, TreatAsOrdinal{});
         auto theMask = computeSingleBitShiftMask(bpos);
         constexpr Ordinal startingConditionCode = 0b000;
         constexpr Ordinal onConditionMet = 0b010;
@@ -1122,38 +1122,40 @@ namespace i960 {
         AnInstruction;
         auto len = extractValue(src1, TreatAsOrdinal{});
         auto src = extractValue(src2, TreatAsOrdinal{});
-        getRegister(dest).setOrdinal(rotateOperation(src, len));
+        setRegister(dest, rotateOperation(src, len), TreatAsOrdinal{});
     }
     void
     Core::logicalAnd(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(
-                extractValue(src2, TreatAsOrdinal{}) &
-                extractValue(src1, TreatAsOrdinal{}));
+        setRegister(dest,
+                    extractValue(src2, TreatAsOrdinal{}) & extractValue(src1, TreatAsOrdinal{}),
+                    TreatAsOrdinal {});
     }
     void
     Core::andnot(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(
-                (extractValue(src2, TreatAsOrdinal{})) &
-                (~extractValue(src1, TreatAsOrdinal{})));
+        setRegister(dest,
+                    (extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{})),
+                    TreatAsOrdinal {});
     }
     void
     Core::logicalNand(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) | (~extractValue(src1, TreatAsOrdinal{})));
+        setRegister(dest, (~extractValue(src2, TreatAsOrdinal{})) | (~extractValue(src1, TreatAsOrdinal{})), TreatAsOrdinal {});
     }
 
     void
     Core::logicalNor(RegLit src1, RegLit src2, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal((~extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{})));
+        auto result = (~extractValue(src2, TreatAsOrdinal{})) & (~extractValue(src1, TreatAsOrdinal{}));
+        setRegister(dest, result, TreatAsOrdinal{});
     }
 
     void
     Core::logicalNot(RegLit src, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(~extractValue(src, TreatAsOrdinal{}));
+        auto result = ~extractValue(src, TreatAsOrdinal{});
+        setRegister(dest, result, TreatAsOrdinal{});
     }
     void
     Core::notand(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -1188,36 +1190,36 @@ namespace i960 {
     void
     Core::lda(Ordinal mem, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(mem);
+        setRegister(dest, mem, TreatAsOrdinal{});
     }
     void
     Core::ld(Ordinal address, RegisterIndex dest) {
         AnInstruction;
         auto result = loadOrdinal(address);
-        getRegister(dest).setOrdinal(result);
+        setRegister(dest, result, TreatAsOrdinal{});
     }
     void
     Core::ldob(Ordinal mem, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setByteOrdinal(loadByteOrdinal(mem));
+        setRegister(dest, loadByteOrdinal(mem), TreatAsByteOrdinal{});
     }
 
     void
     Core::ldos(Ordinal mem, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setShortOrdinal(loadShortOrdinal(mem));
+        setRegister(dest, loadShortOrdinal(mem), TreatAsShortOrdinal{});
     }
 
     void
     Core::ldib(Ordinal mem, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setByteInteger(loadByteInteger(mem));
+        setRegister(dest, loadByteInteger(mem), TreatAsByteInteger{});
     }
 
     void
     Core::ldis(Ordinal mem, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setShortInteger(loadShortInteger(mem));
+        setRegister(dest, loadShortInteger(mem), TreatAsShortInteger{});
     }
 
     void

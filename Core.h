@@ -61,6 +61,10 @@ namespace i960
         void setRegister(RegisterIndex index, typename Tag::ReturnType rt, Tag) noexcept {
             getRegister(index).set(rt, Tag{});
         }
+        template<typename Tag>
+        constexpr typename Tag::ReturnType getRegisterValue(RegisterIndex index, Tag) const noexcept {
+            return getRegister(index).get(Tag{});
+        }
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
         InterfaceUnit& getInterfaceUnit(Address address) noexcept;
         Ordinal loadOrdinal(Address address) noexcept;
@@ -75,7 +79,6 @@ namespace i960
         void storeShortOrdinal (Address address, ShortOrdinal value) noexcept;
         ShortInteger loadShortInteger(Address address) noexcept;
         void storeShortInteger (Address address, ShortInteger value) noexcept;
-    private:
     private:
         void executeInstruction(const DecodedInstruction& inst);
     public: // fault related
@@ -294,7 +297,7 @@ namespace i960
         template<ConditionCodeKind cck>
         void
         testBase(RegisterIndex dest) {
-            setRegister<TreatAsOrdinal>(dest, ac.conditionIs<cck>() ? 1 : 0, TreatAsOrdinal {});
+            setRegister(dest, ac.conditionIs<cck>() ? 1 : 0, TreatAsOrdinal {});
         }
     private:
         [[nodiscard]] PreviousFramePointer getPFP() noexcept;
