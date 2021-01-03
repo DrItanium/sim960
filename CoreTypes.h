@@ -13,12 +13,17 @@ using Address = Ordinal;
 using Real = float;
 using LongReal = double;
 using ExtendedReal = long double;
-struct TreatAsOrdinal final { using ReturnType = Ordinal; };
-struct TreatAsInteger final { using ReturnType = Integer; };
-struct TreatAsByteOrdinal final { using ReturnType = ByteOrdinal; };
-struct TreatAsByteInteger final { using ReturnType = ByteInteger; };
-struct TreatAsShortOrdinal final { using ReturnType = ShortOrdinal; };
-struct TreatAsShortInteger final { using ReturnType = ShortInteger; };
-struct TreatAsLongOrdinal final { using ReturnType = LongOrdinal; };
-struct TreatAsLongInteger final { using ReturnType = LongInteger; };
+template<typename T>
+struct TreatAs final { using ReturnType = T; };
+using TreatAsOrdinal = TreatAs<Ordinal>;
+using TreatAsInteger = TreatAs<Integer>;
+using TreatAsByteOrdinal = TreatAs<ByteOrdinal>;
+using TreatAsByteInteger = TreatAs<ByteInteger>;
+using TreatAsShortInteger = TreatAs<ShortInteger>;
+using TreatAsShortOrdinal = TreatAs<ShortOrdinal>;
+using TreatAsLongOrdinal = TreatAs<LongOrdinal>;
+using TreatAsLongInteger = TreatAs<LongInteger>;
+using TreatAsReal = TreatAs<Real>;
+using TreatAsLongReal = TreatAs<LongReal>;
+using TreatAsExtendedReal = TreatAs<ExtendedReal>;
 #endif // end I960_CORE_TYPES_H__
