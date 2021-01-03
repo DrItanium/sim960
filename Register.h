@@ -148,6 +148,13 @@ namespace i960 {
         };
     };
     class LongRegister {
+    private:
+        union OrdinalRealView {
+            LongOrdinal ord;
+            LongReal lreal;
+            constexpr explicit OrdinalRealView(LongOrdinal value) noexcept : ord(value) { }
+            constexpr explicit OrdinalRealView(LongReal value) noexcept : lreal(value) { }
+        };
     public:
         LongRegister(Register& lower, Register& upper) noexcept : _lower(lower), _upper(upper) { }
         void setOrdinal(LongOrdinal value) noexcept {
@@ -158,15 +165,23 @@ namespace i960 {
             _lower.setInteger(static_cast<Integer>(value));
             _upper.setInteger(static_cast<Integer>(value >> 32));
         }
-        constexpr LongOrdinal getOrdinal() const noexcept {
+        void setReal(LongReal value) noexcept {
+            OrdinalRealView orv(value);
+            setOrdinal(orv.ord);
+        }
+        [[nodiscard]] constexpr LongOrdinal getOrdinal() const noexcept {
             auto lword = static_cast<LongOrdinal>(_lower.getOrdinal());
             auto uword = static_cast<LongOrdinal>(_upper.getOrdinal()) << 32;
             return lword | uword;
         }
-        constexpr LongInteger getInteger() const noexcept {
+        [[nodiscard]] constexpr LongInteger getInteger() const noexcept {
             auto lword = static_cast<LongInteger>(_lower.getInteger());
             auto uword = static_cast<LongInteger>(_upper.getInteger()) << 32;
             return lword | uword;
+        }
+        [[nodiscard]] constexpr LongReal getReal() const noexcept {
+            OrdinalRealView orv(getOrdinal());
+            return orv.lreal;
         }
         explicit operator LongOrdinal() const noexcept { return getOrdinal(); }
         explicit operator LongInteger() const noexcept { return getInteger(); }
