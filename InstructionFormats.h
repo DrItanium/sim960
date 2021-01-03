@@ -74,17 +74,16 @@ namespace i960 {
         constexpr ShortOrdinal getOpcode() const noexcept { return (static_cast<ShortOrdinal>(opcode) << 4) & 0x0FF0; }
         constexpr i960::RegisterIndex getSrc2() const noexcept { return i960::toRegisterIndex(src2); }
         constexpr i960::RegisterIndex getSrc1() const noexcept { return i960::toRegisterIndex(src1); }
-        constexpr bool getTBit() const noexcept { return t; }
-        constexpr ShortInteger getDisplacement() const noexcept { return displacement; }
+        constexpr bool getTBit() const noexcept { return (displacement & 0b10); }
+        constexpr bool getS2() const noexcept { return (displacement & 0b1); }
+        constexpr ShortInteger getDisplacement() const noexcept { return displacement & (~0b11); }
         std::string decodeName() const noexcept;
         constexpr auto lowerHalf() const noexcept { return _value; }
     private:
         union {
             Ordinal _value;
             struct {
-                unsigned int s2: 1;
-                unsigned int t: 1;
-                int displacement: 11;
+                int displacement: 13;
                 unsigned int m1: 1;
                 unsigned int src2: 5;
                 unsigned int src1: 5;

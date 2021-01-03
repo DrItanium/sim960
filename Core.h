@@ -5,6 +5,7 @@
 #include <variant>
 #include <algorithm>
 #include <memory>
+#include <iostream>
 
 #include "CoreTypes.h"
 #include "Register.h"
@@ -221,7 +222,12 @@ namespace i960
         void
         conditionalBranch(Displacement22 dest) {
             if (ac.conditionIs<cck>()) {
-                ip.setInteger(ip.getInteger() + dest.getValue());
+                auto dv = dest.getValue();
+                auto oldLoc = ip.getInteger();
+                auto newLoc = (oldLoc + dv) & (~0b11);
+                ip.setInteger(newLoc);
+                std::cout << "Branching from 0x" << std::hex << oldLoc << " to 0x" << std::hex << newLoc << std::endl;
+                doNotAdvanceIp();
             }
         }
         template<ConditionCodeKind cck>
