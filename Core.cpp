@@ -38,12 +38,8 @@ namespace i960 {
      * @return
      */
     Ordinal
-    Core::getWordAtIP(bool advance) noexcept {
-        auto ipLoc = ip.getOrdinal();
-        if (advance) {
-            nextInstruction();
-        }
-        return loadOrdinal(ipLoc);
+    Core::getWordAtIP() noexcept {
+        return loadOrdinal(ip.getOrdinal());
     }
     Ordinal
     Core::extractValue(RegLit value, TreatAsOrdinal) const noexcept {
@@ -278,11 +274,6 @@ namespace i960 {
         }
     }
     void
-    Core::nextInstruction() {
-        ip.setOrdinal(ip.getOrdinal() + 4);
-    }
-
-    void
     Core::execute(const MEMFormatInstruction &inst) noexcept {
         auto address = inst.computeAddress(*this);
         auto opcode = inst.getOpcode();
@@ -439,13 +430,16 @@ namespace i960 {
     void
     Core::cycle() {
         // always load two words
-        auto lower = getWordAtIP(true);
-        auto upper = getWordAtIP(false); // do not automatically advance this time
+        auto lower = loadOrdinal(ip.getOrdinal());
+        auto upper = loadOrdinal(ip.getOrdinal() + 4);
         cycle(lower, upper);
     }
     void
     Core::cycle(Ordinal lower, Ordinal upper) {
         executeInstruction(decode(lower, upper));
+        ip.increment(ipIncrement_);
+        // by default we increment by four so reset to that
+        ipIncrement_ = 4;
     }
     void
     Core::executeInstruction(const DecodedInstruction &inst) {

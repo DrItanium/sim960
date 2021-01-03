@@ -87,6 +87,7 @@ namespace i960 {
         void set(Integer value, TreatAsInteger) noexcept { setInteger(value); }
         explicit operator Ordinal() const noexcept { return getOrdinal(); }
         explicit operator Integer() const noexcept { return getInteger(); }
+        void increment(Ordinal value) noexcept { ordValue += value; }
     private:
         union {
             Ordinal ordValue;

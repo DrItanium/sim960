@@ -308,7 +308,6 @@ namespace i960
         inline void selo(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::Ordered>(src1, src2, dest); }
 
     public:
-        void nextInstruction();
         /**
          * @brief Set ip to the nearest word aligned address
          * @param address Where ip should be, it is word aligned internally
@@ -343,6 +342,15 @@ namespace i960
         void cmpible(RegLit src1, RegisterIndex src2, ShortInteger targ);
         void cmpibno(RegLit src1, RegisterIndex src2, ShortInteger targ);
         void cmpibo(RegLit src1, RegisterIndex src2, ShortInteger targ);
+    public:
+        /**
+         * @brief Tell the ip incrementer that the instruction is double wide (increment by 8 instead)
+         */
+        void instructionIsDoubleWide() noexcept;
+        /**
+         * @brief Tell the ip incrementer that the instruction prevents ip from being implicitly incremented by four
+         */
+        void doNotAdvanceIp() noexcept;
     private:
         BusInterfaceUnit& biu_;
         RegisterFile globals, locals;
@@ -359,6 +367,7 @@ namespace i960
         Ordinal interruptTableBase_ = 0;
         Ordinal nmiVector_ = 0;
         // no on die ram yet, at some point I may consider doing this, I have no idea how much space different peripherals will take
+        Ordinal ipIncrement_ = 4;
 
     };
 
