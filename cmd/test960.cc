@@ -574,7 +574,6 @@ namespace i960 {
 int main() {
     std::cout << "Starting up test960..." << std::endl;
     for (int i = 0; i < i960::theMemorySpace.size(); ++i) {
-        std::cout << "\tSetting up Memory Space " << i << std::endl;
         i960::theMemorySpace[i] = i960::makeSection();
     }
     std::cout << "Running tests..." << std::endl;

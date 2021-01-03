@@ -57,12 +57,6 @@ namespace i960
         [[nodiscard]] const Register& getRegister(RegisterIndex index) const noexcept;
         [[nodiscard]] const Register& getIP() const noexcept { return ip; }
         [[noreturn]] void busTestFailed() noexcept;
-        /**
-         * @brief Retrieve the word at the ip address
-         * @param advance
-         * @return
-         */
-        Ordinal getWordAtIP(bool advance = false) noexcept;
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
         InterfaceUnit& getInterfaceUnit(Address address) noexcept;
         Ordinal loadOrdinal(Address address) noexcept;
