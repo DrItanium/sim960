@@ -1460,9 +1460,6 @@ namespace i960 {
     Ordinal Core::loadOrdinal(Address address) noexcept {
         return getInterfaceUnit(address).load(address, TreatAsOrdinal{});
     }
-    Integer Core::loadInteger(Address address) noexcept {
-        return getInterfaceUnit(address).load(address, TreatAsInteger{});
-    }
     ByteOrdinal Core::loadByteOrdinal(Address address) noexcept {
         return getInterfaceUnit(address).load(address, TreatAsByteOrdinal{});
     }
@@ -1477,9 +1474,6 @@ namespace i960 {
     }
     void Core::storeOrdinal(Address address, Ordinal value) noexcept {
         getInterfaceUnit(address).store(address, value, TreatAsOrdinal{});
-    }
-    void Core::storeInteger(Address address, Integer value) noexcept {
-        getInterfaceUnit(address).store(address, value, TreatAsInteger{});
     }
     void Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
         getInterfaceUnit(address).store(address, value, TreatAsByteOrdinal{});

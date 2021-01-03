@@ -69,8 +69,6 @@ namespace i960
         InterfaceUnit& getInterfaceUnit(Address address) noexcept;
         Ordinal loadOrdinal(Address address) noexcept;
         void storeOrdinal (Address address, Ordinal value) noexcept;
-        Integer loadInteger(Address address) noexcept;
-        void storeInteger (Address address, Integer value) noexcept;
         ByteOrdinal loadByteOrdinal(Address address) noexcept;
         void storeByteOrdinal (Address address, ByteOrdinal value) noexcept;
         ByteInteger loadByteInteger(Address address) noexcept;

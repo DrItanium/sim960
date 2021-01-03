@@ -92,10 +92,6 @@ namespace i960 {
                 return loadCell(address).ord;
             }
         }
-        Integer load(Address address, TreatAsInteger integer) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].ival;
-        }
         void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
             CellTarget cell(address);
             theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()]= value;
@@ -115,17 +111,6 @@ namespace i960 {
         void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
             CellTarget cell(address);
             theMemorySpace[cell.getSectionId()][cell.getCellId()].ord = value;
-            if (address == 0xFFFF0100) {
-                if (value != 0) {
-                    std::cout << "LED ON" << std::endl;
-                } else {
-                    std::cout << "LED OFF" << std::endl;
-                }
-            }
-        }
-        void store(Address address, Integer value, TreatAsInteger integer) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].ival = value;
             if (address == 0xFFFF0100) {
                 if (value != 0) {
                     std::cout << "LED ON" << std::endl;

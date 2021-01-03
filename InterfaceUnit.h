@@ -15,13 +15,11 @@ namespace i960 {
         virtual ShortOrdinal load(Address address, TreatAsShortOrdinal) = 0;
         virtual ShortInteger load(Address address, TreatAsShortInteger) = 0;
         virtual Ordinal load(Address address, TreatAsOrdinal) = 0;
-        virtual Integer load(Address address, TreatAsInteger) = 0;
         virtual void store(Address address, ByteOrdinal value, TreatAsByteOrdinal) = 0;
         virtual void store(Address address, ByteInteger value, TreatAsByteInteger) = 0;
         virtual void store(Address address, ShortOrdinal value, TreatAsShortOrdinal) = 0;
         virtual void store(Address address, ShortInteger value, TreatAsShortInteger) = 0;
         virtual void store(Address address, Ordinal value, TreatAsOrdinal) = 0;
-        virtual void store(Address address, Integer value, TreatAsInteger) = 0;
     };
 } // end namespace i960
 
