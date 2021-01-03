@@ -120,7 +120,7 @@ namespace i960
         void movq(RegLit src, RegisterIndex dest);
     private: // internals
         template<typename Tag>
-        [[nodiscard]] typename Tag::ReturnType extractValue(RegLit value, Tag) const noexcept {
+        [[nodiscard]] constexpr typename Tag::ReturnType extractValue(RegLit value, Tag) const noexcept {
             return std::visit([this](auto &&value) -> Ordinal {
                 using K = std::decay_t<decltype(value)>;
                 if constexpr (std::is_same_v<K, Literal>) {
@@ -352,11 +352,9 @@ namespace i960
         template<ConditionCodeKind cck>
         void selectGeneral(RegLit src1, RegLit src2, RegisterIndex dest) noexcept {
             using T = TreatAsOrdinal;
-            if ((ac.conditionIs<cck>()) || (static_cast<ByteOrdinal>(cck) == ac.getConditionCode())) {
-                setRegister<T>(dest, extractValue(src2, T{}), T{});
-            } else {
-                setRegister<T>(dest, extractValue(src1, T{}), T{});
-            }
+            setRegister(dest,
+                        extractValue(((ac.conditionIs<cck>()) || (static_cast<ByteOrdinal>(cck) == ac.getConditionCode())) ? src2 : src1, T{}),
+                        T{});
         }
         inline void selno(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::Unordered>(src1, src2, dest); }
         inline void selg(RegLit src1, RegLit src2, RegisterIndex dest) noexcept { selectGeneral<ConditionCodeKind::GreaterThan>(src1, src2, dest); }
