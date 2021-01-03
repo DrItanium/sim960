@@ -6,14 +6,20 @@
 #include "PreviousFramePointer.h"
 #include "ProcessorAddress.h"
 #include "InstructionFormats.h"
+#ifndef ARDUINO
 #include <iostream>
 #include <string>
+#endif
 namespace i960 {
+#ifndef ARDUINO
     void
     displayInstruction(Ordinal address, const std::string& name) {
         std::cout << "\t\tExecuting: " << name << " @ 0x" << std::hex << address << std::endl;
     }
 #define AnInstruction displayInstruction(ip.getOrdinal(), __PRETTY_FUNCTION__)
+#else // !ARDUINO defined
+#define AnInstruction
+#endif
     constexpr Ordinal largestOrdinal = 0xFFFF'FFFF;
     constexpr RegisterIndex PFP = LocalRegister[0];
     constexpr RegisterIndex SP = LocalRegister[1];
