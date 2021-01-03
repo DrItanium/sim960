@@ -410,7 +410,7 @@ namespace i960 {
         }
         /// @todo check the frame pointers and such at some point in the future
         // offset testing
-        testCore.nextInstruction();
+        testCore.setIP(testCore.getIP().getOrdinal() + 4); // advance offset
         testCore.cycle(0x0b'00'9f'fc); // bal
         std::cout << "bal 0xa000 // offset style" << std::endl;
         if (testCore.getIP().getOrdinal() != 0xa000) {

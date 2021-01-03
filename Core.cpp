@@ -32,15 +32,6 @@ namespace i960 {
             return MEMFormatInstruction(lower, upper);
         }
     }
-    /**
-     * @brief Retrieve the word at the ip address
-     * @param advance
-     * @return
-     */
-    Ordinal
-    Core::getWordAtIP() noexcept {
-        return loadOrdinal(ip.getOrdinal());
-    }
     Ordinal
     Core::extractValue(RegLit value, TreatAsOrdinal) const noexcept {
         return std::visit([this](auto &&value) -> Ordinal {
@@ -623,7 +614,8 @@ namespace i960 {
                 saveRegisterSet();
                 allocateNewLocalRegisterSet();
             }
-            getReturnInstructionPointer().setOrdinal(ip.getOrdinal());
+            // save the next instruction location
+            getReturnInstructionPointer().setOrdinal(ip.getOrdinal() + ipIncrement_);
             ip.setOrdinal(temp & (~0b11));
             Ordinal tempa = 0;
             if (isLocalProcedure(temp) || pc.inSupervisorMode()) {
@@ -641,6 +633,7 @@ namespace i960 {
             pfp.setReturnStatus(static_cast<PreviousFramePointer::ReturnStatusField>(temp));
             getFramePointer().setOrdinal(tempa);
             getStackPointer().setOrdinal(tempa + 64);
+            doNotAdvanceIp();
         }
     }
     bool
@@ -719,6 +712,7 @@ namespace i960 {
                     checkPendingInterrupts();
                     break;
             }
+            doNotAdvanceIp();
         }
     }
     void
@@ -732,7 +726,7 @@ namespace i960 {
         // make a new stack frame
         auto tmp = (sp.getOrdinal() + computeAlignmentBoundaryConstant()) &
                    (~computeAlignmentBoundaryConstant());
-        rip.setOrdinal(ip.getOrdinal());
+        rip.setOrdinal(ip.getOrdinal() + ipIncrement_);
         saveRegisterSet();
         allocateNewLocalRegisterSet();
         ip.setOrdinal(targ);
@@ -740,6 +734,7 @@ namespace i960 {
         pfp.setRawValue(fp.getOrdinal());
         fp.setOrdinal(tmp);
         sp.setOrdinal(tmp + 64);
+        doNotAdvanceIp();
     }
     void
     Core::call(Displacement22 targ) {
@@ -753,7 +748,7 @@ namespace i960 {
         // make a new stack frame
         auto tmp = (sp.getOrdinal() + computeAlignmentBoundaryConstant()) &
                    (~computeAlignmentBoundaryConstant());
-        rip.setOrdinal(ip.getOrdinal());
+        rip.setOrdinal(ip.getOrdinal() + ipIncrement_);
         saveRegisterSet();
         allocateNewLocalRegisterSet();
         auto addr = ip.getInteger();
@@ -761,6 +756,7 @@ namespace i960 {
         pfp.setRawValue(fp.getOrdinal());
         fp.setOrdinal(tmp);
         sp.setOrdinal(tmp + 64);
+        doNotAdvanceIp();
     }
 
     void
@@ -776,6 +772,7 @@ namespace i960 {
         if ((theSrc & theMask) == compareAgainst) {
             ac.setConditionCode(onConditionMet);
             ip.setInteger(ip.getInteger() + targ);
+            doNotAdvanceIp();
         }
     }
     void
@@ -791,6 +788,7 @@ namespace i960 {
         if ((theSrc & theMask) == compareAgainst) {
             ac.setConditionCode(onConditionMet);
             ip.setInteger(ip.getInteger() + targ);
+            doNotAdvanceIp();
         }
     }
     void
@@ -952,8 +950,10 @@ namespace i960 {
         std::cout << "\t\t\t\tip (as integer): 0x" << std::hex << ip.getInteger() << ", offset: 0x" << targ.getValue() << std::endl;
         std::cout << "\t\t\t\tip (as ordinal): 0x" << std::hex << ip.getOrdinal() << std::endl;
         auto total = (ip.getInteger() + targ.getValue()) & (~0b11);
-        std::cout << "\t\t\tjumping to 0x" << std::hex << total << std::endl;
+        std::cout << "\t\t\tjumping to 0x" << std::hex << (ip.getInteger() + targ.getValue()) << " (partial)" << std::endl;
+        std::cout << "\t\t\tactually jumping to 0x" << std::hex << total << std::endl;
         ip.setInteger(total);
+        doNotAdvanceIp();
     }
     void
     Core::bal(Displacement22 targ) {
@@ -961,17 +961,20 @@ namespace i960 {
         globals[14].setOrdinal(ip.getOrdinal() + 4);
         // make sure that the code is consistent
         b(targ);
+        doNotAdvanceIp();
     }
     void
     Core::bx(Ordinal targ) {
         AnInstruction;
         ip.setOrdinal(targ);
+        doNotAdvanceIp();
     }
     void
     Core::balx(Ordinal targ, RegisterIndex dest) {
         AnInstruction;
-        getRegister(dest).setOrdinal(ip.getOrdinal());
+        getRegister(dest).setOrdinal(ip.getOrdinal() + ipIncrement_);
         ip.setOrdinal(targ);
+        doNotAdvanceIp();
     }
     void
     Core::addc(RegLit src1, RegLit src2, RegisterIndex dest) {
@@ -1569,6 +1572,14 @@ namespace i960 {
     Core::cmpi(RegLit src1, RegLit src2) {
         AnInstruction;
         compareBase<TreatAsInteger>(src1, src2);
+    }
+    void
+    Core::doNotAdvanceIp() noexcept {
+        ipIncrement_ = 0;
+    }
+    void
+    Core::instructionIsDoubleWide() noexcept {
+        ipIncrement_ = 8;
     }
 }
 #undef AnInstruction

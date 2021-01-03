@@ -114,7 +114,7 @@ namespace i960 {
     class MEMFormatInstruction {
     public:
         constexpr explicit MEMFormatInstruction(Ordinal lowerHalf, Ordinal upperHalf) noexcept: lower(lowerHalf), next(upperHalf) {}
-        constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
+        [[nodiscard]] constexpr ShortOrdinal getOpcode() const noexcept { return static_cast<ShortOrdinal>(opcode) << 4; }
         template<typename Core>
         Ordinal computeAddress(Core &referenceCore) const noexcept {
             if (isMEMAFormat()) {
@@ -123,15 +123,15 @@ namespace i960 {
                 return computeAddress_MEMB(referenceCore);
             }
         }
-        constexpr i960::RegisterIndex getSrcDest() const noexcept { return static_cast<i960::RegisterIndex>(srcDest); }
+        [[nodiscard]] constexpr i960::RegisterIndex getSrcDest() const noexcept { return static_cast<i960::RegisterIndex>(srcDest); }
         std::string decodeName() const noexcept;
-        constexpr auto upperHalf() const noexcept { return next; }
-        constexpr auto lowerHalf() const noexcept { return lower; }
+        [[nodiscard]] constexpr auto upperHalf() const noexcept { return next; }
+        [[nodiscard]] constexpr auto lowerHalf() const noexcept { return lower; }
     private:
-        constexpr bool isMEMAFormat() const noexcept { return modeMajor & 1 == 0; }
-        constexpr bool isMEMBFormat() const noexcept { return modeMajor & 1 != 0; }
+        [[nodiscard]] constexpr bool isMEMAFormat() const noexcept { return (modeMajor & 1u) == 0; }
+        [[nodiscard]] constexpr bool isMEMBFormat() const noexcept { return (modeMajor & 1u) != 0; }
         template<typename Core>
-        Ordinal computeAddress_MEMA(Core &referenceCore) const noexcept {
+        [[nodiscard]] Ordinal computeAddress_MEMA(Core &referenceCore) const noexcept {
             // the lsb of mema.mode will always be 0 to get to this point
             if (mema.mode == 0b00) {
                 // absolute offset
@@ -149,7 +149,7 @@ namespace i960 {
                 case 0b0100: // register indirect
                     return referenceCore.getRegister(i960::toRegisterIndex(memb.abase)).getOrdinal();
                 case 0b0101: // ip with displacement
-                    referenceCore.nextInstruction();
+                    referenceCore.instructionIsDoubleWide();
                     return static_cast<Ordinal>(referenceCore.getIP().getInteger() + optionalDisplacement + 8);
                 case 0b0110: // reserved
                     return -1;
@@ -158,18 +158,18 @@ namespace i960 {
                            referenceCore.getRegister(i960::toRegisterIndex(memb.index)).getOrdinal() *
                            computeScale(referenceCore);
                 case 0b1100: // absolute displacement
-                    referenceCore.nextInstruction();
+                    referenceCore.instructionIsDoubleWide();
                     return static_cast<Ordinal>(optionalDisplacement);
                 case 0b1101: // register indirect with displacement
-                    referenceCore.nextInstruction();
+                    referenceCore.instructionIsDoubleWide();
                     return static_cast<Ordinal>(referenceCore.getRegister(i960::toRegisterIndex(memb.abase)).getInteger() +
                                                 optionalDisplacement);
                 case 0b1110: // index with displacement
-                    referenceCore.nextInstruction();
+                    referenceCore.instructionIsDoubleWide();
                     return static_cast<Ordinal>(referenceCore.getRegister(i960::toRegisterIndex(memb.index)).getInteger() *
                                                 computeScale(referenceCore) + optionalDisplacement);
                 case 0b1111: // register indirect with index and displacement
-                    referenceCore.nextInstruction();
+                    referenceCore.instructionIsDoubleWide();
                     return static_cast<Ordinal>(referenceCore.getRegister(i960::toRegisterIndex(memb.abase)).getInteger() +
                                                 referenceCore.getRegister(i960::toRegisterIndex(memb.index)).getInteger() *
                                                 computeScale(referenceCore) + optionalDisplacement);
