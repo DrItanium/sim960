@@ -32,34 +32,6 @@ namespace i960 {
             return MEMFormatInstruction(lower, upper);
         }
     }
-    Ordinal
-    Core::extractValue(RegLit value, TreatAsOrdinal) const noexcept {
-        return std::visit([this](auto &&value) -> Ordinal {
-            using K = std::decay_t<decltype(value)>;
-            if constexpr (std::is_same_v<K, Literal>) {
-                return static_cast<Ordinal>(toInteger(value));
-            } else if constexpr (std::is_same_v<K, RegisterIndex>) {
-                return getRegister(value).getOrdinal();
-            } else {
-                static_assert(DependentFalse<K>, "Unimplemented type!");
-                return 0;
-            }
-        }, value);
-    }
-    Integer
-    Core::extractValue(RegLit value, TreatAsInteger) const noexcept {
-        return std::visit([this](auto &&value) -> Integer {
-            using K = std::decay_t<decltype(value)>;
-            if constexpr (std::is_same_v<K, Literal>) {
-                return static_cast<Integer>(toInteger(value));
-            } else if constexpr (std::is_same_v<K, RegisterIndex>) {
-                return getRegister(value).getInteger();
-            } else {
-                static_assert(DependentFalse<K>, "Unimplemented type!");
-                return 0;
-            }
-        }, value);
-    }
     RegLit
     Core::nextValue(RegLit value) const noexcept {
         return std::visit([this](auto &&value) -> RegLit {
