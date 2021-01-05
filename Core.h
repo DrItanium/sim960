@@ -15,7 +15,6 @@
 #include "Disassembly.h"
 #include "TraceControls.h"
 #include "PreviousFramePointer.h"
-#include "BusInterfaceUnit.h"
 #include "InstructionFormats.h"
 namespace i960
 {
@@ -29,11 +28,12 @@ namespace i960
         static constexpr Ordinal rotateOperation(Ordinal src, Ordinal length) noexcept {
             return (src << length) | (src >> ((-length) & 31u));
         }
-    private:
+    public:
         using DecodedInstruction = std::variant<RegFormatInstruction,
                 MEMFormatInstruction,
                 COBRInstruction,
                 CTRLInstruction>;
+    private:
         static DecodedInstruction decode(Ordinal lower, Ordinal upper) noexcept;
     public:
         using RegisterFile = std::array<Register, 16>;
@@ -67,15 +67,15 @@ namespace i960
             return getRegister(index).get(Tag{});
         }
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
-        virtual Ordinal loadOrdinal(Address address) noexcept = 0;
+        virtual Ordinal load(Address address) noexcept = 0;
         [[nodiscard]] ByteOrdinal loadByteOrdinal(Address address) noexcept;
         [[nodiscard]] ByteInteger loadByteInteger(Address address) noexcept;
         [[nodiscard]] ShortOrdinal loadShortOrdinal(Address address) noexcept;
         [[nodiscard]] ShortInteger loadShortInteger(Address address) noexcept;
-        virtual void storeOrdinal(Address address, Ordinal value, bool byteEnable0 = true, bool byteEnable1 = true, bool byteEnable2 = true, bool byteEnable3 = true) noexcept = 0;
-        void storeByteOrdinal (Address address, ByteOrdinal value) noexcept;
+        virtual void store(Address address, Ordinal value) noexcept = 0;
+        virtual void storeByte(Address address, ByteOrdinal value) noexcept = 0;
+        virtual void storeShort(Address address, ShortOrdinal value) noexcept = 0;
         void storeByteInteger (Address address, ByteInteger value) noexcept;
-        void storeShortOrdinal (Address address, ShortOrdinal value) noexcept;
         void storeShortInteger (Address address, ShortInteger value) noexcept;
     private:
         void executeInstruction(const DecodedInstruction& inst);
@@ -373,7 +373,7 @@ namespace i960
         void setFP(Address address) noexcept { getFramePointer().setOrdinal(address); }
         void setFrameStart(Address address) noexcept { setFP(address); setSP(address + 64); }
     private:
-        void badInstruction(DecodedInstruction inst);
+        virtual void badInstruction(DecodedInstruction inst) noexcept = 0;
         [[nodiscard]] Ordinal getSystemProcedureEntry(Ordinal targ) noexcept;
         [[nodiscard]] bool registerSetAvailable() const noexcept;
         [[nodiscard]] bool registerSetNotAllocated(Ordinal address) const noexcept;

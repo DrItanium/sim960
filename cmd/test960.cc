@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <tuple>
+#include "InstructionFormats.h"
 // custom implementation (this is on purpose)
 namespace i960 {
     // allocate memory in 16 megabyte sections, 256 of them!
@@ -62,29 +63,14 @@ namespace i960 {
     }
     class TestCore : public i960::Core {
     public:
-        using TestCore::TestCore;
+        using Core::Core;
         ~TestCore() override = default;
         Cell& loadCell(Address address) noexcept {
             CellTarget cell(address);
             return theMemorySpace[cell.getSectionId()][cell.getCellId()];
         }
-        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override {
-            CellTarget cell(address);
-            return loadCell(address).bo[cell.getByteOffset()];
-        }
-        ByteInteger load(Address address, TreatAsByteInteger integer) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()];
-        }
-        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()];
-        }
-        ShortInteger load(Address address, TreatAsShortInteger integer) override {
-            CellTarget cell(address);
-            return theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()];
-        }
-        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+        Ordinal
+        load(Address address) noexcept override {
             if (address == 0xFFFF0104) {
                 std::cout << "Accessing io constant" << std::endl;
                 return 1;
@@ -92,25 +78,9 @@ namespace i960 {
                 return loadCell(address).ord;
             }
         }
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].bo[cell.getByteOffset()]= value;
-        }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].bi[cell.getByteOffset()]= value;
-        }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].so[cell.getCellShortOffset()]= value;
-        }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].si[cell.getCellShortOffset()]= value;
-        }
-        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
-            CellTarget cell(address);
-            theMemorySpace[cell.getSectionId()][cell.getCellId()].ord = value;
+        void
+        store(Address address, Ordinal value) noexcept override {
+            loadCell(address).ord = value;
             if (address == 0xFFFF0100) {
                 if (value != 0) {
                     std::cout << "LED ON" << std::endl;
@@ -118,6 +88,32 @@ namespace i960 {
                     std::cout << "LED OFF" << std::endl;
                 }
             }
+        }
+        void
+        storeByte(Address address, ByteOrdinal value) noexcept override {
+            CellTarget cell(address);
+            loadCell(address).bo[cell.getByteOffset()] = value;
+        }
+        void
+        storeShort(Address address, ShortOrdinal value) noexcept override {
+            CellTarget cell(address);
+            loadCell(address).so[cell.getCellShortOffset()] = value;
+        }
+        void
+        badInstruction(i960::Core::DecodedInstruction inst) noexcept override {
+            std::cerr << "BAD INSTRUCTION @ 0x" << getIP().getOrdinal()  << std::endl;
+            std::visit([](auto &&value) {
+                using K = std::decay_t<decltype(value)>;
+                std::cerr << "\tInstruction opcode: 0x";
+                if constexpr (std::is_same_v<K, MEMFormatInstruction>) {
+                    std::cerr << std::hex << value.upperHalf();
+                }
+                std::cerr << std::hex << value.lowerHalf() << std::endl;
+                if (auto name = value.decodeName(); !name.empty()) {
+                    std::cerr << "\tName: " << name << std::endl;
+                }
+            }, inst);
+            raiseFault();
         }
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
@@ -148,31 +144,14 @@ namespace i960 {
         installProgramFragments(startingAddress+1, values...);
     }
 
-    void
-    Core::badInstruction(DecodedInstruction inst) {
-        std::cerr << "BAD INSTRUCTION @ 0x" << ip.getOrdinal()  << std::endl;
-        std::visit([](auto &&value) {
-            using K = std::decay_t<decltype(value)>;
-            std::cerr << "\tInstruction opcode: 0x";
-            if constexpr (std::is_same_v<K, MEMFormatInstruction>) {
-                std::cerr << std::hex << value.upperHalf();
-            }
-            std::cerr << std::hex << value.lowerHalf() << std::endl;
-            if (auto name = value.decodeName(); !name.empty()) {
-                std::cerr << "\tName: " << name << std::endl;
-            }
-        }, inst);
-        raiseFault();
-    }
 
 
 
     void
     test0() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
-        TestBusInterfaceUnit tbiu;
         // make sure that each instruction operates as expected
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
@@ -217,8 +196,7 @@ namespace i960 {
     test1() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
@@ -270,8 +248,7 @@ namespace i960 {
     test2() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // double check that registers are clear at this point
         auto l4 = static_cast<i960::RegisterIndex>(4);
@@ -329,8 +306,7 @@ namespace i960 {
     testB() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // double check that registers are clear at this point
         if (testCore.getIP().getOrdinal() != 0) {
@@ -351,8 +327,7 @@ namespace i960 {
         // test call
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // double check that registers are clear at this point
         if (testCore.getIP().getOrdinal() != 0) {
@@ -373,8 +348,7 @@ namespace i960 {
         // test bal
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // double check that registers are clear at this point
         if (testCore.getIP().getOrdinal() != 0) {
@@ -408,8 +382,7 @@ namespace i960 {
     testProperCycle() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+        TestCore testCore(0,4);
         testCore.post();
         // setup instructions
         installProgramFragments(0, 0x8c20'3000,
@@ -460,8 +433,8 @@ namespace i960 {
     testSimpleProgram() {
         std::cout << __PRETTY_FUNCTION__  << std::endl;
         // make sure that each instruction operates as expected
-        TestBusInterfaceUnit tbiu;
-        i960::Core testCore(tbiu, 0,4);
+
+        TestCore testCore(0,4);
         testCore.post();
         // setup instructions
         installProgramFragments(0,

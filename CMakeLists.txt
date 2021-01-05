@@ -23,8 +23,6 @@ add_library(core960
         ProcessorMappingConfiguration.h
         ProcessorAddress.h
         TraceControls.cpp
-        InterfaceUnit.h
-        BusInterfaceUnit.h
         InstructionFormats.cpp
         InstructionFormats.h MemoryCell.h)
 

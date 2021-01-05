@@ -399,8 +399,8 @@ namespace i960 {
     void
     Core::cycle() {
         // always load two words
-        auto lower = loadOrdinal(ip.getOrdinal());
-        auto upper = loadOrdinal(ip.getOrdinal() + 4);
+        auto lower = load(ip.getOrdinal());
+        auto upper = load(ip.getOrdinal() + 4);
         cycle(lower, upper);
     }
     void
@@ -440,7 +440,7 @@ namespace i960 {
         // okay, we have to save all of the registers to the stack or the on board
         // register cache (however, I'm not implementing that yet)
         for (const auto& c : locals) {
-            storeOrdinal(address, c.getOrdinal());
+            store(address, c.getOrdinal());
             address +=4;
         }
 
@@ -451,7 +451,7 @@ namespace i960 {
         // restore the local register frame, generally done when you return from a
         // previous function
         for (auto & r : locals) {
-            r.setOrdinal(loadOrdinal(address));
+            r.setOrdinal(load(address));
             address += 4;
         }
     }
@@ -559,7 +559,7 @@ namespace i960 {
     }
     Ordinal
     Core::getSystemProcedureEntry(Ordinal targ) noexcept {
-        return loadOrdinal((getSystemProcedureTableBase() + 0x30) + targ);
+        return load((getSystemProcedureTableBase() + 0x30) + targ);
     }
     bool
     Core::registerSetAvailable() const noexcept {
@@ -639,8 +639,8 @@ namespace i960 {
                     getFPAndIP();
                     break;
                 case PreviousFramePointer::ReturnStatusField::Fault:
-                    tempa = loadOrdinal(fp.getOrdinal() - 16);
-                    tempb = loadOrdinal(fp.getOrdinal() - 12);
+                    tempa = load(fp.getOrdinal() - 16);
+                    tempb = load(fp.getOrdinal() - 12);
                     getFPAndIP();
                     ac.setRawValue(tempb);
                     if (pc.inSupervisorMode()) {
@@ -675,8 +675,8 @@ namespace i960 {
                     // unpredictable behavior
                     break;
                 case PreviousFramePointer::ReturnStatusField::Interrupt:
-                    tempa = loadOrdinal(fp.getOrdinal() - 16);
-                    tempb = loadOrdinal(fp.getOrdinal() - 12);
+                    tempa = load(fp.getOrdinal() - 16);
+                    tempb = load(fp.getOrdinal() - 12);
                     getFPAndIP();
                     ac.setRawValue(tempb);
                     if (pc.inSupervisorMode()) {
@@ -1163,7 +1163,7 @@ namespace i960 {
     void
     Core::ld(Ordinal address, RegisterIndex dest) {
         AnInstruction;
-        auto result = loadOrdinal(address);
+        auto result = load(address);
         setRegister(dest, result, TreatAsOrdinal{});
     }
     void
@@ -1193,13 +1193,13 @@ namespace i960 {
     void
     Core::st(RegisterIndex src, Ordinal dest) {
         AnInstruction;
-        storeOrdinal(dest, getRegister(src).getOrdinal());
+        store(dest, getRegister(src).getOrdinal());
     }
 
     void
     Core::stob(RegisterIndex src, Ordinal dest) {
         AnInstruction;
-        storeByteOrdinal(dest, getRegister(src).getByteOrdinal());
+        storeByte(dest, getRegister(src).getByteOrdinal());
     }
 
     void
@@ -1217,7 +1217,7 @@ namespace i960 {
     void
     Core::stos(RegisterIndex src, Ordinal dest) {
         AnInstruction;
-        storeShortOrdinal(dest, getRegister(src).getShortOrdinal());
+        storeShort(dest, getRegister(src).getShortOrdinal());
     }
 
     void
@@ -1227,8 +1227,8 @@ namespace i960 {
             /// @todo raise a operation.invalid_operand fault
             raiseFault();
         } else {
-            storeOrdinal(address, getRegisterValue(src, TreatAsOrdinal{}));
-            storeOrdinal(address + 4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal {}));
+            store(address, getRegisterValue(src, TreatAsOrdinal{}));
+            store(address + 4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
             if ((address & 0b111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED fault
                 raiseFault();
@@ -1242,9 +1242,9 @@ namespace i960 {
             /// @todo raise a operation.invalid_operand fault
             raiseFault();
         } else {
-            storeOrdinal(address, getRegisterValue(src, TreatAsOrdinal{}));
-            storeOrdinal(address+4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
-            storeOrdinal(address+8, getRegisterValue(nextRegisterIndex(nextRegisterIndex(src)), TreatAsOrdinal{}));
+            store(address, getRegisterValue(src, TreatAsOrdinal{}));
+            store(address + 4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
+            store(address + 8, getRegisterValue(nextRegisterIndex(nextRegisterIndex(src)), TreatAsOrdinal{}));
             if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1259,10 +1259,10 @@ namespace i960 {
             raiseFault();
             /// @todo raise a operation.invalid_operand fault
         } else {
-            storeOrdinal(address, getRegisterValue(src, TreatAsOrdinal{}));
-            storeOrdinal(address+4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
-            storeOrdinal(address+8, getRegisterValue(nextRegisterIndex(nextRegisterIndex(src)), TreatAsOrdinal{}));
-            storeOrdinal(address+12, getRegisterValue(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(src))), TreatAsOrdinal{}));
+            store(address, getRegisterValue(src, TreatAsOrdinal{}));
+            store(address + 4, getRegisterValue(nextRegisterIndex(src), TreatAsOrdinal{}));
+            store(address + 8, getRegisterValue(nextRegisterIndex(nextRegisterIndex(src)), TreatAsOrdinal{}));
+            store(address + 12, getRegisterValue(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(src))), TreatAsOrdinal{}));
             if ((address & 0b1111) != 0 && _unalignedFaultEnabled) {
                 raiseFault();
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
@@ -1279,8 +1279,8 @@ namespace i960 {
             setRegister(dest, -1, TreatAsOrdinal{});
             raiseFault();
         } else {
-            setRegister(dest, loadOrdinal(mem), TreatAsOrdinal{});
-            setRegister(nextRegisterIndex(dest), loadOrdinal(mem+4), TreatAsOrdinal{});
+            setRegister(dest, load(mem), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), load(mem + 4), TreatAsOrdinal{});
             if ((mem & 0b111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1296,9 +1296,9 @@ namespace i960 {
             setRegister(dest, -1, TreatAsOrdinal{});
             raiseFault();
         } else {
-            setRegister(dest, loadOrdinal(mem), TreatAsOrdinal{});
-            setRegister(nextRegisterIndex(dest), loadOrdinal(mem+4), TreatAsOrdinal{});
-            setRegister(nextRegisterIndex(nextRegisterIndex(dest)), loadOrdinal(mem+8), TreatAsOrdinal{});
+            setRegister(dest, load(mem), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), load(mem + 4), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(nextRegisterIndex(dest)), load(mem + 8), TreatAsOrdinal{});
             if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1314,10 +1314,10 @@ namespace i960 {
             getRegister(dest).setOrdinal(-1);
             raiseFault();
         } else {
-            setRegister(dest, loadOrdinal(mem), TreatAsOrdinal{});
-            setRegister(nextRegisterIndex(dest), loadOrdinal(mem+4), TreatAsOrdinal{});
-            setRegister(nextRegisterIndex(nextRegisterIndex(dest)), loadOrdinal(mem+8), TreatAsOrdinal{});
-            setRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest))), loadOrdinal(mem+12), TreatAsOrdinal{});
+            setRegister(dest, load(mem), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(dest), load(mem + 4), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(nextRegisterIndex(dest)), load(mem + 8), TreatAsOrdinal{});
+            setRegister(nextRegisterIndex(nextRegisterIndex(nextRegisterIndex(dest))), load(mem + 12), TreatAsOrdinal{});
             if ((mem & 0b1111) != 0 && _unalignedFaultEnabled) {
                 /// @todo generate an OPERATION.UNALIGNED_FAULT
                 raiseFault();
@@ -1396,11 +1396,11 @@ namespace i960 {
         }
         static constexpr auto shouldProcessPCRB = false;
         if constexpr (shouldProcessPCRB) {
-            prcbBase_ = loadOrdinal(ibrBase_ + 0x14);
-            ctrlTableBase_ = loadOrdinal(prcbBase_ + 0x4);
+            prcbBase_ = load(ibrBase_ + 0x14);
+            ctrlTableBase_ = load(prcbBase_ + 0x4);
             processPRCB();
         }
-        ip.setOrdinal(loadOrdinal(ibrBase_+0x10));
+        ip.setOrdinal(load(ibrBase_ + 0x10));
         /// @todo set the device id correctly
         getRegister(g0).setOrdinal(0xFDEDABCD);
         /// and done...
@@ -1410,10 +1410,10 @@ namespace i960 {
         /// @todo implement based off of the i960Hx manual
         /// setup the internal peripherals
         auto pcrbMMR = prcbBase_;
-        faultTableBase_ = loadOrdinal(pcrbMMR);
-        ctrlTableBase_ = loadOrdinal(pcrbMMR + 0x4);
-        ac.setRawValue(loadOrdinal(pcrbMMR + 0x8));
-        auto faultConfig = loadOrdinal(pcrbMMR + 0xc);
+        faultTableBase_ = load(pcrbMMR);
+        ctrlTableBase_ = load(pcrbMMR + 0x4);
+        ac.setRawValue(load(pcrbMMR + 0x8));
+        auto faultConfig = load(pcrbMMR + 0xc);
 
         if ((faultConfig >> 30) & 1) {
             _unalignedFaultEnabled = false;
@@ -1422,8 +1422,8 @@ namespace i960 {
         }
         // load interrupt table and cache nmi vector entry
         // resetBlockNMI
-        interruptTableBase_= loadOrdinal(pcrbMMR + 0x10);
-        nmiVector_ = loadOrdinal(interruptTableBase_ + (248*4) + 4);
+        interruptTableBase_= load(pcrbMMR + 0x10);
+        nmiVector_ = load(interruptTableBase_ + (248 * 4) + 4);
         // process system procedure table
         // initialize isp, fp, sp, and pfp
         // initialize instruction cache
@@ -1458,58 +1458,41 @@ namespace i960 {
     }
     Ordinal
     Core::getSupervisorStackPointer() noexcept {
-        return loadOrdinal(getSystemProcedureTableBase() + 0xC);
+        return load(getSystemProcedureTableBase() + 0xC);
     }
     ByteOrdinal
     Core::loadByteOrdinal(Address address) noexcept {
-        return static_cast<ByteOrdinal>(loadOrdinal(address));
+        return static_cast<ByteOrdinal>(load(address));
     }
     ByteInteger
     Core::loadByteInteger(Address address) noexcept {
-        return static_cast<ByteInteger>(loadOrdinal(address));
+        return static_cast<ByteInteger>(load(address));
     }
     ShortOrdinal
     Core::loadShortOrdinal(Address address) noexcept {
-        return static_cast<ShortOrdinal>(loadOrdinal(address));
+        return static_cast<ShortOrdinal>(load(address));
     }
     ShortInteger
     Core::loadShortInteger(Address address) noexcept {
-        return static_cast<ShortInteger>(loadOrdinal(address));
-    }
-    void Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
-        union {
-            ByteOrdinal value;
-            Ordinal ordValue;
-        } k;
-        k.value = value;
-        storeOrdinal(address, k.ordValue, true, false, false, false);
+        return static_cast<ShortInteger>(load(address));
     }
     void
     Core::storeByteInteger(Address address, ByteInteger value) noexcept {
         union {
             ByteInteger value;
-            Ordinal ordValue;
+            ByteOrdinal ordValue;
         } k;
         k.value = value;
-        storeOrdinal(address, k.ordValue, true, false, false, false);
-    }
-    void
-    Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
-        union {
-            ShortOrdinal value;
-            Ordinal ordValue;
-        } k;
-        k.value = value;
-        storeOrdinal(address, k.ordValue, true, true, false, false);
+        storeByte(address, k.ordValue);
     }
     void
     Core::storeShortInteger(Address address, ShortInteger value) noexcept {
         union {
             ShortInteger value;
-            Ordinal ordValue;
+            ShortOrdinal ordValue;
         } k;
         k.value = value;
-        storeOrdinal(address, k.ordValue, true, true, false, false);
+        storeShort(address, k.ordValue);
     }
     void Core::cmpo(RegLit src1, RegLit src2) {
         AnInstruction;
