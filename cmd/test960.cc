@@ -57,14 +57,14 @@ namespace i960 {
         ByteOrdinal cellByteOffset;
         ByteOrdinal cellShortOffset;
     };
-    void
-    Core::busTestFailed() noexcept {
-        throw "BUS TEST FAILED!";
-    }
     class TestCore : public i960::Core {
     public:
         using Core::Core;
         ~TestCore() override = default;
+        void
+        busTestFailed() override {
+            throw "BUS TEST FAILED!";
+        }
         Cell& loadCell(Address address) noexcept {
             CellTarget cell(address);
             return theMemorySpace[cell.getSectionId()][cell.getCellId()];

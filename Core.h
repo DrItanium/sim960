@@ -57,7 +57,7 @@ namespace i960
         [[nodiscard]] Register& getRegister(RegisterIndex index) noexcept;
         [[nodiscard]] const Register& getRegister(RegisterIndex index) const noexcept;
         [[nodiscard]] const Register& getIP() const noexcept { return ip; }
-        [[noreturn]] void busTestFailed() noexcept;
+        virtual void busTestFailed() = 0;
         template<typename Tag>
         void setRegister(RegisterIndex index, typename Tag::ReturnType rt, Tag) noexcept {
             getRegister(index).set(rt, Tag{});
