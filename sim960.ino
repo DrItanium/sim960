@@ -20,6 +20,7 @@
 constexpr bool doCPUComputation = true;
 constexpr auto i960Zx_SALIGN = 4;
 Adafruit_NeoPixel onboardNeoPixel(1, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
+#if 0
 Adafruit_FlashTransport_QSPI flashTransport;
 Adafruit_SPIFlash flash(&flashTransport);
 FatFileSystem fatfs;
@@ -61,6 +62,7 @@ loadConfiguration(const std::string& filename, i960::MappingConfiguration &theMa
   file.close();
   return true;
 }
+#endif
 
 [[noreturn]]
 void
@@ -214,6 +216,7 @@ void setupSPI() {
     SPI.begin();
     Serial.println("Done");
 }
+#if 0
 void setupSDCard() {
     Serial.print("Starting up onboard QSPI Flash...");
     flash.begin();
@@ -237,12 +240,14 @@ void setupSDCard() {
         Serial.println("Card found!");
     }
 }
+#endif
 void setupNeoPixel() {
     Serial.print("Initialzing onboard NeoPixel...");
     onboardNeoPixel.begin();
     onboardNeoPixel.show();
     Serial.println("Done");
 }
+#if 0
 void setupMappingConfiguration() {
     Serial.println(F("Loading mapping configuration..."));
     if (!loadConfiguration(filename, mapping)) {
@@ -250,6 +255,7 @@ void setupMappingConfiguration() {
         somethingBadHappened();
     }
 }
+#endif
 /// @todo implement the register frames "in hardware"
 void setup() {
     setupSerial();
