@@ -147,16 +147,13 @@ constexpr Address codeStartsAt = 0x0000'0120;
 constexpr Address ledAddress = 0xFF00'0100;
 constexpr Address sleepConstantAddress = 0xFF00'0104;
 namespace i960 {
-    class ZxBusInterfaceUnit : public BusInterfaceUnit {
+    class ZxProcessor : public Core {
     public:
-        using BusInterfaceUnit::BusInterfaceUnit;
-        ~ZxBusInterfaceUnit() override = default;
-        ByteOrdinal load(Address address, TreatAsByteOrdinal ordinal) override { return 0; }
-        ByteInteger load(Address address, TreatAsByteInteger integer) override { return 0; }
-        ShortOrdinal load(Address address, TreatAsShortOrdinal ordinal) override { return 0; }
-        ShortInteger load(Address address, TreatAsShortInteger integer) override { return 0; }
+        using Core::Core;
+        ~ZxProcessor() override = default;
 
-        Ordinal load(Address address, TreatAsOrdinal ordinal) override {
+        Ordinal
+        load(Address address) noexcept override {
             Serial.print("load: 0x");
             Serial.println(address, HEX);
             if (address < 0x128) {
@@ -168,45 +165,49 @@ namespace i960 {
                 default: return 0;
             }
         }
-        void store(Address address, ByteOrdinal value, TreatAsByteOrdinal ordinal) override { }
-        void store(Address address, ByteInteger value, TreatAsByteInteger integer) override { }
-        void store(Address address, ShortOrdinal value, TreatAsShortOrdinal ordinal) override { }
-        void store(Address address, ShortInteger value, TreatAsShortInteger integer) override { }
-        void store(Address address, Ordinal value, TreatAsOrdinal ordinal) override {
+        void
+        storeByte(Address address, ByteOrdinal value) noexcept override {
+
+        }
+        void
+        storeShort(Address address, ShortOrdinal value) noexcept override {
+
+        }
+        void
+        store(Address address, Ordinal value) noexcept override {
             switch (address) {
                 case ledAddress:
                     digitalWrite(LED_BUILTIN, value != 0 ? HIGH : LOW);
                     break;
             }
         }
+        void
+        badInstruction(Core::DecodedInstruction inst) noexcept override {
+            Serial.println("BAD INSTRUCTION!");
+            std::visit([](auto&& value) {
+                using K = std::decay_t<decltype(value)>;
+                Serial.print("Instruction opcode: 0x");
+                if constexpr (std::is_same_v<K, i960::MEMFormatInstruction>) {
+                    Serial.print(value.upperHalf(), HEX);
+                }
+                Serial.println(value.lowerHalf(), HEX);
+                auto name = value.decodeName();
+                if (!name.empty()) {
+                    Serial.print("Name: ");
+                    Serial.println(name.c_str());
+                }
+            }, inst);
+            raiseFault();
+            somethingBadHappened();
+        }
+        void
+        busTestFailed() noexcept override {
+            somethingBadHappened();
+        }
     };
     /// @todo handle unaligned load/store and loads/store which span multiple sections
-    void
-    Core::badInstruction(DecodedInstruction inst) {
-        Serial.println("BAD INSTRUCTION!");
-        std::visit([](auto&& value) {
-            using K = std::decay_t<decltype(value)>;
-            Serial.print("Instruction opcode: 0x");
-            if constexpr (std::is_same_v<K, i960::MEMFormatInstruction>) {
-                Serial.print(value.upperHalf(), HEX);
-            }
-            Serial.println(value.lowerHalf(), HEX);
-            auto name = value.decodeName();
-            if (!name.empty()) {
-                Serial.print("Name: ");
-                Serial.println(name.c_str());
-            }
-        }, inst);
-        raiseFault();
-        somethingBadHappened();
-    }
-    void
-    Core::busTestFailed() noexcept {
-        somethingBadHappened();
-    }
 }
-i960::ZxBusInterfaceUnit zxBXU;
-i960::Core cpuCore(zxBXU, zxBootBase, i960Zx_SALIGN);
+i960::ZxProcessor cpuCore(zxBootBase, i960Zx_SALIGN);
 void setupSerial() {
     Serial.begin(9600);
     while (!Serial) {
