@@ -1460,40 +1460,56 @@ namespace i960 {
     Core::getSupervisorStackPointer() noexcept {
         return loadOrdinal(getSystemProcedureTableBase() + 0xC);
     }
-    InterfaceUnit &Core::getInterfaceUnit(Address address) noexcept {
-        return biu_;
+    ByteOrdinal
+    Core::loadByteOrdinal(Address address) noexcept {
+        return static_cast<ByteOrdinal>(loadOrdinal(address));
     }
-    Ordinal Core::loadOrdinal(Address address) noexcept {
-        return getInterfaceUnit(address).load(address, TreatAsOrdinal{});
+    ByteInteger
+    Core::loadByteInteger(Address address) noexcept {
+        return static_cast<ByteInteger>(loadOrdinal(address));
     }
-    ByteOrdinal Core::loadByteOrdinal(Address address) noexcept {
-        return getInterfaceUnit(address).load(address, TreatAsByteOrdinal{});
+    ShortOrdinal
+    Core::loadShortOrdinal(Address address) noexcept {
+        return static_cast<ShortOrdinal>(loadOrdinal(address));
     }
-    ByteInteger Core::loadByteInteger(Address address) noexcept {
-        return getInterfaceUnit(address).load(address, TreatAsByteInteger{});
-    }
-    ShortOrdinal Core::loadShortOrdinal(Address address) noexcept {
-        return getInterfaceUnit(address).load(address, TreatAsShortOrdinal{});
-    }
-    ShortInteger Core::loadShortInteger(Address address) noexcept {
-        return getInterfaceUnit(address).load(address, TreatAsShortInteger{});
-    }
-    void Core::storeOrdinal(Address address, Ordinal value) noexcept {
-        getInterfaceUnit(address).store(address, value, TreatAsOrdinal{});
+    ShortInteger
+    Core::loadShortInteger(Address address) noexcept {
+        return static_cast<ShortInteger>(loadOrdinal(address));
     }
     void Core::storeByteOrdinal(Address address, ByteOrdinal value) noexcept {
-        getInterfaceUnit(address).store(address, value, TreatAsByteOrdinal{});
-
+        union {
+            ByteOrdinal value;
+            Ordinal ordValue;
+        } k;
+        k.value = value;
+        storeOrdinal(address, k.ordValue, true, false, false, false);
     }
-    void Core::storeByteInteger(Address address, ByteInteger value) {
-        getInterfaceUnit(address).store(address, value, TreatAsByteInteger{});
-
+    void
+    Core::storeByteInteger(Address address, ByteInteger value) noexcept {
+        union {
+            ByteInteger value;
+            Ordinal ordValue;
+        } k;
+        k.value = value;
+        storeOrdinal(address, k.ordValue, true, false, false, false);
     }
-    void Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
-        getInterfaceUnit(address).store(address, value, TreatAsShortOrdinal{});
+    void
+    Core::storeShortOrdinal(Address address, ShortOrdinal value) noexcept {
+        union {
+            ShortOrdinal value;
+            Ordinal ordValue;
+        } k;
+        k.value = value;
+        storeOrdinal(address, k.ordValue, true, true, false, false);
     }
-    void Core::storeShortInteger(Address address, ShortInteger value) noexcept {
-        getInterfaceUnit(address).store(address, value, TreatAsShortInteger{});
+    void
+    Core::storeShortInteger(Address address, ShortInteger value) noexcept {
+        union {
+            ShortInteger value;
+            Ordinal ordValue;
+        } k;
+        k.value = value;
+        storeOrdinal(address, k.ordValue, true, true, false, false);
     }
     void Core::cmpo(RegLit src1, RegLit src2) {
         AnInstruction;

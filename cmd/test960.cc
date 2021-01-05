@@ -60,10 +60,10 @@ namespace i960 {
     Core::busTestFailed() noexcept {
         throw "BUS TEST FAILED!";
     }
-    class TestBusInterfaceUnit : public BusInterfaceUnit {
+    class TestCore : public i960::Core {
     public:
-        using BusInterfaceUnit::BusInterfaceUnit;
-        ~TestBusInterfaceUnit() override = default;
+        using TestCore::TestCore;
+        ~TestCore() override = default;
         Cell& loadCell(Address address) noexcept {
             CellTarget cell(address);
             return theMemorySpace[cell.getSectionId()][cell.getCellId()];

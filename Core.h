@@ -43,8 +43,9 @@ namespace i960
          * @param ibrBase The address of the initialization boot record (defaults to 0xFEFF'FF30, same as the i960 Hx)
          * @param salign The stack alignment value (defaults to 1)
          */
-        explicit Core(BusInterfaceUnit& biu, Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : biu_(biu), salign_(salign), ibrBase_(ibrBase) { }
-        constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
+        explicit Core(Ordinal ibrBase = 0xFEFF'FF30, Ordinal salign = 1) : salign_(salign), ibrBase_(ibrBase) { }
+        virtual ~Core() = default;
+        [[nodiscard]] constexpr Ordinal computeAlignmentBoundaryConstant() const noexcept {
             return (salign_ * 16) - 1;
         }
         /**
@@ -66,16 +67,15 @@ namespace i960
             return getRegister(index).get(Tag{});
         }
     private: // memory controller interface routines for abstraction purposes, must be implemented in the .ino file
-        InterfaceUnit& getInterfaceUnit(Address address) noexcept;
-        Ordinal loadOrdinal(Address address) noexcept;
-        void storeOrdinal (Address address, Ordinal value) noexcept;
-        ByteOrdinal loadByteOrdinal(Address address) noexcept;
+        virtual Ordinal loadOrdinal(Address address) noexcept = 0;
+        [[nodiscard]] ByteOrdinal loadByteOrdinal(Address address) noexcept;
+        [[nodiscard]] ByteInteger loadByteInteger(Address address) noexcept;
+        [[nodiscard]] ShortOrdinal loadShortOrdinal(Address address) noexcept;
+        [[nodiscard]] ShortInteger loadShortInteger(Address address) noexcept;
+        virtual void storeOrdinal(Address address, Ordinal value, bool byteEnable0 = true, bool byteEnable1 = true, bool byteEnable2 = true, bool byteEnable3 = true) noexcept = 0;
         void storeByteOrdinal (Address address, ByteOrdinal value) noexcept;
-        ByteInteger loadByteInteger(Address address) noexcept;
-        void storeByteInteger (Address address, ByteInteger value);
-        ShortOrdinal loadShortOrdinal(Address address) noexcept;
+        void storeByteInteger (Address address, ByteInteger value) noexcept;
         void storeShortOrdinal (Address address, ShortOrdinal value) noexcept;
-        ShortInteger loadShortInteger(Address address) noexcept;
         void storeShortInteger (Address address, ShortInteger value) noexcept;
     private:
         void executeInstruction(const DecodedInstruction& inst);
@@ -408,7 +408,6 @@ namespace i960
          */
         void doNotAdvanceIp() noexcept;
     private:
-        BusInterfaceUnit& biu_;
         RegisterFile globals, locals;
         Register ip; // always start at address zero
         ArithmeticControls ac;
