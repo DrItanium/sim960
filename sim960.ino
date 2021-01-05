@@ -6,11 +6,13 @@
 // Adapt this class to the target microcontroller board
 // Right now I am targeting a grand central m4
 #include <SPI.h>
-#include <Wire.h>
-#include <SdFat.h>
 #include <Adafruit_NeoPixel.h>
+#include <Wire.h>
+#if 0
+#include <SdFat.h>
 #include <Adafruit_SPIFlash.h>
 #include <ArduinoJson.h>
+#endif
 #include <array>
 #include "CoreTypes.h"
 #include "Core.h"
